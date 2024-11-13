@@ -1,20 +1,11 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL;
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001' ;
 
-interface Api {
-  getPlayers: () => Promise<any>;
-  addPlayer: (summonerName: string) => Promise<any>;
-  getPlayerById: (id: string) => Promise<any>;
-  deletePlayer: (id: string) => Promise<any>;
-  getPlayerGames: (id: string) => Promise<any>;
-  updateAllPlayers: () => Promise<any>;
-}
-
-export const api: Api = {
+export const api = {
   getPlayers: async () => {
     try {
-      const response = await axios.get(`${API_URL}/players`);
+      const response = await axios.get(`${API_URL}/api/players`);
       return response.data;
     } catch (error) {
       console.error('Error fetching players:', error);
@@ -24,7 +15,7 @@ export const api: Api = {
 
   updateAllPlayers: async () => {
     try {
-      const response = await axios.post(`${API_URL}/players/update-all`);
+      const response = await axios.post(`${API_URL}/api/players/update-all`);
       return response.data;
     } catch (error) {
       console.error('Error updating all players:', error);
@@ -34,7 +25,7 @@ export const api: Api = {
 
   getPlayerGames: async (id: string) => {
     try {
-      const response = await axios.get(`${API_URL}/players/${id}/games`);
+      const response = await axios.get(`${API_URL}/api/players/${id}/games`);
       return response.data;
     } catch (error) {
       console.error('Error fetching player games:', error);
@@ -44,7 +35,7 @@ export const api: Api = {
 
   addPlayer: async (summonerName: string) => {
     try {
-      const response = await axios.post(`${API_URL}/players`, { summonerName });
+      const response = await axios.post(`${API_URL}/api/players`, { summonerName });
       return response.data;
     } catch (error) {
       console.error('Error adding player:', error);
@@ -54,7 +45,7 @@ export const api: Api = {
 
   getPlayerById: async (id: string) => {
     try {
-      const response = await axios.get(`${API_URL}/players/${id}`);
+      const response = await axios.get(`${API_URL}/api/players/${id}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching player:', error);
@@ -64,7 +55,7 @@ export const api: Api = {
 
   deletePlayer: async (id: string) => {
     try {
-      const response = await axios.delete(`${API_URL}/players/${id}`);
+      const response = await axios.delete(`${API_URL}/api/players/${id}`);
       return response.data;
     } catch (error) {
       console.error('Error deleting player:', error);
@@ -72,5 +63,3 @@ export const api: Api = {
     }
   }
 };
-
-export type { Api };

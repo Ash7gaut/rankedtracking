@@ -1,7 +1,6 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
-import { RankedStats, MatchDetails, SummonerResponse, MatchResponse, Participant } from 'frontend/src/types/interfaces';
-
+import { RankedStats, MatchDetails, SummonerResponse, MatchResponse, Participant } from '../types/interfaces';
 dotenv.config();
 
 const RIOT_API_KEY = process.env.RIOT_API_KEY;
@@ -115,28 +114,31 @@ export const riotService = {
         }
       );
 
-      // Ajout d'un log pour vérifier les données reçues
-      console.log('Match data from Riot API:', {
-        gameDuration: response.data.info.gameDuration,
-        gameCreation: response.data.info.gameCreation
-      });
-
       const participant = response.data.info.participants.find(
         (p) => p.puuid === puuid
       );
-  
+
       if (!participant) {
         throw new Error('Participant not found in match');
       }
-  
-      // Séparer les alliés et les adversaires
+
+      // Fonction pour formater le nom du joueur
+      const formatPlayerName = (player: any) => {
+        // Si riotIdGameName existe, utiliser le nouveau format
+        if (player.riotIdGameName) {
+          return player.riotIdGameName + (player.riotIdTagline ? ` #${player.riotIdTagline}` : '');
+        }
+        // Sinon utiliser l'ancien format
+        return player.summonerName;
+      };
+
       const allies = response.data.info.participants.filter(
         p => p.teamId === participant.teamId && p.puuid !== puuid
       );
       const enemies = response.data.info.participants.filter(
         p => p.teamId !== participant.teamId
       );
-  
+
       return {
         gameId: matchId,
         gameCreation: response.data.info.gameCreation,
@@ -149,12 +151,12 @@ export const riotService = {
         allies: allies.map(ally => ({
           championId: ally.championId,
           championName: ally.championName,
-          summonerName: ally.summonerName
+          summonerName: formatPlayerName(ally) // Utiliser la nouvelle fonction
         })),
         enemies: enemies.map(enemy => ({
           championId: enemy.championId,
           championName: enemy.championName,
-          summonerName: enemy.summonerName
+          summonerName: formatPlayerName(enemy) // Utiliser la nouvelle fonction
         }))
       };
     } catch (error) {

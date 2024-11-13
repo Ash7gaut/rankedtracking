@@ -13,17 +13,11 @@ export const GameCard: React.FC<GameCardProps> = ({
   playerName,
 }) => {
   const formatGameDuration = (seconds: number) => {
-    console.log("Formatting duration for seconds:", seconds);
     if (!seconds && seconds !== 0) return "0:00";
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
-
-  console.log("Game data in card:", {
-    gameDuration: game.gameDuration,
-    formattedDuration: formatGameDuration(game.gameDuration),
-  });
 
   const mainPlayer = {
     championId: game.championId,
@@ -52,16 +46,7 @@ export const GameCard: React.FC<GameCardProps> = ({
               {game.win ? "Victoire" : "Défaite"}
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Durée test: {formatGameDuration(1500)}
-            </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Durée réelle:{" "}
-              {game.gameDuration
-                ? formatGameDuration(game.gameDuration)
-                : "No duration"}
-            </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Durée brute: {game.gameDuration}
+              {formatGameDuration(game.gameDuration)}
             </p>
           </div>
         </div>
