@@ -4,22 +4,21 @@ import { api } from "../../utils/api";
 import { Header } from "./components/Header";
 import { PlayersList } from "./components/PlayersList/index";
 import { PlayerFilter } from "./components/PlayerFilter/PlayerFilter";
+import { RoleFilter } from "./components/RoleFilter/RoleFilter";
 import { Player } from "../../types/interfaces";
 
 const Home = () => {
-  const queryClient = useQueryClient();
   const [selectedPlayers, setSelectedPlayers] = useState<Set<string>>(
     new Set()
   );
+  const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const {
     data: players,
     error,
     isFetching,
-  } = useQuery<Player[]>("players", api.getPlayers, {
-    refetchOnWindowFocus: false,
-    staleTime: Infinity,
-  });
+  } = useQuery<Player[]>("players", api.getPlayers);
 
   const handlePlayerSelection = (playerName: string) => {
     setSelectedPlayers((prev) => {
@@ -33,15 +32,15 @@ const Home = () => {
     });
   };
 
+  const handleRoleSelection = (role: string | null) => {
+    setSelectedRole(role);
+  };
+
   const filteredPlayers = players?.filter((player) => {
-    if (selectedPlayers.size === 0) return true;
-    console.log(
-      "Filtering player:",
-      player.player_name,
-      "Selected:",
-      selectedPlayers
-    );
-    return selectedPlayers.has(player.player_name);
+    const matchesPlayer =
+      selectedPlayers.size === 0 || selectedPlayers.has(player.player_name);
+    const matchesRole = !selectedRole || player.role === selectedRole;
+    return matchesPlayer && matchesRole;
   });
 
   const handleRefresh = async () => {
@@ -53,23 +52,31 @@ const Home = () => {
     }
   };
 
-  if (error) return <div>Erreur de chargement: {(error as Error).message}</div>;
-
   return (
     <div>
       <Header
-        title="LoL Friends Stats"
+        title="Classement"
         onRefresh={handleRefresh}
         isRefreshing={isFetching}
       />
-      {players && (
+      <div className="space-y-4">
         <PlayerFilter
-          players={players}
+          players={players || []}
           selectedPlayers={selectedPlayers}
           onPlayerSelection={handlePlayerSelection}
         />
-      )}
-      <PlayersList players={filteredPlayers || []} />
+        <RoleFilter
+          selectedRole={selectedRole}
+          onRoleSelection={handleRoleSelection}
+        />
+        {error ? (
+          <div className="text-red-500 dark:text-red-400">
+            Erreur de chargement des données
+          </div>
+        ) : (
+          <PlayersList players={filteredPlayers || []} />
+        )}
+      </div>
     </div>
   );
 };
