@@ -3,16 +3,24 @@ import type { Request, Response, RequestHandler } from 'express';
 import { riotService } from '../services/riotService.js';
 import { supabase } from '../config/supabase.js';
 import { updateAllPlayers } from '../controllers/playerController.js';
+import { MatchDetails } from '../types/interfaces.js';
 
 const router = express.Router();
 
 // Gestionnaire pour obtenir tous les joueurs
 const handleGetPlayers: RequestHandler = async (_req, res) => {
   try {
-    const { data, error } = await supabase.from('players').select('*');
+    const { data, error } = await supabase
+      .from('players')
+      .select('*')
+      .order('tier')
+      .order('rank')
+      .order('league_points', { ascending: false });
+
     if (error) throw error;
-    res.json(data);
+    res.json(data || []);
   } catch (error) {
+    console.error('Error fetching players:', error);
     res.status(500).json({ error: 'Error fetching players' });
   }
 };
@@ -133,17 +141,17 @@ const handleGetPlayerGames: RequestHandler = async (req, res) => {
   const { puuid } = req.params;
   
   try {
-    // Récupérer les IDs des dernières parties
-    const matchIds: string[] = await riotService.getMatchHistory(puuid);
-    
-    // Récupérer les détails des 5 dernières parties
+    const matchIds = await riotService.getMatchHistory(puuid);
     const games = await Promise.all(
-      matchIds.slice(0, 5).map((matchId: string) => 
-        riotService.getMatchDetails(matchId, puuid)
-      )
+      matchIds.map(matchId => riotService.getMatchDetails(matchId, puuid))
     );
 
-    res.json(games);
+    // Filtrer les parties null et prendre les 5 premières parties classées
+    const rankedGames = games
+      .filter((game): game is MatchDetails => game !== null)
+      .slice(0, 5);
+
+    res.json(rankedGames);
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Error fetching games' });

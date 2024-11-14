@@ -92,18 +92,20 @@ export const riotService = {
           },
           params: {
             start: 0,
-            count: 5
+            count: 20,
+            queue: 420,
+            type: 'ranked'
           }
         }
       );
-      return response.data;
+      return response.data.slice(0, 5);
     } catch (error) {
       console.error('Error in getMatchHistory:', error);
       throw error;
     }
   },
 
-  getMatchDetails: async (matchId: string, puuid: string): Promise<MatchDetails> => {
+  getMatchDetails: async (matchId: string, puuid: string): Promise<MatchDetails | null> => {
     try {
       const response = await axios.get<MatchResponse>(
         `https://europe.api.riotgames.com/lol/match/v5/matches/${matchId}`,
@@ -113,6 +115,11 @@ export const riotService = {
           }
         }
       );
+
+      // Vérifier si c'est une partie classée solo/duo
+      if (response.data.info.queueId !== 420) {
+        return null;
+      }
 
       const participant = response.data.info.participants.find(
         (p) => p.puuid === puuid
@@ -124,11 +131,9 @@ export const riotService = {
 
       // Fonction pour formater le nom du joueur
       const formatPlayerName = (player: any) => {
-        // Si riotIdGameName existe, utiliser le nouveau format
         if (player.riotIdGameName) {
           return player.riotIdGameName + (player.riotIdTagline ? ` #${player.riotIdTagline}` : '');
         }
-        // Sinon utiliser l'ancien format
         return player.summonerName;
       };
 
@@ -151,12 +156,12 @@ export const riotService = {
         allies: allies.map(ally => ({
           championId: ally.championId,
           championName: ally.championName,
-          summonerName: formatPlayerName(ally) // Utiliser la nouvelle fonction
+          summonerName: formatPlayerName(ally)
         })),
         enemies: enemies.map(enemy => ({
           championId: enemy.championId,
           championName: enemy.championName,
-          summonerName: formatPlayerName(enemy) // Utiliser la nouvelle fonction
+          summonerName: formatPlayerName(enemy)
         }))
       };
     } catch (error) {

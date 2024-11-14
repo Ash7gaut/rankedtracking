@@ -86,7 +86,8 @@ export interface MatchResponse {
   info: {
     gameCreation: number;
     gameDuration: number;
-    participants: Array<{
+    queueId: number;
+    participants: {
       puuid: string;
       championId: number;
       championName: string;
@@ -96,7 +97,9 @@ export interface MatchResponse {
       kills: number;
       deaths: number;
       assists: number;
-    }>;
+      riotIdGameName?: string;
+      riotIdTagline?: string;
+    }[];
   };
 }
 
