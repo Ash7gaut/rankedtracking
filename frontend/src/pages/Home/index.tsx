@@ -4,33 +4,31 @@ import { api } from "../../utils/api";
 import { Header } from "./components/Header";
 import { AddPlayerForm } from "./components/AddPlayerForm/index";
 import { PlayersList } from "./components/PlayersList/index";
+import { Player } from "../../types/interfaces";
 
 const Home: React.FC = () => {
   const queryClient = useQueryClient();
 
+  // Utiliser l'API du backend qui communique déjà avec Supabase
   const {
     data: players,
-    isLoading,
     error,
     isFetching,
-  } = useQuery("players", api.getPlayers, {
+  } = useQuery<Player[]>("players", api.getPlayers, {
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchInterval: false,
+    staleTime: Infinity,
   });
 
   const handleRefresh = async () => {
     try {
-      // Appeler la route de mise à jour
       await api.updateAllPlayers();
-      // Rafraîchir les données après la mise à jour
-      await queryClient.invalidateQueries("players");
+      // Recharger les données via l'API après la mise à jour
+      queryClient.invalidateQueries("players");
     } catch (error) {
       console.error("Erreur lors de la mise à jour:", error);
     }
   };
 
-  if (isLoading) return <div>Chargement...</div>;
   if (error) return <div>Erreur de chargement: {(error as Error).message}</div>;
 
   return (

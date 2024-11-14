@@ -14,33 +14,37 @@ const PlayerDetails: React.FC = () => {
 
   const {
     data: player,
-    isLoading,
     error,
-  } = useQuery<Player>(["player", id], () => api.getPlayerById(id!));
+    isFetching,
+  } = useQuery<Player>(["player", id], () => api.getPlayerById(id!), {
+    staleTime: Infinity,
+    cacheTime: Infinity,
+  });
 
   const { data: games, isLoading: gamesLoading } = useQuery(
     ["games", player?.puuid],
     () => api.getPlayerGames(player!.puuid),
     {
       enabled: !!player?.puuid,
+      staleTime: Infinity,
+      cacheTime: Infinity,
     }
   );
 
   const championNames = useChampionNames(games);
 
-  if (isLoading)
-    return <div className="text-gray-900 dark:text-white">Chargement...</div>;
   if (error)
     return (
       <div className="text-gray-900 dark:text-white">Erreur de chargement</div>
     );
-  if (!player)
-    return (
-      <div className="text-gray-900 dark:text-white">Joueur non trouvé</div>
-    );
+  if (!player) return null;
 
   return (
-    <div className="p-6">
+    <div
+      className={`p-6 ${
+        isFetching ? "opacity-70" : ""
+      } transition-opacity duration-300`}
+    >
       <PlayerHeader playerId={id!} />
       <PlayerProfile player={player} />
       <PlayerStats player={player} />
