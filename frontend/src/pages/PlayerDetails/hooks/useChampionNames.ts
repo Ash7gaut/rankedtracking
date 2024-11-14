@@ -4,6 +4,7 @@ import { getChampionNameById } from "../../../utils/championUtils";
 
 export const useChampionNames = (games: Game[] | undefined) => {
   const [championNames, setChampionNames] = useState<{ [key: number]: string }>({});
+  
 
   useEffect(() => {
     if (games) {
