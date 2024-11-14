@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { useUpdateCooldown } from "frontend/src/pages/PlayerDetails/hooks/useUpdateCooldown";
 
 interface HeaderProps {
@@ -7,16 +8,12 @@ interface HeaderProps {
   isRefreshing: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({
-  title,
-  onRefresh,
-  isRefreshing,
-}) => {
+export const Header = ({ title, onRefresh, isRefreshing }: HeaderProps) => {
+  const navigate = useNavigate();
   const { isOnCooldown, remainingTime, startCooldown } = useUpdateCooldown();
 
   const handleRefresh = async () => {
     if (isOnCooldown) return;
-
     await onRefresh();
     startCooldown();
   };
@@ -27,6 +24,12 @@ export const Header: React.FC<HeaderProps> = ({
         {title}
       </h1>
       <div className="flex items-center gap-4">
+        <button
+          onClick={() => navigate("/ajouter")}
+          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+        >
+          Ajouter un joueur
+        </button>
         <button
           onClick={handleRefresh}
           disabled={isRefreshing || isOnCooldown}

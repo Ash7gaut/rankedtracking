@@ -87,7 +87,7 @@ export interface MatchResponse {
     gameCreation: number;
     gameDuration: number;
     queueId: number;
-    participants: {
+    participants: Array<{
       puuid: string;
       championId: number;
       championName: string;
@@ -97,28 +97,33 @@ export interface MatchResponse {
       kills: number;
       deaths: number;
       assists: number;
+      totalDamageDealtToChampions: number;
       riotIdGameName?: string;
       riotIdTagline?: string;
-    }[];
+    }>;
   };
 }
 
-export interface MatchDetails extends Game {
+export interface MatchDetails {
   gameId: string;
   gameCreation: number;
+  gameDuration: number;
   championId: number;
   win: boolean;
   kills: number;
   deaths: number;
   assists: number;
-  allies: Array<{
+  totalDamageDealtToChampions: number;
+  allies: {
     championId: number;
     championName: string;
     summonerName: string;
-  }>;
-  enemies: Array<{
+    totalDamageDealtToChampions: number;
+  }[];
+  enemies: {
     championId: number;
     championName: string;
     summonerName: string;
-  }>;
+    totalDamageDealtToChampions: number;
+  }[];
 }

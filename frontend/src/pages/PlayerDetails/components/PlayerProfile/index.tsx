@@ -1,11 +1,10 @@
-import React from "react";
 import { Player } from "frontend/src/types/interfaces";
 
 interface PlayerProfileProps {
   player: Player;
 }
 
-export const PlayerProfile: React.FC<PlayerProfileProps> = ({ player }) => {
+export const PlayerProfile = ({ player }: PlayerProfileProps) => {
   return (
     <div className="flex items-center gap-6 mb-6">
       <img
