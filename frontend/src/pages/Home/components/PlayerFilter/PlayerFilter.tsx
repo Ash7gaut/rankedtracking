@@ -37,7 +37,7 @@ export const PlayerFilter = ({
       </button>
 
       {isOpen && (
-        <div className="mt-3 grid grid-cols-3 gap-2">
+        <div className="mt-3 grid grid-cols-4 gap-3">
           {uniquePlayerNames.map((playerName) => (
             <label
               key={playerName}
