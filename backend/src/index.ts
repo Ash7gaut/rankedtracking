@@ -8,11 +8,10 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3001;
 
-// Configuration CORS
 app.use(cors({
   origin: [
     'https://rankedtracking.vercel.app',
-    'http://localhost:3000'  // Pour le développement local
+    'http://localhost:3000' 
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],

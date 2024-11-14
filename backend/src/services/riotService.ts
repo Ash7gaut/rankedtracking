@@ -153,15 +153,18 @@ export const riotService = {
         kills: participant.kills,
         deaths: participant.deaths,
         assists: participant.assists,
+        totalDamageDealtToChampions: participant.totalDamageDealtToChampions,
         allies: allies.map(ally => ({
           championId: ally.championId,
           championName: ally.championName,
-          summonerName: formatPlayerName(ally)
+          summonerName: formatPlayerName(ally),
+          totalDamageDealtToChampions: ally.totalDamageDealtToChampions
         })),
         enemies: enemies.map(enemy => ({
           championId: enemy.championId,
           championName: enemy.championName,
-          summonerName: formatPlayerName(enemy)
+          summonerName: formatPlayerName(enemy),
+          totalDamageDealtToChampions: enemy.totalDamageDealtToChampions
         }))
       };
     } catch (error) {

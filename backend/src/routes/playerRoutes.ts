@@ -51,31 +51,22 @@ const handleGetPlayerById: RequestHandler = async (req, res) => {
 const handleAddPlayer: RequestHandler = async (req, res) => {
   try {
     const { summonerName } = req.body;
-    console.log('Received summonerName:', summonerName);
     
     // Séparer le nom et le tag
     const [gameName, tagLine] = summonerName.split('#');
-    console.log('Parsed name:', gameName, 'tag:', tagLine);
     
     if (!gameName || !tagLine) {
       res.status(400).json({ error: 'Format invalide. Utilisez le format: nom#tag' });
       return;
     }
 
-    console.log('Calling Riot API...');
     const summonerData = await riotService.getSummonerByName(gameName, tagLine);
-    console.log('Summoner data:', summonerData);
 
-    console.log('Getting ranked stats...');
     const rankedStats = await riotService.getRankedStats(summonerData.id);
-    console.log('Ranked stats:', rankedStats);
 
     const soloQStats = rankedStats.find(
       (queue: any) => queue.queueType === 'RANKED_SOLO_5x5'
     );
-    console.log('SoloQ stats:', soloQStats);
-
-    console.log('Upserting to Supabase...');
     const { data, error } = await supabase
       .from('players')
       .upsert({
@@ -98,7 +89,6 @@ const handleAddPlayer: RequestHandler = async (req, res) => {
       throw error;
     }
     
-    console.log('Success! Data:', data);
     res.json(data);
   } catch (error: any) {
     console.error('Detailed error:', error.response?.data || error);
@@ -116,22 +106,21 @@ const handleDeletePlayer: RequestHandler = async (req, res) => {
   res.status(204).send();
 };
 
-
-// const handleUpdateAllPlayers: RequestHandler = async (req, res) => {
-//   await updateAllPlayers();
-//   res.status(200).send();
-// };
-
 interface MatchResponse {
   info: {
     gameCreation: number;
     participants: Array<{
       puuid: string;
       championId: number;
+      championName: string;
       win: boolean;
       kills: number;
       deaths: number;
       assists: number;
+      totalDamageDealtToChampions: number;
+      teamId: number;
+      riotIdGameName?: string;
+      riotIdTagline?: string;
     }>;
   };
 }
@@ -158,14 +147,12 @@ const handleGetPlayerGames: RequestHandler = async (req, res) => {
   }
 };
 
-// ... reste du code ...
-
 // Routes
 router.get('/', handleGetPlayers);
 router.post('/', handleAddPlayer);
 router.get('/:id', handleGetPlayerById);
 router.delete('/:id', handleDeletePlayer);
 router.get('/:puuid/games', handleGetPlayerGames);
-router.post('/update-all', updateAllPlayers); // Nouvelle route pour la mise à jour
+router.post('/update-all', updateAllPlayers);
 
 export default router;
