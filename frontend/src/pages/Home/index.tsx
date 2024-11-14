@@ -5,7 +5,7 @@ import { Header } from "./components/Header";
 import { PlayersList } from "./components/PlayersList/index";
 import { Player } from "../../types/interfaces";
 
-const Home: React.FC = () => {
+const Home = () => {
   const queryClient = useQueryClient();
 
   // Utiliser l'API du backend qui communique déjà avec Supabase

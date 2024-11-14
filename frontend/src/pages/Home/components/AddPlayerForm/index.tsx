@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useQueryClient } from "react-query";
 import { api } from "../../../../utils/api";
 
-export const AddPlayerForm: React.FC = () => {
+export const AddPlayerForm = () => {
   const [summonerName, setSummonerName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

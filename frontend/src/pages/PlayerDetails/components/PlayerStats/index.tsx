@@ -5,7 +5,7 @@ interface PlayerStatsProps {
   player: Player;
 }
 
-export const PlayerStats: React.FC<PlayerStatsProps> = ({ player }) => {
+export const PlayerStats = ({ player }: PlayerStatsProps) => {
   const winRate =
     player.wins && player.losses
       ? ((player.wins / (player.wins + player.losses)) * 100).toFixed(1)

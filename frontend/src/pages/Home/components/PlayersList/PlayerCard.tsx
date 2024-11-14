@@ -4,14 +4,9 @@ import { Player } from "frontend/src/types/interfaces";
 interface PlayerCardProps {
   player: Player;
   rank?: number;
-  isFirst?: boolean;
 }
 
-export const PlayerCard: React.FC<PlayerCardProps> = ({
-  player,
-  rank,
-  isFirst,
-}) => {
+export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
   const navigate = useNavigate();
 
   // Calcul du winrate modifié
@@ -47,7 +42,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
             rank
           )} w-8 h-8 rounded-full flex items-center justify-center text-white font-bold shadow-lg z-20`}
           style={{
-            top: isFirst ? "-1.5rem" : "-1rem",
+            top: "-1rem",
           }}
         >
           {rank}

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home/index";
 import PlayerDetails from "./pages/PlayerDetails/index";
+import AddPlayer from "./pages/AddPlayer/AddPlayer";
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => {
@@ -36,6 +37,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/player/:id" element={<PlayerDetails />} />
+            <Route path="/add" element={<AddPlayer />} />
           </Routes>
         </div>
       </div>

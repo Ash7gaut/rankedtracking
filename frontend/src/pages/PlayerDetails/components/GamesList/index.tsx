@@ -9,12 +9,12 @@ interface GamesListProps {
   playerName: string;
 }
 
-export const GamesList: React.FC<GamesListProps> = ({
+export const GamesList = ({
   games,
   isLoading,
   championNames,
   playerName,
-}) => {
+}: GamesListProps) => {
   console.log("Games data:", games); // Ajout du log
 
   if (isLoading) {

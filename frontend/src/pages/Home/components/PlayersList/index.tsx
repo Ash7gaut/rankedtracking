@@ -7,12 +7,9 @@ interface PlayersListProps {
   players: Player[];
 }
 
-export const PlayersList: React.FC<PlayersListProps> = ({ players }) => {
+export const PlayersList = ({ players }: PlayersListProps) => {
   const sortedPlayers = [...players].sort(compareRanks);
   const [firstPlace, ...restPlayers] = sortedPlayers;
-
-  console.log("First Place:", firstPlace); // Debug
-  console.log("Rest Players:", restPlayers); // Debug
 
   return (
     <div className="space-y-6">

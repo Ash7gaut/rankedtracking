@@ -9,7 +9,7 @@ import { PlayerStats } from "./components/PlayerStats";
 import { GamesList } from "./components/GamesList";
 import { useChampionNames } from "./hooks/useChampionNames";
 
-const PlayerDetails: React.FC = () => {
+const PlayerDetails = () => {
   const { id } = useParams<{ id: string }>();
 
   const {
