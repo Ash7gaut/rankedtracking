@@ -81,7 +81,7 @@ export const getPlayerById = async (req: Request, res: Response) => {
 
 export const addPlayer = async (req: Request, res: Response) => {
   try {
-    const { summonerName, playerName } = req.body;
+    const { summonerName, playerName, role } = req.body;
     
     const [gameName, tagLine] = summonerName.split('#');
     
@@ -91,7 +91,6 @@ export const addPlayer = async (req: Request, res: Response) => {
 
     const summonerData = await riotService.getSummonerByName(gameName, tagLine);
     const rankedStats = await riotService.getRankedStats(summonerData.id);
-    console.log('Ranked Stats pour nouveau joueur:', rankedStats);
 
     const soloQStats = rankedStats.find(
       (queue: any) => queue.queueType === 'RANKED_SOLO_5x5'
@@ -101,6 +100,7 @@ export const addPlayer = async (req: Request, res: Response) => {
       summoner_id: summonerData.id,
       summoner_name: summonerData.riotId,
       player_name: playerName,
+      role: role,
       puuid: summonerData.puuid,
       profile_icon_id: summonerData.profileIconId,
       tier: soloQStats?.tier || null,
@@ -110,7 +110,6 @@ export const addPlayer = async (req: Request, res: Response) => {
       losses: soloQStats?.losses || 0,
       last_update: new Date().toISOString()
     };
-    console.log('Données du joueur à ajouter:', playerData);
 
     const { data, error } = await supabase
       .from('players')
@@ -119,7 +118,6 @@ export const addPlayer = async (req: Request, res: Response) => {
       .single();
 
     if (error) throw error;
-    console.log('Joueur ajouté:', data);
     res.json(data);
   } catch (error) {
     console.error('Error:', error);
