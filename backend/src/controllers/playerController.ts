@@ -81,7 +81,7 @@ export const getPlayerById = async (req: Request, res: Response) => {
 
 export const addPlayer = async (req: Request, res: Response) => {
   try {
-    const { summonerName } = req.body;
+    const { summonerName, playerName } = req.body;
     
     const [gameName, tagLine] = summonerName.split('#');
     
@@ -100,6 +100,7 @@ export const addPlayer = async (req: Request, res: Response) => {
     const playerData = {
       summoner_id: summonerData.id,
       summoner_name: summonerData.riotId,
+      player_name: playerName,
       puuid: summonerData.puuid,
       profile_icon_id: summonerData.profileIconId,
       tier: soloQStats?.tier || null,
