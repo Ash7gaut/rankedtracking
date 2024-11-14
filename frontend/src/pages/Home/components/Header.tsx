@@ -26,7 +26,8 @@ export const Header = ({ title, onRefresh, isRefreshing }: HeaderProps) => {
       <div className="flex items-center gap-4">
         <button
           onClick={() => navigate("/ajouter")}
-          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors opacity-50 cursor-not-allowed"
+          disabled={true}
         >
           Ajouter un joueur
         </button>
