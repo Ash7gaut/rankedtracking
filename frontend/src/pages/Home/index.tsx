@@ -2,7 +2,6 @@ import React from "react";
 import { useQuery, useQueryClient } from "react-query";
 import { api } from "../../utils/api";
 import { Header } from "./components/Header";
-import { AddPlayerForm } from "./components/AddPlayerForm/index";
 import { PlayersList } from "./components/PlayersList/index";
 import { Player } from "../../types/interfaces";
 
@@ -38,7 +37,6 @@ const Home: React.FC = () => {
         onRefresh={handleRefresh}
         isRefreshing={isFetching}
       />
-      <AddPlayerForm />
       <PlayersList players={players || []} />
     </div>
   );
