@@ -59,24 +59,28 @@ const Home = () => {
         onRefresh={handleRefresh}
         isRefreshing={isFetching}
       />
-      <div className="space-y-4">
-        <PlayerFilter
-          players={players || []}
-          selectedPlayers={selectedPlayers}
-          onPlayerSelection={handlePlayerSelection}
-        />
-        <RoleFilter
-          selectedRole={selectedRole}
-          onRoleSelection={handleRoleSelection}
-        />
-        {error ? (
-          <div className="text-red-500 dark:text-red-400">
-            Erreur de chargement des données
-          </div>
-        ) : (
-          <PlayersList players={filteredPlayers || []} />
-        )}
+      <div className="flex gap-4 mb-6">
+        <div className="flex-1">
+          <PlayerFilter
+            players={players || []}
+            selectedPlayers={selectedPlayers}
+            onPlayerSelection={handlePlayerSelection}
+          />
+        </div>
+        <div className="flex-1">
+          <RoleFilter
+            selectedRole={selectedRole}
+            onRoleSelection={handleRoleSelection}
+          />
+        </div>
       </div>
+      {error ? (
+        <div className="text-red-500 dark:text-red-400">
+          Erreur de chargement des données
+        </div>
+      ) : (
+        <PlayersList players={filteredPlayers || []} />
+      )}
     </div>
   );
 };
