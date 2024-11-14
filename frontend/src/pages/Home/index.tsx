@@ -1,14 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { useQuery, useQueryClient } from "react-query";
 import { api } from "../../utils/api";
 import { Header } from "./components/Header";
 import { PlayersList } from "./components/PlayersList/index";
+import { PlayerFilter } from "./components/PlayerFilter/PlayerFilter";
 import { Player } from "../../types/interfaces";
 
 const Home = () => {
   const queryClient = useQueryClient();
+  const [selectedPlayers, setSelectedPlayers] = useState<Set<string>>(
+    new Set()
+  );
 
-  // Utiliser l'API du backend qui communique déjà avec Supabase
   const {
     data: players,
     error,
@@ -18,10 +21,32 @@ const Home = () => {
     staleTime: Infinity,
   });
 
+  const handlePlayerSelection = (playerName: string) => {
+    setSelectedPlayers((prev) => {
+      const newSelection = new Set(prev);
+      if (newSelection.has(playerName)) {
+        newSelection.delete(playerName);
+      } else {
+        newSelection.add(playerName);
+      }
+      return newSelection;
+    });
+  };
+
+  const filteredPlayers = players?.filter((player) => {
+    if (selectedPlayers.size === 0) return true;
+    console.log(
+      "Filtering player:",
+      player.player_name,
+      "Selected:",
+      selectedPlayers
+    );
+    return selectedPlayers.has(player.player_name);
+  });
+
   const handleRefresh = async () => {
     try {
       await api.updateAllPlayers();
-      // Recharger les données via l'API après la mise à jour
       queryClient.invalidateQueries("players");
     } catch (error) {
       console.error("Erreur lors de la mise à jour:", error);
@@ -37,7 +62,14 @@ const Home = () => {
         onRefresh={handleRefresh}
         isRefreshing={isFetching}
       />
-      <PlayersList players={players || []} />
+      {players && (
+        <PlayerFilter
+          players={players}
+          selectedPlayers={selectedPlayers}
+          onPlayerSelection={handlePlayerSelection}
+        />
+      )}
+      <PlayersList players={filteredPlayers || []} />
     </div>
   );
 };

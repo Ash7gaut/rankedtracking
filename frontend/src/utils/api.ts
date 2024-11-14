@@ -33,14 +33,20 @@ export const api = {
     }
   },
 
-  addPlayer: async (summonerName: string) => {
-    try {
-      const response = await axios.post(`${API_URL}/api/players`, { summonerName });
-      return response.data;
-    } catch (error) {
-      console.error('Error adding player:', error);
-      throw error;
+  addPlayer: async (summonerName: string, playerName: string) => {
+    const response = await fetch(`${API_URL}/api/players`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ summonerName, playerName }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Erreur lors de l'ajout du joueur");
     }
+
+    return response.json();
   },
 
   getPlayerById: async (id: string) => {

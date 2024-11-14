@@ -2,6 +2,7 @@ export interface Player {
   id: string;
   summoner_id: string;
   summoner_name: string;
+  player_name: string;
   puuid: string;
   profile_icon_id: number;
   tier?: string;
