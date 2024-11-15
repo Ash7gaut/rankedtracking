@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import playerRoutes from './routes/playerRoutes.js';
-import { startAutoUpdateService } from 'backend/src/services/autoUpdateService';
 
 
 dotenv.config();
@@ -27,8 +26,6 @@ app.use(express.json());
 // Routes
 app.use('/api/players', playerRoutes);
 
-// Démarre le service de mise à jour automatique
-startAutoUpdateService();
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
