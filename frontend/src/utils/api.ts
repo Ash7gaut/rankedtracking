@@ -33,13 +33,23 @@ export const api = {
     }
   },
 
-  addPlayer: async (summonerName: string, playerName: string, role: string) => {
+  addPlayer: async (
+    summonerName: string, 
+    playerName: string, 
+    role: string,
+    isMain: boolean = false 
+  ) => {
     const response = await fetch(`${API_URL}/api/players`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ summonerName, playerName, role }),
+      body: JSON.stringify({ 
+        summonerName, 
+        playerName, 
+        role,
+        isMain 
+      }),
     });
 
     if (!response.ok) {

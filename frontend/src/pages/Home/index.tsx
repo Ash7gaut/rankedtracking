@@ -5,6 +5,7 @@ import { Header } from "./components/Header";
 import { PlayersList } from "./components/PlayersList/index";
 import { PlayerFilter } from "./components/PlayerFilter/PlayerFilter";
 import { RoleFilter } from "./components/RoleFilter/RoleFilter";
+import { MainAccountFilter } from "./components/MainAccountFilter/MainAccountFilter";
 import { Player } from "../../types/interfaces";
 
 const Home = () => {
@@ -12,6 +13,7 @@ const Home = () => {
     new Set()
   );
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const [isMainOnly, setIsMainOnly] = useState(false);
   const queryClient = useQueryClient();
 
   const {
@@ -40,7 +42,8 @@ const Home = () => {
     const matchesPlayer =
       selectedPlayers.size === 0 || selectedPlayers.has(player.player_name);
     const matchesRole = !selectedRole || player.role === selectedRole;
-    return matchesPlayer && matchesRole;
+    const matchesMainAccount = !isMainOnly || player.is_main;
+    return matchesPlayer && matchesRole && matchesMainAccount;
   });
 
   const handleRefresh = async () => {
@@ -59,18 +62,24 @@ const Home = () => {
         onRefresh={handleRefresh}
         isRefreshing={isFetching}
       />
-      <div className="flex gap-4 mb-6">
-        <div className="flex-1">
+      <div className="flex flex-wrap gap-4 mb-6">
+        <div className="flex-1 min-w-[300px]">
           <PlayerFilter
             players={players || []}
             selectedPlayers={selectedPlayers}
             onPlayerSelection={handlePlayerSelection}
           />
         </div>
-        <div className="flex-1">
+        <div className="flex-1 min-w-[300px]">
           <RoleFilter
             selectedRole={selectedRole}
             onRoleSelection={handleRoleSelection}
+          />
+        </div>
+        <div className="flex-1 min-w-[300px]">
+          <MainAccountFilter
+            isMainOnly={isMainOnly}
+            onMainAccountToggle={() => setIsMainOnly(!isMainOnly)}
           />
         </div>
       </div>

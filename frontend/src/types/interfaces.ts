@@ -4,6 +4,7 @@ export interface Player {
   summoner_name: string;
   player_name: string;
   role: 'TOP' | 'JUNGLE' | 'MID' | 'ADC' | 'SUPPORT';
+  is_main: boolean;
   puuid: string;
   profile_icon_id: number;
   tier?: string;

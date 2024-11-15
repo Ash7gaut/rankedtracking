@@ -11,6 +11,7 @@ export const AddPlayerForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const [isMain, setIsMain] = useState(false);
 
   const { data: players } = useQuery<Player[]>("players", api.getPlayers);
 
@@ -51,10 +52,11 @@ export const AddPlayerForm = () => {
     setError(null);
 
     try {
-      await api.addPlayer(summonerName, playerName, role);
+      await api.addPlayer(summonerName, playerName, role, isMain);
       setSummonerName("");
       setPlayerName("");
       setRole("");
+      setIsMain(false);
       queryClient.invalidateQueries("players");
     } catch (err) {
       setError("Erreur lors de l'ajout du joueur");
@@ -127,11 +129,11 @@ export const AddPlayerForm = () => {
           required
         >
           <option value="">Sélectionner un rôle</option>
-          <option value="TOP">Top 🛡️</option>
-          <option value="JUNGLE">Jungle 🌲</option>
-          <option value="MID">Mid ⚔️</option>
-          <option value="ADC">ADC 🎯</option>
-          <option value="SUPPORT">Support 💝</option>
+          <option value="TOP">Top</option>
+          <option value="JUNGLE">Jungle</option>
+          <option value="MID">Mid</option>
+          <option value="ADC">ADC</option>
+          <option value="SUPPORT">Support</option>
         </select>
 
         {/* Champ pour le nom d'invocateur */}
@@ -143,6 +145,18 @@ export const AddPlayerForm = () => {
           className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:border-blue-500 dark:bg-gray-700 dark:text-white"
           disabled={isLoading}
         />
+
+        <label className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            checked={isMain}
+            onChange={(e) => setIsMain(e.target.checked)}
+            className="form-checkbox h-5 w-5 text-blue-500"
+          />
+          <span className="text-gray-700 dark:text-gray-300">
+            Compte principal
+          </span>
+        </label>
 
         <button
           type="submit"
