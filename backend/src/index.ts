@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import playerRoutes from './routes/playerRoutes.js';
-import { startAutoUpdateService } from './services/autoUpdateService';
+import { startAutoUpdateService } from 'backend/src/services/autoUpdateService';
 
 
 dotenv.config();
