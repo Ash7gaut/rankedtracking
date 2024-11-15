@@ -60,7 +60,7 @@ const updateAllPlayers = async () => {
               league_points: soloQStats?.leaguePoints || 0,
               wins: soloQStats?.wins || 0,
               losses: soloQStats?.losses || 0,
-              in_game: activeGame.inGame,
+              in_game: activeGame.inGame || false,
               last_update: new Date().toISOString()
             };
 
@@ -71,7 +71,7 @@ const updateAllPlayers = async () => {
 
             if (updateError) throw updateError;
             
-            console.log(`✅ ${player.summoner_name} mis à jour${activeGame.inGame ? ' (IN GAME)' : ''}`);
+            console.log(`✅ ${player.summoner_name} mis à jour${activeGame.inGame ? ' (IN GAME)' : ' (NOT IN GAME)'}`);
             updates.push({ success: true, player: player.summoner_name });
             success = true;
           } catch (error: any) {
