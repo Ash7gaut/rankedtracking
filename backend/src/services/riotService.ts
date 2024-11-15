@@ -171,5 +171,24 @@ export const riotService = {
       console.error('Error in getMatchDetails:', error);
       throw error;
     }
-  }
+  },
+
+  getActiveGame: async (puuid: string) => {
+    try {
+      const response = await axios.get(
+        `https://euw1.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${puuid}`,
+        {
+          headers: {
+            'X-Riot-Token': RIOT_API_KEY
+          }
+        }
+      );
+      return { inGame: true, data: response.data };
+    } catch (error: any) {
+      if (error.response && error.response.status === 404) {
+        return { inGame: false, data: null };
+      }
+      throw error;
+    }
+  },
 };

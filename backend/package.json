@@ -6,7 +6,8 @@
     "prebuild": "rm -rf dist",
     "build": "tsc",
     "postbuild": "ls -la dist/services/",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.46.1",
@@ -20,6 +21,8 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/node": "^22.9.0",
+    "nodemon": "^3.0.3",
+    "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3"
   }
