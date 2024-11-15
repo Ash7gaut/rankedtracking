@@ -20,7 +20,13 @@ const Home = () => {
     data: players,
     error,
     isFetching,
-  } = useQuery<Player[]>("players", api.getPlayers);
+  } = useQuery<Player[]>("players", api.getPlayers, {
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
+    staleTime: 0,
+    initialDataUpdatedAt: 0,
+    refetchInterval: 30000,
+  });
 
   const handlePlayerSelection = (playerName: string) => {
     setSelectedPlayers((prev) => {
