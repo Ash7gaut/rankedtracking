@@ -3,6 +3,14 @@ import { riotService } from './riotService.js';
 
 const UPDATE_INTERVAL = 5 * 60 * 1000; // 5 minutes en millisecondes
 
+// Limites de l'API Riot
+const RATE_LIMIT_PER_SECOND = 20;  // 20 requêtes par seconde
+const RATE_LIMIT_PER_2_MIN = 100;  // 100 requêtes par 2 minutes
+const DELAY_BETWEEN_REQUESTS = 1000 / RATE_LIMIT_PER_SECOND; // ~50ms entre chaque requête
+const MAX_RETRIES = 3;
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 export const startAutoUpdateService = () => {
   console.log('Service de mise à jour automatique initialisé');
 
@@ -32,38 +40,68 @@ const updateAllPlayers = async () => {
 
     console.log(`[${timestamp}] Mise à jour de ${players.length} joueurs...`);
 
-    const updates = await Promise.all(
-      players.map(async (player) => {
-        try {
-          const rankedStats = await riotService.getRankedStats(player.summoner_id);
-          const soloQStats = rankedStats.find(
-            (queue: any) => queue.queueType === 'RANKED_SOLO_5x5'
-          );
+    // Diviser les joueurs en lots de 100 (limite par 2 minutes)
+    const batches = [];
+    for (let i = 0; i < players.length; i += RATE_LIMIT_PER_2_MIN) {
+      batches.push(players.slice(i, i + RATE_LIMIT_PER_2_MIN));
+    }
 
-          const updateData = {
-            tier: soloQStats?.tier || null,
-            rank: soloQStats?.rank || null,
-            league_points: soloQStats?.leaguePoints || 0,
-            wins: soloQStats?.wins || 0,
-            losses: soloQStats?.losses || 0,
-            last_update: new Date().toISOString()
-          };
+    const updates = [];
+    for (const batch of batches) {
+      console.log(`[${timestamp}] Traitement d'un nouveau lot de ${batch.length} joueurs`);
+      
+      for (const player of batch) {
+        let retries = 0;
+        let success = false;
 
-          const { error: updateError } = await supabase
-            .from('players')
-            .update(updateData)
-            .eq('id', player.id);
+        while (!success && retries < MAX_RETRIES) {
+          try {
+            await sleep(DELAY_BETWEEN_REQUESTS);
 
-          if (updateError) throw updateError;
-          
-          console.log(`[${timestamp}] ✅ ${player.summoner_name} mis à jour`);
-          return { success: true, player: player.summoner_name };
-        } catch (error) {
-          console.error(`[${timestamp}] ❌ Erreur pour ${player.summoner_name}:`, error);
-          return { success: false, player: player.summoner_name, error };
+            const rankedStats = await riotService.getRankedStats(player.summoner_id);
+            const soloQStats = rankedStats.find(
+              (queue: any) => queue.queueType === 'RANKED_SOLO_5x5'
+            );
+
+            const updateData = {
+              tier: soloQStats?.tier || null,
+              rank: soloQStats?.rank || null,
+              league_points: soloQStats?.leaguePoints || 0,
+              wins: soloQStats?.wins || 0,
+              losses: soloQStats?.losses || 0,
+              last_update: new Date().toISOString()
+            };
+
+            const { error: updateError } = await supabase
+              .from('players')
+              .update(updateData)
+              .eq('id', player.id);
+
+            if (updateError) throw updateError;
+            
+            console.log(`[${timestamp}] ✅ ${player.summoner_name} mis à jour`);
+            updates.push({ success: true, player: player.summoner_name });
+            success = true;
+          } catch (error: any) {
+            retries++;
+            if (error?.response?.status === 429) {
+              const retryAfter = error?.response?.headers?.['retry-after'] || 10;
+              console.log(`[${timestamp}] Rate limit atteint pour ${player.summoner_name}, attente de ${retryAfter}s (tentative ${retries}/${MAX_RETRIES})`);
+              await sleep(retryAfter * 1000);
+            } else if (retries === MAX_RETRIES) {
+              console.error(`[${timestamp}] ❌ Échec définitif pour ${player.summoner_name}:`, error);
+              updates.push({ success: false, player: player.summoner_name, error });
+            }
+          }
         }
-      })
-    );
+      }
+
+      // Attendre 2 minutes avant le prochain lot
+      if (batches.indexOf(batch) < batches.length - 1) {
+        console.log(`[${timestamp}] Attente de 2 minutes avant le prochain lot...`);
+        await sleep(120000); // 2 minutes
+      }
+    }
 
     const successCount = updates.filter(u => u.success).length;
     const failedUpdates = updates.filter(u => !u.success);
