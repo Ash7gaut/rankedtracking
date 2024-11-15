@@ -30,6 +30,7 @@ export const AddPlayerForm = () => {
     David: "JUNGLE",
     powah: "SUPPORT",
     Benji: "ADC",
+    valentin: "MID",
   };
 
   const existingPlayerNames = Array.from(
