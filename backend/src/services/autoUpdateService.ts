@@ -56,4 +56,5 @@ export const startAutoUpdateService = () => {
       console.error('Erreur lors de la mise à jour automatique:', error);
     }
   });
+  
 };

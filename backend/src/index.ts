@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import playerRoutes from './routes/playerRoutes.js';
 import { startAutoUpdateService } from './services/autoUpdateService';
 
+
 dotenv.config();
 
 const app = express();
