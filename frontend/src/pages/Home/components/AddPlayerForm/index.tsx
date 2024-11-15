@@ -13,9 +13,37 @@ export const AddPlayerForm = () => {
   const queryClient = useQueryClient();
 
   const { data: players } = useQuery<Player[]>("players", api.getPlayers);
+
+  // Mapping des joueurs existants avec leurs rôles
+  const playerRoles: { [key: string]: string } = {
+    Mayd: "ADC",
+    Benoit: "TOP",
+    Zouzou: "JUNGLE",
+    Cedric: "MID",
+    Minh: "MID",
+    napo: "SUPPORT",
+    Ibra: "TOP",
+    Katy: "ADC",
+    Roke: "TOP",
+    melio: "JUNGLE",
+    David: "JUNGLE",
+    powah: "SUPPORT",
+    Benji: "ADC",
+  };
+
   const existingPlayerNames = Array.from(
     new Set(players?.map((p) => p.player_name))
   ).filter(Boolean);
+
+  // Mise à jour du gestionnaire de changement de joueur
+  const handlePlayerNameChange = (name: string) => {
+    setPlayerName(name);
+    if (playerRoles[name]) {
+      setRole(playerRoles[name]);
+    } else {
+      setRole("");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,7 +92,7 @@ export const AddPlayerForm = () => {
           </label>
         </div>
 
-        {/* Champ pour le nom du joueur */}
+        {/* Champ pour le nom du joueur modifié */}
         {isNewPlayer ? (
           <input
             type="text"
@@ -77,7 +105,7 @@ export const AddPlayerForm = () => {
         ) : (
           <select
             value={playerName}
-            onChange={(e) => setPlayerName(e.target.value)}
+            onChange={(e) => handlePlayerNameChange(e.target.value)}
             className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:border-blue-500 dark:bg-gray-700 dark:text-white"
             disabled={isLoading}
           >
@@ -90,12 +118,12 @@ export const AddPlayerForm = () => {
           </select>
         )}
 
-        {/* Nouveau sélecteur de rôle */}
+        {/* Sélecteur de rôle */}
         <select
           value={role}
           onChange={(e) => setRole(e.target.value)}
           className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-          disabled={isLoading}
+          disabled={isLoading || (!!playerName && !!playerRoles[playerName])}
           required
         >
           <option value="">Sélectionner un rôle</option>
