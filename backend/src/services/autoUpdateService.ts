@@ -66,7 +66,16 @@ const updateAllPlayers = async () => {
     );
 
     const successCount = updates.filter(u => u.success).length;
+    const failedUpdates = updates.filter(u => !u.success);
+    
     console.log(`[${timestamp}] Mise à jour terminée: ${successCount}/${players.length} joueurs mis à jour`);
+    
+    if (failedUpdates.length > 0) {
+      console.log(`[${timestamp}] Joueurs non mis à jour :`);
+      failedUpdates.forEach(update => {
+        console.log(`[${timestamp}] ❌ ${update.player} - Erreur: ${update.error}`);
+      });
+    }
   } catch (error) {
     console.error(`[${timestamp}] Erreur globale:`, error);
   }
