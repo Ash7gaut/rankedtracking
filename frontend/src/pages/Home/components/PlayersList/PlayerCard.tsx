@@ -9,6 +9,8 @@ interface PlayerCardProps {
 export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
   const navigate = useNavigate();
 
+  console.log(`Debug - ${player.summoner_name} card data:`, player);
+
   // Calcul du winrate modifié
   const winRate = (() => {
     if (!player.wins && !player.losses) return "0";
@@ -34,8 +36,24 @@ export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
     }
   };
 
+  // Fonction pour déterminer la couleur du badge IN GAME
+  const getInGameBadgeColor = (winRate: number) => {
+    if (winRate < 50) return "bg-amber-800"; // Couleur caca pour winrate < 45%
+    return "bg-green-500"; // Couleur verte par défaut
+  };
+
   return (
     <div className="relative">
+      {player.in_game && (
+        <div
+          className={`absolute top-2 right-2 ${getInGameBadgeColor(
+            Number(winRate)
+          )} text-white px-2 py-1 rounded-full text-xs font-semibold animate-pulse z-50`}
+        >
+          IN GAME
+        </div>
+      )}
+
       {rank && rank <= 3 && (
         <div
           className={`absolute left-1/2 transform -translate-x-1/2 ${getBadgeColor(

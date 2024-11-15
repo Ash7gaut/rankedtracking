@@ -13,6 +13,7 @@ export interface Player {
   wins?: number;
   losses?: number;
   last_update?: string;
+  in_game?: boolean;
 }
 
 export interface Match {
