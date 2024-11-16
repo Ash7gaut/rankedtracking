@@ -39,8 +39,10 @@ export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
     return "bg-green-500";
   };
 
+  // Fonction pour formater le nom d'invocateur pour l'URL Porofessor
   const formatSummonerNameForUrl = (name: string) => {
-    return encodeURIComponent(name.replace(/\s+/g, "-"));
+    // Remplacer les espaces par %20 et # par -
+    return name.replace(/ /g, "%20").replace(/#/g, "-");
   };
 
   return (
