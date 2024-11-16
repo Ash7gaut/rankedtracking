@@ -137,7 +137,12 @@ export const updateAllPlayers = async (req: Request, res: Response) => {
     const updatedPlayers = await Promise.all(
       players.map(async (player) => {
         try {
-          const rankedStats = await riotService.getRankedStats(player.summoner_id);
+          // Récupérer les stats ranked ET le statut in_game en parallèle
+          const [rankedStats, activeGame] = await Promise.all([
+            riotService.getRankedStats(player.summoner_id),
+            riotService.getActiveGame(player.puuid)
+          ]);
+
           const soloQStats = rankedStats.find(
             (queue: any) => queue.queueType === 'RANKED_SOLO_5x5'
           );
@@ -148,6 +153,7 @@ export const updateAllPlayers = async (req: Request, res: Response) => {
             league_points: soloQStats?.leaguePoints || 0,
             wins: soloQStats?.wins || 0,
             losses: soloQStats?.losses || 0,
+            in_game: activeGame.inGame,
             last_update: new Date().toISOString()
           };
 
