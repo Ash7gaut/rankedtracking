@@ -15,18 +15,19 @@ const Home = () => {
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [isMainOnly, setIsMainOnly] = useState(false);
   const queryClient = useQueryClient();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const {
-    data: players,
-    error,
-    isFetching,
-  } = useQuery<Player[]>("players", api.getPlayers, {
-    refetchOnMount: "always",
-    refetchOnWindowFocus: true,
-    staleTime: 0,
-    initialDataUpdatedAt: 0,
-    refetchInterval: 30000,
-  });
+  const { data: players, error } = useQuery<Player[]>(
+    "players",
+    api.getPlayers,
+    {
+      refetchOnMount: "always",
+      refetchOnWindowFocus: true,
+      staleTime: 0,
+      initialDataUpdatedAt: 0,
+      refetchInterval: 30000,
+    }
+  );
 
   const handlePlayerSelection = (playerName: string) => {
     setSelectedPlayers((prev) => {
@@ -53,11 +54,15 @@ const Home = () => {
   });
 
   const handleRefresh = async () => {
+    setIsRefreshing(true);
+
     try {
       await api.updateAllPlayers();
-      queryClient.invalidateQueries("players");
+      await queryClient.invalidateQueries("players");
     } catch (error) {
       console.error("Erreur lors de la mise à jour:", error);
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -66,7 +71,7 @@ const Home = () => {
       <Header
         title="Classement"
         onRefresh={handleRefresh}
-        isRefreshing={isFetching}
+        isRefreshing={isRefreshing}
       />
       <div className="flex flex-wrap gap-4 mb-6">
         <div className="flex-1 min-w-[300px]">
