@@ -9,8 +9,6 @@ interface PlayerCardProps {
 export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
   const navigate = useNavigate();
 
-  console.log(`Debug - ${player.summoner_name} card data:`, player);
-
   // Calcul du winrate modifié
   const winRate = (() => {
     if (!player.wins && !player.losses) return "0";
@@ -36,22 +34,31 @@ export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
     }
   };
 
-  // Fonction pour déterminer la couleur du badge IN GAME
   const getInGameBadgeColor = (winRate: number) => {
-    if (winRate < 50) return "bg-amber-800"; // Couleur caca pour winrate < 45%
-    return "bg-green-500"; // Couleur verte par défaut
+    if (winRate < 50) return "bg-amber-800";
+    return "bg-green-500";
+  };
+
+  const formatSummonerNameForUrl = (name: string) => {
+    return encodeURIComponent(name.replace(/\s+/g, "-"));
   };
 
   return (
     <div className="relative">
       {player.in_game && (
-        <div
+        <a
+          href={`https://porofessor.gg/fr/live/euw/${formatSummonerNameForUrl(
+            player.summoner_name
+          )}`}
+          target="_blank"
+          rel="noopener noreferrer"
           className={`absolute top-2 right-2 ${getInGameBadgeColor(
             Number(winRate)
-          )} text-white px-2 py-1 rounded-full text-xs font-semibold animate-pulse z-50`}
+          )} text-white px-2 py-1 rounded-full text-xs font-semibold animate-pulse z-50 hover:brightness-110 transition-all`}
+          onClick={(e) => e.stopPropagation()} // Empêche la navigation vers la page de détails
         >
           IN GAME
-        </div>
+        </a>
       )}
 
       {rank && rank <= 3 && (
