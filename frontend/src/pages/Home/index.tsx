@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "react-query";
 import { api } from "../../utils/api";
 import { Header } from "./components/Header";
 import { PlayersList } from "./components/PlayersList/index";
+import { SkeletonCard } from "./components/PlayersList/SkeletonCard";
 import { PlayerFilter } from "./components/PlayerFilter/PlayerFilter";
 import { RoleFilter } from "./components/RoleFilter/RoleFilter";
 import { MainAccountFilter } from "./components/MainAccountFilter/MainAccountFilter";
@@ -14,6 +15,7 @@ const Home = () => {
   );
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [isMainOnly, setIsMainOnly] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const queryClient = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -21,6 +23,9 @@ const Home = () => {
     "players",
     api.getPlayers,
     {
+      retry: 2,
+      retryDelay: 1000,
+      onSettled: () => setIsInitialLoading(false),
       refetchOnMount: "always",
       refetchOnWindowFocus: true,
       staleTime: 0,
@@ -73,33 +78,55 @@ const Home = () => {
         onRefresh={handleRefresh}
         isRefreshing={isRefreshing}
       />
-      <div className="flex flex-wrap gap-4 mb-6">
-        <div className="flex-1 min-w-[300px]">
-          <PlayerFilter
-            players={players || []}
-            selectedPlayers={selectedPlayers}
-            onPlayerSelection={handlePlayerSelection}
-          />
-        </div>
-        <div className="flex-1 min-w-[300px]">
-          <RoleFilter
-            selectedRole={selectedRole}
-            onRoleSelection={handleRoleSelection}
-          />
-        </div>
-        <div className="flex-1 min-w-[300px]">
-          <MainAccountFilter
-            isMainOnly={isMainOnly}
-            onMainAccountToggle={() => setIsMainOnly(!isMainOnly)}
-          />
-        </div>
-      </div>
-      {error ? (
-        <div className="text-red-500 dark:text-red-400">
-          Erreur de chargement des données
-        </div>
-      ) : (
-        <PlayersList players={filteredPlayers || []} />
+
+      {isInitialLoading && (
+        <>
+          <div className="flex flex-col items-center justify-center mt-20 mb-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+            <p className="mt-4 text-gray-600 dark:text-gray-400">
+              Chargement des données, cela peut prendre jusqu'à 1 minute...
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[...Array(9)].map((_, index) => (
+              <SkeletonCard key={index} />
+            ))}
+          </div>
+        </>
+      )}
+
+      {!isInitialLoading && (
+        <>
+          <div className="flex flex-wrap gap-4 mb-6">
+            <div className="flex-1 min-w-[300px]">
+              <PlayerFilter
+                players={players || []}
+                selectedPlayers={selectedPlayers}
+                onPlayerSelection={handlePlayerSelection}
+              />
+            </div>
+            <div className="flex-1 min-w-[300px]">
+              <RoleFilter
+                selectedRole={selectedRole}
+                onRoleSelection={handleRoleSelection}
+              />
+            </div>
+            <div className="flex-1 min-w-[300px]">
+              <MainAccountFilter
+                isMainOnly={isMainOnly}
+                onMainAccountToggle={() => setIsMainOnly(!isMainOnly)}
+              />
+            </div>
+          </div>
+          {error ? (
+            <div className="text-red-500 dark:text-red-400">
+              Erreur de chargement des données
+            </div>
+          ) : (
+            <PlayersList players={filteredPlayers || []} />
+          )}
+        </>
       )}
     </div>
   );
