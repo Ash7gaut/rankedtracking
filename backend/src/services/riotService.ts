@@ -76,7 +76,12 @@ export const riotService = {
       }
 
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
+      if (error.response?.status === 429) {
+        const retryAfter = error.response.headers['retry-after'] || 10;
+        await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
+        return riotService.getRankedStats(summonerId); // Retry after waiting
+      }
       console.error('Error in getRankedStats:', error);
       throw error;
     }
