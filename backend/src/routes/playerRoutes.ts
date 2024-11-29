@@ -4,6 +4,7 @@ import { riotService } from '../services/riotService.js';
 import { supabase } from '../config/supabase.js';
 import { updateAllPlayers } from '../controllers/playerController.js';
 import { MatchDetails } from '../types/interfaces.js';
+import { addPlayer } from '../controllers/playerController.js';
 
 const router = express.Router();
 
@@ -48,66 +49,69 @@ const handleGetPlayerById: RequestHandler = async (req, res) => {
 };
 
 // Gestionnaire pour ajouter un joueur
-const handleAddPlayer: RequestHandler = async (req, res) => {
-  try {
-    const { summonerName } = req.body;
-    console.log('Received summonerName:', summonerName);
+// const handleAddPlayer: RequestHandler = async (req, res) => {
+//   try {
+//     const { summonerName, playerName, role, isMain } = req.body;
+//     // Log pour débugger les valeurs reçues
+//     console.log('Received data:', { 
+//       summonerName, 
+//       playerName, 
+//       role, 
+//       isMain,
+//       roleType: typeof role,
+//       isMainType: typeof isMain 
+//     });
     
-    // Séparer le nom et le tag
-    const [gameName, tagLine] = summonerName.split('#');
-    console.log('Parsed name:', gameName, 'tag:', tagLine);
+//     const [gameName, tagLine] = summonerName.split('#');
     
-    if (!gameName || !tagLine) {
-      res.status(400).json({ error: 'Format invalide. Utilisez le format: nom#tag' });
-      return;
-    }
+//     if (!gameName || !tagLine) {
+//       res.status(400).json({ error: 'Format invalide. Utilisez le format: nom#tag' });
+//       return;
+//     }
 
-    console.log('Calling Riot API...');
-    const summonerData = await riotService.getSummonerByName(gameName, tagLine);
-    console.log('Summoner data:', summonerData);
+//     const summonerData = await riotService.getSummonerByName(gameName, tagLine);
+//     const rankedStats = await riotService.getRankedStats(summonerData.id);
+//     const soloQStats = rankedStats.find(
+//       (queue: any) => queue.queueType === 'RANKED_SOLO_5x5'
+//     );
 
-    console.log('Getting ranked stats...');
-    const rankedStats = await riotService.getRankedStats(summonerData.id);
-    console.log('Ranked stats:', rankedStats);
+//     const formattedRole = role.toUpperCase() as 'TOP' | 'JUNGLE' | 'MID' | 'ADC' | 'SUPPORT';
+//     const formattedIsMain = isMain === true;
 
-    const soloQStats = rankedStats.find(
-      (queue: any) => queue.queueType === 'RANKED_SOLO_5x5'
-    );
-    console.log('SoloQ stats:', soloQStats);
+//     const playerData = {
+//       summoner_id: summonerData.id,
+//       summoner_name: summonerData.riotId,
+//       player_name: playerName,
+//       role: formattedRole,
+//       is_main: formattedIsMain,
+//       puuid: summonerData.puuid,
+//       profile_icon_id: summonerData.profileIconId,
+//       tier: soloQStats?.tier || null,
+//       rank: soloQStats?.rank || null,
+//       league_points: soloQStats?.leaguePoints || 0,
+//       wins: soloQStats?.wins || 0,
+//       losses: soloQStats?.losses || 0,
+//       last_update: new Date().toISOString()
+//     };
 
-    console.log('Upserting to Supabase...');
-    const { data, error } = await supabase
-      .from('players')
-      .upsert({
-        summoner_id: summonerData.id,
-        summoner_name: summonerData.riotId,
-        puuid: summonerData.puuid,
-        profile_icon_id: summonerData.profileIconId,
-        tier: soloQStats?.tier || null,
-        rank: soloQStats?.rank || null,
-        league_points: soloQStats?.leaguePoints || 0,
-        wins: soloQStats?.wins || 0,
-        losses: soloQStats?.losses || 0,
-        last_update: new Date().toISOString()
-      })
-      .select()
-      .single();
+//     const { data, error } = await supabase
+//       .from('players')
+//       .upsert(playerData)
+//       .select()
+//       .single();
 
-    if (error) {
-      console.error('Supabase error:', error);
-      throw error;
-    }
+//     if (error) {
+//       console.error('Supabase error:', error);
+//       throw error;
+//     }
     
-    console.log('Success! Data:', data);
-    res.json(data);
-  } catch (error: any) {
-    console.error('Detailed error:', error.response?.data || error);
-    res.status(500).json({ 
-      error: 'Error adding player',
-      details: error.response?.data || error.message 
-    });
-  }
-};
+//     console.log('Inserted data:', data);
+//     res.json(data);
+//   } catch (error) {
+//     console.error('Error adding player:', error);
+//     res.status(500).json({ error: 'Error adding player' });
+//   }
+// };
 
 const handleDeletePlayer: RequestHandler = async (req, res) => {
   const { id } = req.params;
@@ -116,11 +120,6 @@ const handleDeletePlayer: RequestHandler = async (req, res) => {
   res.status(204).send();
 };
 
-
-// const handleUpdateAllPlayers: RequestHandler = async (req, res) => {
-//   await updateAllPlayers();
-//   res.status(200).send();
-// };
 
 interface MatchResponse {
   info: {
@@ -146,7 +145,7 @@ const handleGetPlayerGames: RequestHandler = async (req, res) => {
       matchIds.map(matchId => riotService.getMatchDetails(matchId, puuid))
     );
 
-    // Filtrer les parties null et prendre les 5 premières parties classées
+    // Filtrer les parties et prendre les 5 premières parties classées
     const rankedGames = games
       .filter((game): game is MatchDetails => game !== null)
       .slice(0, 5);
@@ -158,14 +157,32 @@ const handleGetPlayerGames: RequestHandler = async (req, res) => {
   }
 };
 
-// ... reste du code ...
-
 // Routes
 router.get('/', handleGetPlayers);
-router.post('/', handleAddPlayer);
+router.post('/', addPlayer as RequestHandler);
 router.get('/:id', handleGetPlayerById);
 router.delete('/:id', handleDeletePlayer);
 router.get('/:puuid/games', handleGetPlayerGames);
-router.post('/update-all', updateAllPlayers); // Nouvelle route pour la mise à jour
+router.post('/update-all', updateAllPlayers);
+router.get('/players/:name', async (req, res) => {
+  const { name } = req.params;
+  
+  try {
+    const { data, error } = await supabase
+      .from('players')
+      .select('*')
+      .eq('summoner_name', name)
+      .single();
+
+    if (error) throw error;
+    if (!data) {
+      res.status(404).json({ error: 'Player not found' });
+      return;
+    }
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching player' });
+  }
+});
 
 export default router;

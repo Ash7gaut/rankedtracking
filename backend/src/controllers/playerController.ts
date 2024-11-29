@@ -36,7 +36,7 @@ export const getPlayerById = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Player not found' });
     }
 
-    // 2. Mettre à jour les données du joueur
+      // 2. Mettre à jour les données du joueur
     try {
       const rankedStats = await riotService.getRankedStats(player.summoner_id);
       console.log('Ranked Stats pour', player.summoner_name, ':', rankedStats);
@@ -81,7 +81,14 @@ export const getPlayerById = async (req: Request, res: Response) => {
 
 export const addPlayer = async (req: Request, res: Response) => {
   try {
-    const { summonerName, playerName, role } = req.body;
+    const { summonerName, playerName, role, isMain } = req.body;
+    console.log('Données reçues dans le contrôleur:', { 
+      summonerName, 
+      playerName, 
+      role, 
+      isMain,
+      typeIsMain: typeof isMain
+    });
     
     const [gameName, tagLine] = summonerName.split('#');
     
@@ -91,7 +98,6 @@ export const addPlayer = async (req: Request, res: Response) => {
 
     const summonerData = await riotService.getSummonerByName(gameName, tagLine);
     const rankedStats = await riotService.getRankedStats(summonerData.id);
-
     const soloQStats = rankedStats.find(
       (queue: any) => queue.queueType === 'RANKED_SOLO_5x5'
     );
@@ -100,7 +106,8 @@ export const addPlayer = async (req: Request, res: Response) => {
       summoner_id: summonerData.id,
       summoner_name: summonerData.riotId,
       player_name: playerName,
-      role: role,
+      role: role.toUpperCase(),
+      is_main: isMain === true,
       puuid: summonerData.puuid,
       profile_icon_id: summonerData.profileIconId,
       tier: soloQStats?.tier || null,
@@ -111,13 +118,20 @@ export const addPlayer = async (req: Request, res: Response) => {
       last_update: new Date().toISOString()
     };
 
+    console.log('Données à insérer dans la BDD:', playerData);
+
     const { data, error } = await supabase
       .from('players')
       .upsert(playerData)
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Erreur Supabase:', error);
+      throw error;
+    }
+
+    console.log('Données insérées avec succès:', data);
     res.json(data);
   } catch (error) {
     console.error('Error:', error);
@@ -125,7 +139,7 @@ export const addPlayer = async (req: Request, res: Response) => {
   }
 };
 
-// Nouvelle fonction pour la mise à jour
+
 export const updateAllPlayers = async (req: Request, res: Response) => {
   try {
     const { data: players, error: fetchError } = await supabase
@@ -137,7 +151,6 @@ export const updateAllPlayers = async (req: Request, res: Response) => {
     const updatedPlayers = await Promise.all(
       players.map(async (player) => {
         try {
-          // Récupérer les stats ranked ET le statut in_game en parallèle
           const [rankedStats, activeGame] = await Promise.all([
             riotService.getRankedStats(player.summoner_id),
             riotService.getActiveGame(player.puuid)

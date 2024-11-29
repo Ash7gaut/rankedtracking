@@ -57,7 +57,7 @@ export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
           className={`absolute top-2 right-2 ${getInGameBadgeColor(
             Number(winRate)
           )} text-white px-2 py-1 rounded-full text-xs font-semibold animate-pulse z-50 hover:brightness-110 transition-all`}
-          onClick={(e) => e.stopPropagation()} // Empêche la navigation vers la page de détails
+          onClick={(e) => e.stopPropagation()}
         >
           IN GAME
         </a>

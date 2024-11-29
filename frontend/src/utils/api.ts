@@ -39,24 +39,23 @@ export const api = {
     role: string,
     isMain: boolean = false 
   ) => {
-    const response = await fetch(`${API_URL}/api/players`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ 
-        summonerName, 
-        playerName, 
-        role,
-        isMain 
-      }),
-    });
+    const payload = {
+      summonerName, 
+      playerName, 
+      role,
+      isMain
+    };
+    
+    console.log('Frontend - Données envoyées à l\'API:', payload);
 
-    if (!response.ok) {
-      throw new Error("Erreur lors de l'ajout du joueur");
+    try {
+      const response = await axios.post(`${API_URL}/api/players`, payload);
+      console.log('Frontend - Réponse reçue du serveur:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Frontend - Erreur:', error);
+      throw error;
     }
-
-    return response.json();
   },
 
   getPlayerById: async (id: string) => {
@@ -77,5 +76,5 @@ export const api = {
       console.error('Error deleting player:', error);
       throw error;
     }
-  }
+  },
 };

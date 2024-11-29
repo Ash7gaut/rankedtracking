@@ -15,7 +15,6 @@ export const AddPlayerForm = () => {
 
   const { data: players } = useQuery<Player[]>("players", api.getPlayers);
 
-  // Mapping des joueurs existants avec leurs rôles
   const playerRoles: { [key: string]: string } = {
     Mayd: "ADC",
     Benoit: "TOP",
