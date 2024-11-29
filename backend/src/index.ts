@@ -25,7 +25,6 @@ app.use('/api/players', playerRoutes);
 // Démarrer le service de mise à jour automatique
 startAutoUpdateService();
 
-// Ajoute cette route health check
 app.get('/health', (_req, res) => {
   res.status(200).send('OK');
 });
