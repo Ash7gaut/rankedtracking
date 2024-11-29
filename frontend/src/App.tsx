@@ -1,24 +1,49 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { supabase } from "./utils/supabase";
+import { Session } from "@supabase/supabase-js";
 import Home from "./pages/Home/index";
+import Login from "./pages/Login";
 import PlayerDetails from "./pages/PlayerDetails/index";
 import AddPlayer from "./pages/AddPlayer/AddPlayer";
+import Profile from "./pages/Profile/Profile";
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => {
-    // Récupérer la préférence sauvegardée ou utiliser la préférence système
     const saved = localStorage.getItem("darkMode");
     return saved
       ? JSON.parse(saved)
       : window.matchMedia("(prefers-color-scheme: dark)").matches;
   });
 
+  const [session, setSession] = useState<Session | null>(null);
+
   useEffect(() => {
-    // Sauvegarder la préférence
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
     localStorage.setItem("darkMode", JSON.stringify(darkMode));
-    // Appliquer la classe dark au HTML
     document.documentElement.classList.toggle("dark", darkMode);
   }, [darkMode]);
+
+  // Composant pour protéger les routes
+  const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+    if (!session) {
+      return <Navigate to="/login" />;
+    }
+    return <>{children}</>;
+  };
 
   return (
     <BrowserRouter>
@@ -35,9 +60,28 @@ function App() {
             {darkMode ? "🌞" : "🌙"}
           </button>
           <Routes>
+            {/* Routes publiques */}
             <Route path="/" element={<Home />} />
-            <Route path="/player/:id" element={<PlayerDetails />} />
-            <Route path="/add" element={<AddPlayer />} />
+            <Route path="/login" element={<Login />} />
+
+            {/* Routes protégées */}
+            <Route
+              path="/player/:id"
+              element={
+                <ProtectedRoute>
+                  <PlayerDetails />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/add"
+              element={
+                <ProtectedRoute>
+                  <AddPlayer />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/profile" element={<Profile />} />
           </Routes>
         </div>
       </div>

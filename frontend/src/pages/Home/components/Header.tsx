@@ -1,6 +1,9 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUpdateCooldown } from "frontend/src/pages/PlayerDetails/hooks/useUpdateCooldown";
+import { supabase } from "../../../utils/supabase";
+import { Session } from "@supabase/supabase-js";
+import { AccountMenu } from "../../../components/AccountMenu";
 
 interface HeaderProps {
   title: string;
@@ -11,6 +14,21 @@ interface HeaderProps {
 export const Header = ({ title, onRefresh, isRefreshing }: HeaderProps) => {
   const navigate = useNavigate();
   const { isOnCooldown, remainingTime, startCooldown } = useUpdateCooldown();
+  const [session, setSession] = useState<Session | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleRefresh = async () => {
     if (isOnCooldown) return;
@@ -24,13 +42,24 @@ export const Header = ({ title, onRefresh, isRefreshing }: HeaderProps) => {
         {title}
       </h1>
       <div className="flex items-center gap-4">
-        <button
-          onClick={() => navigate("/ajouter")}
-          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors opacity-50 cursor-not-allowed"
-          disabled={true}
-        >
-          Ajouter un joueur
-        </button>
+        {session ? (
+          <>
+            <button
+              onClick={() => navigate("/add")}
+              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+            >
+              Ajouter un joueur
+            </button>
+            <AccountMenu session={session} />
+          </>
+        ) : (
+          <button
+            onClick={() => navigate("/login")}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+          >
+            Connexion
+          </button>
+        )}
         <button
           onClick={handleRefresh}
           disabled={isRefreshing || isOnCooldown}
