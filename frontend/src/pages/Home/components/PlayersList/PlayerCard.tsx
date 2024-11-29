@@ -126,6 +126,22 @@ export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
           </div>
         </div>
       </div>
+
+      <a
+        href={`https://www.leagueofgraphs.com/fr/summoner/euw/${formatSummonerNameForUrl(
+          player.summoner_name
+        )}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="absolute bottom-2 right-2 text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 hover:underline z-20"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <img
+          src="https://i.imgur.com/TCDG5tK.png"
+          alt="League of Graphs"
+          className="w-7 h-7"
+        />
+      </a>
     </div>
   );
 };

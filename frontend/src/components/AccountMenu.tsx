@@ -12,11 +12,9 @@ export const AccountMenu = ({ session }: AccountMenuProps) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  // Récupérer le nom d'affichage ou l'email
   const displayName =
     session?.user.user_metadata?.username || session?.user.email;
 
-  // Ferme le menu si on clique en dehors
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -29,8 +27,15 @@ export const AccountMenu = ({ session }: AccountMenuProps) => {
   }, []);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setIsOpen(false);
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion:", error);
+    } finally {
+      localStorage.clear();
+      navigate("/login");
+      window.location.reload();
+    }
   };
 
   if (!session) return null;
