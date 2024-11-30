@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../utils/supabase";
 import { useNavigate } from "react-router-dom";
+import { AddPlayerForm } from "../Home/components/AddPlayerForm";
 
 interface LinkedAccount {
   summoner_name: string;
@@ -9,45 +10,58 @@ interface LinkedAccount {
 const Profile = () => {
   const [loading, setLoading] = useState(false);
   const [username, setUsername] = useState("");
+  const [userRole, setUserRole] = useState("");
   const [email, setEmail] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [linkedAccounts, setLinkedAccounts] = useState<LinkedAccount[]>([]);
+  const [isAddPlayerOpen, setIsAddPlayerOpen] = useState(false);
   const navigate = useNavigate();
 
   const loadProfileData = async () => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
-      navigate("/login");
-      return;
-    }
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/login");
+        return;
+      }
 
-    if (email !== session.user.email) {
-      setEmail(session.user.email || "");
-    }
+      if (email !== session.user.email) {
+        setEmail(session.user.email || "");
+      }
 
-    const currentUsername = session.user.user_metadata?.username;
-    if (username !== currentUsername) {
-      setUsername(currentUsername || "");
-    }
+      const { data: userData, error } = await supabase
+        .from("usernames")
+        .select("username, role")
+        .eq("user_id", session.user.id)
+        .single();
 
-    if (currentUsername) {
-      console.log("Recherche des comptes pour:", currentUsername);
+      if (error && error.code !== "PGRST116") {
+        console.error("Erreur lors de la récupération des données:", error);
+        return;
+      }
 
-      const { data, error } = await supabase
-        .from("players")
-        .select("summoner_name")
-        .eq("player_name", currentUsername);
+      if (userData) {
+        setUsername(userData.username || "");
+        setUserRole(userData.role || "");
+      }
 
-      if (error) {
-        console.error("Erreur:", error);
-      } else {
-        if (JSON.stringify(data) !== JSON.stringify(linkedAccounts)) {
-          setLinkedAccounts(data || []);
+      if (userData?.username) {
+        const { data: linkedAccountsData, error: linkedError } = await supabase
+          .from("players")
+          .select("summoner_name")
+          .eq("player_name", userData.username);
+
+        if (linkedError) {
+          console.error("Erreur:", linkedError);
+        } else {
+          setLinkedAccounts(linkedAccountsData || []);
         }
       }
+    } catch (error) {
+      console.error("Erreur lors du chargement des données:", error);
     }
   };
 
@@ -88,7 +102,7 @@ const Profile = () => {
         throw new Error("Session non trouvée");
       }
 
-      // 1. D'abord, supprimer l'ancien pseudo de la table usernames
+      // 1. D'abord, supprimer l'ancien pseudo
       const { error: deleteError } = await supabase
         .from("usernames")
         .delete()
@@ -114,21 +128,23 @@ const Profile = () => {
         return;
       }
 
-      // 3. Mettre à jour les métadonnées de l'utilisateur
+      // 3. Mettre à jour les métadonnées utilisateur
       const { error: userError } = await supabase.auth.updateUser({
         data: {
           username: username,
           full_name: username,
           name: username,
+          role: userRole,
         },
       });
 
       if (userError) throw userError;
 
-      // 4. Insérer le nouveau pseudo
+      // 4. Insérer le nouveau pseudo avec le rôle
       const { error: insertError } = await supabase.from("usernames").insert({
         username: username,
         user_id: session.user.id,
+        role: userRole,
       });
 
       if (insertError) {
@@ -179,7 +195,7 @@ const Profile = () => {
         </div>
       )}
 
-      <form onSubmit={updateProfile} className="space-y-6">
+      <div className="space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Email
@@ -192,42 +208,98 @@ const Profile = () => {
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Pseudo
-          </label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-          />
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Pseudo
+            </label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            />
+          </div>
 
-          {linkedAccounts.length > 0 && (
-            <div className="mt-4 space-y-2">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Comptes LoL liés :
-              </p>
-              {linkedAccounts.map((account, index) => (
-                <div
-                  key={index}
-                  className="pl-4 py-2 bg-gray-50 dark:bg-gray-700/50 rounded text-sm text-white"
-                >
-                  {account.summoner_name}
-                </div>
-              ))}
-            </div>
-          )}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Rôle
+            </label>
+            <select
+              value={userRole}
+              onChange={(e) => setUserRole(e.target.value)}
+              className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            >
+              <option value="">Sélectionner un rôle</option>
+              <option value="TOP">Top</option>
+              <option value="JUNGLE">Jungle</option>
+              <option value="MID">Mid</option>
+              <option value="ADC">ADC</option>
+              <option value="SUPPORT">Support</option>
+            </select>
+          </div>
         </div>
 
         <button
-          type="submit"
+          onClick={updateProfile}
           disabled={loading}
           className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
         >
           {loading ? "Sauvegarde..." : "Sauvegarder"}
         </button>
-      </form>
+      </div>
+
+      <div className="mt-8">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Comptes LoL
+        </h2>
+
+        {linkedAccounts.length > 0 && (
+          <div className="mt-4 space-y-2">
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              Comptes LoL liés :
+            </p>
+            {linkedAccounts.map((account, index) => (
+              <div
+                key={index}
+                className="pl-4 py-2 bg-gray-50 dark:bg-gray-800 rounded text-gray-900 dark:text-white text-sm"
+              >
+                {account.summoner_name}
+              </div>
+            ))}
+          </div>
+        )}
+
+        <button
+          type="button"
+          onClick={() => setIsAddPlayerOpen(!isAddPlayerOpen)}
+          disabled={!username}
+          className={` mt-5 w-full p-2 rounded text-white transition-colors ${
+            username
+              ? "bg-green-500 hover:bg-green-600"
+              : "bg-gray-300 dark:bg-gray-600 cursor-not-allowed"
+          }`}
+        >
+          {username
+            ? isAddPlayerOpen
+              ? "Fermer"
+              : "Ajouter un compte LoL"
+            : "Définissez un pseudo pour ajouter un compte LoL"}
+        </button>
+
+        {isAddPlayerOpen && (
+          <div className="mt-4 bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <AddPlayerForm
+              onSuccess={() => {
+                setIsAddPlayerOpen(false);
+                loadProfileData();
+                setSuccessMessage("Compte LoL ajouté avec succès !");
+              }}
+              defaultPlayerName={username}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

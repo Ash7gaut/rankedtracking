@@ -1,18 +1,11 @@
 import axios from 'axios';
-import { supabase } from './supabase';
 
 const API_URL = process.env.REACT_APP_API_URL || 'https://rankedtracking-backend.onrender.com' ;
-
-const getAuthHeader = async () => {
-  const { data: { session } } = await supabase.auth.getSession();
-  return session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {};
-};
 
 export const api = {
   getPlayers: async () => {
     try {
-      const headers = await getAuthHeader();
-      const response = await axios.get(`${API_URL}/api/players`, { headers });
+      const response = await axios.get(`${API_URL}/api/players`);
       return response.data;
     } catch (error) {
       console.error('Error fetching players:', error);
@@ -22,8 +15,7 @@ export const api = {
 
   updateAllPlayers: async () => {
     try {
-      const headers = await getAuthHeader();
-      const response = await axios.post(`${API_URL}/api/players/update-all`, {}, { headers });
+      const response = await axios.post(`${API_URL}/api/players/update-all`);
       return response.data;
     } catch (error) {
       console.error('Error updating all players:', error);
@@ -33,8 +25,7 @@ export const api = {
 
   getPlayerGames: async (id: string) => {
     try {
-      const headers = await getAuthHeader();
-      const response = await axios.get(`${API_URL}/api/players/${id}/games`, { headers });
+      const response = await axios.get(`${API_URL}/api/players/${id}/games`);
       return response.data;
     } catch (error) {
       console.error('Error fetching player games:', error);
@@ -48,17 +39,21 @@ export const api = {
     role: string,
     isMain: boolean = false 
   ) => {
+    const payload = {
+      summonerName, 
+      playerName, 
+      role,
+      isMain
+    };
+    
+    console.log('Frontend - Données envoyées à l\'API:', payload);
+
     try {
-      const headers = await getAuthHeader();
-      const response = await axios.post(`${API_URL}/api/players`, {
-        summonerName, 
-        playerName, 
-        role,
-        isMain
-      }, { headers });
+      const response = await axios.post(`${API_URL}/api/players`, payload);
+      console.log('Frontend - Réponse reçue du serveur:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Error adding player:', error);
+      console.error('Frontend - Erreur:', error);
       throw error;
     }
   },
