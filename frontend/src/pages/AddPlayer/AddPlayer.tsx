@@ -1,4 +1,3 @@
-import React from "react";
 import { AddPlayerForm } from "../Home/components/AddPlayerForm";
 import { useNavigate } from "react-router-dom";
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useUpdateCooldown } from "frontend/src/pages/PlayerDetails/hooks/useUpdateCooldown";
 import { supabase } from "../../../utils/supabase";
@@ -14,9 +14,9 @@ interface HeaderProps {
 export const Header = ({ title, onRefresh, isRefreshing }: HeaderProps) => {
   const navigate = useNavigate();
   const { isOnCooldown, remainingTime, startCooldown } = useUpdateCooldown();
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] = React.useState<Session | null>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
     });
@@ -43,15 +43,7 @@ export const Header = ({ title, onRefresh, isRefreshing }: HeaderProps) => {
       </h1>
       <div className="flex items-center gap-4">
         {session ? (
-          <>
-            <button
-              onClick={() => navigate("/add")}
-              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
-            >
-              Ajouter un joueur
-            </button>
-            <AccountMenu session={session} />
-          </>
+          <AccountMenu session={session} />
         ) : (
           <button
             onClick={() => navigate("/login")}
