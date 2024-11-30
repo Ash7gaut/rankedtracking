@@ -105,33 +105,7 @@ const Profile = () => {
         throw new Error("Session non trouvée");
       }
 
-      // 1. D'abord, supprimer l'ancien pseudo
-      const { error: deleteError } = await supabase
-        .from("usernames")
-        .delete()
-        .eq("user_id", session.user.id);
-
-      if (deleteError) {
-        console.error(
-          "Erreur lors de la suppression de l'ancien pseudo:",
-          deleteError
-        );
-        throw deleteError;
-      }
-
-      // 2. Vérifier si le nouveau pseudo est disponible
-      const { data: existingUsername } = await supabase
-        .from("usernames")
-        .select("username")
-        .eq("username", username)
-        .single();
-
-      if (existingUsername) {
-        setErrorMessage("Ce pseudo est déjà pris !");
-        return;
-      }
-
-      // 3. Mettre à jour les métadonnées utilisateur
+      // 1. Mettre à jour les métadonnées de l'utilisateur
       const { error: userError } = await supabase.auth.updateUser({
         data: {
           username: username,
@@ -143,20 +117,16 @@ const Profile = () => {
 
       if (userError) throw userError;
 
-      // 4. Insérer le nouveau pseudo avec le rôle
-      const { error: insertError } = await supabase.from("usernames").insert({
-        username: username,
-        user_id: session.user.id,
-        role: userRole,
-      });
+      // 2. Mettre à jour la table usernames
+      const { error: updateError } = await supabase
+        .from("usernames")
+        .update({
+          username: username,
+          role: userRole,
+        })
+        .eq("user_id", session.user.id);
 
-      if (insertError) {
-        console.error(
-          "Erreur lors de l'insertion du nouveau pseudo:",
-          insertError
-        );
-        throw insertError;
-      }
+      if (updateError) throw updateError;
 
       setSuccessMessage("Données mises à jour !");
       await loadProfileData();

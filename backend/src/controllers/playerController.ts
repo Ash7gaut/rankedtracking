@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { riotService } from '../services/riotService.js';
 import { supabase } from '../config/supabase.js';
+import { Player } from '../types/interfaces.js';
 
 interface ParamsWithId {
   id: string;
@@ -118,27 +119,19 @@ export const addPlayer = async (req: Request, res: Response) => {
       last_update: new Date().toISOString()
     };
 
-    console.log('Données à insrer dans la BDD:', playerData);
-
     const { data, error } = await supabase
       .from('players')
       .upsert(playerData)
       .select()
       .single();
 
-    if (error) {
-      console.error('Erreur Supabase:', error);
-      throw error;
-    }
-
-    console.log('Données insérées avec succès:', data);
+    if (error) throw error;
     res.json(data);
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Error adding player' });
   }
 };
-
 
 export const updateAllPlayers = async (req: Request, res: Response) => {
   try {
@@ -151,11 +144,7 @@ export const updateAllPlayers = async (req: Request, res: Response) => {
     const updatedPlayers = await Promise.all(
       players.map(async (player) => {
         try {
-          const [rankedStats, activeGame] = await Promise.all([
-            riotService.getRankedStats(player.summoner_id),
-            riotService.getActiveGame(player.puuid)
-          ]);
-
+          const rankedStats = await riotService.getRankedStats(player.summoner_id);
           const soloQStats = rankedStats.find(
             (queue: any) => queue.queueType === 'RANKED_SOLO_5x5'
           );
@@ -166,7 +155,6 @@ export const updateAllPlayers = async (req: Request, res: Response) => {
             league_points: soloQStats?.leaguePoints || 0,
             wins: soloQStats?.wins || 0,
             losses: soloQStats?.losses || 0,
-            in_game: activeGame.inGame,
             last_update: new Date().toISOString()
           };
 
@@ -202,21 +190,83 @@ export const deletePlayer = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
-    const { error } = await supabase
+    console.log('Tentative de suppression du joueur:', summonerName);
+
+    // D'abord, vérifions si le joueur existe
+    const { data: player, error: findError } = await supabase
+      .from('players')
+      .select('*')
+      .ilike('summoner_name', summonerName) 
+      .single();
+
+    if (findError) {
+      console.error('Erreur lors de la recherche du joueur:', findError);
+      res.status(500).json({ error: 'Erreur lors de la recherche du joueur' });
+      return;
+    }
+
+    if (!player) {
+      console.log('Joueur non trouvé:', summonerName);
+      res.status(404).json({ error: 'Joueur non trouvé' });
+      return;
+    }
+
+    console.log('Joueur trouvé, ID:', player.id);
+
+    // Suppression par ID plutôt que par nom
+    const { error: deleteError } = await supabase
       .from('players')
       .delete()
-      .eq('summoner_name', summonerName);
+      .eq('id', player.id);
 
-    if (error) {
-      console.error('Erreur Supabase:', error);
+    if (deleteError) {
+      console.error('Erreur Supabase lors de la suppression:', deleteError);
       res.status(500).json({ error: 'Erreur lors de la suppression' });
       return;
     }
 
+    console.log('Joueur supprimé avec succès:', summonerName);
     res.status(200).json({ message: 'Joueur supprimé avec succès' });
   } catch (error) {
     console.error('Erreur:', error);
     res.status(500).json({ error: 'Erreur serveur interne' });
+  }
+};
+
+export const updatePlayer = async (player: Player) => {
+  try {
+    const [summonerData, rankedStats] = await Promise.all([
+      riotService.getSummonerByName(player.summoner_name.split('#')[0], player.summoner_name.split('#')[1]),
+      riotService.getRankedStats(player.summoner_id)
+    ]);
+    
+    const soloQStats = rankedStats.find(
+      (queue: any) => queue.queueType === 'RANKED_SOLO_5x5'
+    );
+
+    const updateData = {
+      summoner_name: summonerData.riotId,
+      profile_icon_id: summonerData.profileIconId,
+      tier: soloQStats?.tier || null,
+      rank: soloQStats?.rank || null,
+      league_points: soloQStats?.leaguePoints || 0,
+      wins: soloQStats?.wins || 0,
+      losses: soloQStats?.losses || 0,
+      last_update: new Date().toISOString()
+    };
+
+    const { data: updatedPlayer, error: updateError } = await supabase
+      .from('players')
+      .update(updateData)
+      .eq('id', player.id)
+      .select()
+      .single();
+
+    if (updateError) throw updateError;
+    return updatedPlayer;
+  } catch (error) {
+    console.error(`Erreur lors de la mise à jour de ${player.summoner_name}:`, error);
+    return player;
   }
 };
 

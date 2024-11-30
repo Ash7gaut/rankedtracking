@@ -1,10 +1,9 @@
 import { supabase } from '../config/supabase.js';
 import { riotService } from './riotService.js';
 
-const UPDATE_INTERVAL = 5 * 60 * 1000; // 5 minutes
-const RATE_LIMIT_PER_SECOND = 20;
-const RATE_LIMIT_PER_2_MIN = 100;
-const DELAY_BETWEEN_REQUESTS = 1000 / RATE_LIMIT_PER_SECOND;
+const UPDATE_INTERVAL = 5 * 60 * 1000;
+const RATE_LIMIT_PER_2_MIN = 30;
+const DELAY_BETWEEN_REQUESTS = 1000;
 const MAX_RETRIES = 3;
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -22,6 +21,12 @@ export const startAutoUpdateService = () => {
   }, UPDATE_INTERVAL);
 };
 
+interface UpdateResult {
+  success: boolean;
+  player: string;
+  error: string | null;
+}
+
 const updateAllPlayers = async () => {
   try {
     const { data: players, error: fetchError } = await supabase
@@ -30,12 +35,16 @@ const updateAllPlayers = async () => {
 
     if (fetchError) throw fetchError;
 
+    const totalPlayers = players.length;
+    let updatedCount = 0;
+    console.log(`\nDébut de la mise à jour pour ${totalPlayers} joueurs...`);
+
     const batches = [];
     for (let i = 0; i < players.length; i += RATE_LIMIT_PER_2_MIN) {
       batches.push(players.slice(i, i + RATE_LIMIT_PER_2_MIN));
     }
 
-    const updates = [];
+    const updates: UpdateResult[] = [];
     for (const batch of batches) {
       for (const player of batch) {
         let retries = 0;
@@ -45,10 +54,8 @@ const updateAllPlayers = async () => {
           try {
             await sleep(DELAY_BETWEEN_REQUESTS);
 
-            const [rankedStats, activeGame] = await Promise.all([
-              riotService.getRankedStats(player.summoner_id),
-              riotService.getActiveGame(player.puuid)
-            ]);
+            const rankedStats = await riotService.getRankedStats(player.summoner_id);
+            const activeGame = await riotService.getActiveGame(player.puuid);
 
             const soloQStats = rankedStats.find(
               (queue: any) => queue.queueType === 'RANKED_SOLO_5x5'
@@ -71,37 +78,36 @@ const updateAllPlayers = async () => {
 
             if (updateError) throw updateError;
             
-            console.log(`✅ ${player.summoner_name} mis à jour${activeGame.inGame ? ' (IN GAME)' : ' (NOT IN GAME)'}`);
-            updates.push({ success: true, player: player.summoner_name });
+            updatedCount++;
+            console.log(`✅ ${player.summoner_name} mis à jour (${updatedCount}/${totalPlayers})${activeGame.inGame ? ' (IN GAME)' : ' (NOT IN GAME)'}`);
+            updates.push({ success: true, player: player.summoner_name, error: null });
             success = true;
           } catch (error: any) {
+            if (error.response?.status === 503) {
+              console.log(`Service indisponible pour ${player.summoner_name}, nouvelle tentative dans 5 secondes...`);
+              await sleep(5000);
+              retries++;
+              continue;
+            }
+            
             retries++;
-            if (error?.response?.status === 429) {
-              const retryAfter = error?.response?.headers?.['retry-after'] || 10;
-              await sleep(retryAfter * 1000);
-            } else if (retries === MAX_RETRIES) {
-              console.error(`❌ Échec pour ${player.summoner_name}:`, error);
-              updates.push({ success: false, player: player.summoner_name, error });
+            if (retries === MAX_RETRIES) {
+              console.error(`❌ Échec de la mise à jour pour ${player.summoner_name}:`, error);
+              updates.push({ 
+                success: false, 
+                player: player.summoner_name, 
+                error: error.message || 'Unknown error'
+              });
             }
           }
         }
       }
-
-      if (batches.indexOf(batch) < batches.length - 1) {
-        await sleep(120000);
-      }
     }
 
-    const successCount = updates.filter(u => u.success).length;
-    console.log(`✅ ${successCount}/${players.length} joueurs mis à jour`);
-    
-    const failedUpdates = updates.filter(u => !u.success);
-    if (failedUpdates.length > 0) {
-      failedUpdates.forEach(update => {
-        console.log(`❌ ${update.player} - Erreur: ${update.error}`);
-      });
-    }
+    console.log(`\nMise à jour terminée : ${updatedCount}/${totalPlayers} joueurs mis à jour`);
+    return updates;
   } catch (error) {
     console.error('Erreur globale:', error);
+    throw error;
   }
 };
