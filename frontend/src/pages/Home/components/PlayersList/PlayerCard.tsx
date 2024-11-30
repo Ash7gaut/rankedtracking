@@ -9,7 +9,8 @@ interface PlayerCardProps {
 export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
   const navigate = useNavigate();
 
-  // Calcul du winrate modifié
+  // Calcul du winrate avec vérification du nombre minimum de games et gestion des undefined
+  const totalGames = (player.wins || 0) + (player.losses || 0);
   const winRate = (() => {
     if (!player.wins && !player.losses) return "0";
     if (player.wins && !player.losses) return "100";
@@ -19,7 +20,7 @@ export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
     return "0";
   })();
 
-  const isNegativeWinrate = Number(winRate) < 50;
+  const isNegativeWinrate = totalGames >= 20 && Number(winRate) < 50;
 
   const getBadgeColor = (rank: number) => {
     switch (rank) {
@@ -101,7 +102,9 @@ export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
           <div className="flex-grow">
             <h2 className="text-xl font-bold mb-3 text-gray-900 dark:text-white flex items-center gap-2">
               {player.summoner_name}
-              {isNegativeWinrate && <span title="Winrate négatif">💩</span>}
+              {isNegativeWinrate && (
+                <span title="Winrate négatif (20+ games)">💩</span>
+              )}
             </h2>
             <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
               <div className="text-gray-600 dark:text-gray-300">
