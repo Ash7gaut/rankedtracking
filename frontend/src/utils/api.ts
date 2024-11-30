@@ -73,8 +73,8 @@ export const api = {
       console.log('API - URL:', `${API_URL}/api/players/delete`);
       console.log('API - Données envoyées:', { summonerName });
       
-      const response = await axios.delete(`${API_URL}/api/players/delete`, {
-        data: { summonerName }
+      const response = await axios.post(`${API_URL}/api/players/delete`, {
+        summonerName
       });
       
       console.log('API - Réponse complète:', response);

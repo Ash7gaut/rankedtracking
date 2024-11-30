@@ -186,6 +186,7 @@ const Profile = () => {
 
         await loadProfileData();
         setSuccessMessage("Compte supprimé avec succès");
+        navigate("/");
       } catch (error: any) {
         console.error("3. Erreur:", error);
         setErrorMessage(
