@@ -9,7 +9,6 @@ export default function Auth() {
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [pseudo, setPseudo] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
@@ -51,7 +50,6 @@ export default function Auth() {
     try {
       setLoading(true);
 
-      // Inscription de l'utilisateur
       const {
         data: { user },
         error,
@@ -63,11 +61,10 @@ export default function Auth() {
       if (error) throw error;
       if (!user) throw new Error("Erreur lors de l'inscription");
 
-      // Insertion dans usernames
       const { error: insertError } = await supabase.from("usernames").insert({
-        username: pseudo.toLowerCase(),
         user_id: user.id,
         email: registerEmail.toLowerCase(),
+        username: null,
       });
 
       if (insertError) {
@@ -83,7 +80,7 @@ export default function Auth() {
     } catch (error: any) {
       console.error("Erreur complète:", error);
       if (error.message.includes("duplicate")) {
-        setErrorMessage("Ce pseudo ou cet email est déjà utilisé");
+        setErrorMessage("Cet email est déjà utilisé");
       } else {
         setErrorMessage(
           error.message || "Une erreur est survenue lors de l'inscription"
@@ -157,13 +154,6 @@ export default function Auth() {
               {successMessage}
             </div>
           )}
-          <input
-            type="text"
-            placeholder="Pseudo"
-            value={pseudo}
-            onChange={(e) => setPseudo(e.target.value)}
-            className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-          />
 
           <input
             type="email"

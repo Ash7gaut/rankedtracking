@@ -31,22 +31,28 @@ const Profile = () => {
         return;
       }
 
-      if (email !== session.user.email) {
-        setEmail(session.user.email || "");
+      setEmail(session.user.email || "");
+
+      // Récupérer le username depuis la table usernames
+      const { data: userData, error: userError } = await supabase
+        .from("usernames")
+        .select("username, role")
+        .eq("user_id", session.user.id)
+        .single();
+
+      if (userError) {
+        console.error("Erreur:", userError);
+      } else {
+        setUsername(userData?.username || "");
+        setUserRole(userData?.role || "");
       }
 
-      const displayName =
-        session.user.user_metadata?.username || session.user.email;
-      const role = session.user.user_metadata?.role;
-
-      setUsername(displayName || "");
-      setUserRole(role || "");
-
-      if (displayName) {
+      // Pour les comptes liés, utiliser le username récupéré
+      if (userData?.username) {
         const { data: linkedAccountsData, error: linkedError } = await supabase
           .from("players")
           .select("summoner_name")
-          .eq("player_name", displayName);
+          .eq("player_name", userData.username);
 
         if (linkedError) {
           console.error("Erreur:", linkedError);
@@ -97,29 +103,6 @@ const Profile = () => {
         return;
       }
 
-      const currentUsername = session.user.user_metadata?.username;
-      if (username === currentUsername) {
-        setSuccessMessage("C'est déjà votre pseudo !");
-        setLoading(false);
-        return;
-      }
-
-      // Vérifier si le username existe déjà
-      const { data: existingUser, error: checkError } = await supabase
-        .from("usernames")
-        .select("user_id")
-        .eq("username", username)
-        .single();
-
-      if (checkError && checkError.code !== "PGRST116") {
-        throw checkError;
-      }
-
-      if (existingUser) {
-        setErrorMessage("Ce pseudo est déjà utilisé");
-        return;
-      }
-
       // 1. Mettre à jour les métadonnées de l'utilisateur
       const { error: userError } = await supabase.auth.updateUser({
         data: {
@@ -145,7 +128,7 @@ const Profile = () => {
       const { error: playersError } = await supabase
         .from("players")
         .update({ player_name: username })
-        .eq("player_name", currentUsername);
+        .eq("player_name", session.user.email);
 
       if (playersError) {
         console.error(
