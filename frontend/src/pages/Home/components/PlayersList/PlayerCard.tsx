@@ -106,7 +106,13 @@ export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
             <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
               <div className="text-gray-600 dark:text-gray-300">
                 <span className="font-semibold text-gray-700 dark:text-gray-200"></span>{" "}
-                {player.tier} {player.rank}
+                {player.tier ? (
+                  <>
+                    {player.tier} {player.rank}
+                  </>
+                ) : (
+                  "UNRANKED"
+                )}
               </div>
               <div className="text-gray-600 dark:text-gray-300">
                 <span className="font-semibold text-gray-700 dark:text-gray-200"></span>{" "}
