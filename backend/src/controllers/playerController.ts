@@ -155,7 +155,20 @@ export const updateAllPlayers = async (req: Request, res: Response) => {
         }
 
         const summonerData = await riotService.getSummonerByName(gameName, tagLine);
-        console.log('Données du joueur:', JSON.stringify(summonerData, null, 2));
+        console.log('Données complètes du joueur:', {
+          id: summonerData.id,
+          riotId: summonerData.riotId,
+          accountId: summonerData.accountId,
+          puuid: summonerData.puuid,
+          name: summonerData.name,
+          profileIconId: summonerData.profileIconId,
+          revisionDate: summonerData.revisionDate,
+          summonerLevel: summonerData.summonerLevel,
+          gameName: summonerData.gameName,
+          tagLine: summonerData.tagLine,
+          // Log de l'objet complet au cas où il y aurait d'autres champs
+          fullObject: summonerData
+        });
         
         const rankedStats = await riotService.getRankedStats(summonerData.id);
         const soloQStats = rankedStats.find(
