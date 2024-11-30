@@ -35,27 +35,18 @@ const Profile = () => {
         setEmail(session.user.email || "");
       }
 
-      const { data: userData, error } = await supabase
-        .from("usernames")
-        .select("username, role")
-        .eq("user_id", session.user.id)
-        .single();
+      const displayName =
+        session.user.user_metadata?.username || session.user.email;
+      const role = session.user.user_metadata?.role;
 
-      if (error && error.code !== "PGRST116") {
-        console.error("Erreur lors de la récupération des données:", error);
-        return;
-      }
+      setUsername(displayName || "");
+      setUserRole(role || "");
 
-      if (userData) {
-        setUsername(userData.username || "");
-        setUserRole(userData.role || "");
-      }
-
-      if (userData?.username) {
+      if (displayName) {
         const { data: linkedAccountsData, error: linkedError } = await supabase
           .from("players")
           .select("summoner_name")
-          .eq("player_name", userData.username);
+          .eq("player_name", displayName);
 
         if (linkedError) {
           console.error("Erreur:", linkedError);
@@ -93,31 +84,50 @@ const Profile = () => {
       setSuccessMessage("");
       setErrorMessage("");
 
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        throw new Error("Session non trouvée");
+      }
+
       if (!username.trim()) {
         setErrorMessage("Le pseudo ne peut pas être vide");
         return;
       }
 
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error("Session non trouvée");
+      const currentUsername = session.user.user_metadata?.username;
+      if (username === currentUsername) {
+        setSuccessMessage("C'est déjà votre pseudo !");
+        setLoading(false);
+        return;
       }
 
-      // 1. Mettre à jour les métadonnées de l'utilisateur
+      const { data: existingUser, error: checkError } = await supabase
+        .from("usernames")
+        .select("user_id")
+        .eq("username", username)
+        .single();
+
+      if (checkError && checkError.code !== "PGRST116") {
+        throw checkError;
+      }
+
+      if (existingUser) {
+        setErrorMessage("Ce pseudo est déjà utilisé");
+        return;
+      }
+
       const { error: userError } = await supabase.auth.updateUser({
         data: {
           username: username,
-          full_name: username,
-          name: username,
           role: userRole,
         },
       });
 
       if (userError) throw userError;
 
-      // 2. Mettre à jour la table usernames
       const { error: updateError } = await supabase
         .from("usernames")
         .update({
