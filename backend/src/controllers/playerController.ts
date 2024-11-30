@@ -118,7 +118,7 @@ export const addPlayer = async (req: Request, res: Response) => {
       last_update: new Date().toISOString()
     };
 
-    console.log('Données à insérer dans la BDD:', playerData);
+    console.log('Données à insrer dans la BDD:', playerData);
 
     const { data, error } = await supabase
       .from('players')
@@ -193,14 +193,30 @@ export const updateAllPlayers = async (req: Request, res: Response) => {
   }
 };
 
-export const deletePlayer = async (req: Request, res: Response) => {
-  const { id } = req.params;
+export const deletePlayer = async (req: Request, res: Response): Promise<void> => {
+  const { summonerName } = req.body;
+
   try {
-    const { error } = await supabase.from('players').delete().eq('id', id);
-    if (error) throw error;
-    res.status(204).send();
+    if (!summonerName) {
+      res.status(400).json({ error: "Le nom d'invocateur est requis" });
+      return;
+    }
+
+    const { error } = await supabase
+      .from('players')
+      .delete()
+      .eq('summoner_name', summonerName);
+
+    if (error) {
+      console.error('Erreur Supabase:', error);
+      res.status(500).json({ error: 'Erreur lors de la suppression' });
+      return;
+    }
+
+    res.status(200).json({ message: 'Joueur supprimé avec succès' });
   } catch (error) {
-    res.status(500).json({ error: 'Error deleting player' });
+    console.error('Erreur:', error);
+    res.status(500).json({ error: 'Erreur serveur interne' });
   }
 };
 

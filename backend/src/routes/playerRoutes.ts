@@ -5,6 +5,7 @@ import { supabase } from '../config/supabase.js';
 import { updateAllPlayers } from '../controllers/playerController.js';
 import { MatchDetails } from '../types/interfaces.js';
 import { addPlayer } from '../controllers/playerController.js';
+import { deletePlayer } from '../controllers/playerController.js';
 
 const router = express.Router();
 
@@ -48,70 +49,6 @@ const handleGetPlayerById: RequestHandler = async (req, res) => {
   }
 };
 
-// Gestionnaire pour ajouter un joueur
-// const handleAddPlayer: RequestHandler = async (req, res) => {
-//   try {
-//     const { summonerName, playerName, role, isMain } = req.body;
-//     // Log pour débugger les valeurs reçues
-//     console.log('Received data:', { 
-//       summonerName, 
-//       playerName, 
-//       role, 
-//       isMain,
-//       roleType: typeof role,
-//       isMainType: typeof isMain 
-//     });
-    
-//     const [gameName, tagLine] = summonerName.split('#');
-    
-//     if (!gameName || !tagLine) {
-//       res.status(400).json({ error: 'Format invalide. Utilisez le format: nom#tag' });
-//       return;
-//     }
-
-//     const summonerData = await riotService.getSummonerByName(gameName, tagLine);
-//     const rankedStats = await riotService.getRankedStats(summonerData.id);
-//     const soloQStats = rankedStats.find(
-//       (queue: any) => queue.queueType === 'RANKED_SOLO_5x5'
-//     );
-
-//     const formattedRole = role.toUpperCase() as 'TOP' | 'JUNGLE' | 'MID' | 'ADC' | 'SUPPORT';
-//     const formattedIsMain = isMain === true;
-
-//     const playerData = {
-//       summoner_id: summonerData.id,
-//       summoner_name: summonerData.riotId,
-//       player_name: playerName,
-//       role: formattedRole,
-//       is_main: formattedIsMain,
-//       puuid: summonerData.puuid,
-//       profile_icon_id: summonerData.profileIconId,
-//       tier: soloQStats?.tier || null,
-//       rank: soloQStats?.rank || null,
-//       league_points: soloQStats?.leaguePoints || 0,
-//       wins: soloQStats?.wins || 0,
-//       losses: soloQStats?.losses || 0,
-//       last_update: new Date().toISOString()
-//     };
-
-//     const { data, error } = await supabase
-//       .from('players')
-//       .upsert(playerData)
-//       .select()
-//       .single();
-
-//     if (error) {
-//       console.error('Supabase error:', error);
-//       throw error;
-//     }
-    
-//     console.log('Inserted data:', data);
-//     res.json(data);
-//   } catch (error) {
-//     console.error('Error adding player:', error);
-//     res.status(500).json({ error: 'Error adding player' });
-//   }
-// };
 
 const handleDeletePlayer: RequestHandler = async (req, res) => {
   const { id } = req.params;
@@ -161,7 +98,6 @@ const handleGetPlayerGames: RequestHandler = async (req, res) => {
 router.get('/', handleGetPlayers);
 router.post('/', addPlayer as RequestHandler);
 router.get('/:id', handleGetPlayerById);
-router.delete('/:id', handleDeletePlayer);
 router.get('/:puuid/games', handleGetPlayerGames);
 router.post('/update-all', updateAllPlayers);
 router.get('/players/:name', async (req, res) => {
@@ -184,5 +120,7 @@ router.get('/players/:name', async (req, res) => {
     res.status(500).json({ error: 'Error fetching player' });
   }
 });
+
+router.post('/delete', deletePlayer as RequestHandler);
 
 export default router;
