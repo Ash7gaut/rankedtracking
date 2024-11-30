@@ -139,7 +139,7 @@ export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
         <img
           src="https://i.imgur.com/TCDG5tK.png"
           alt="League of Graphs"
-          className="w-7 h-7"
+          className="w-7 h-7 opacity-30 hover:opacity-100 transition-opacity duration-300"
         />
       </a>
     </div>

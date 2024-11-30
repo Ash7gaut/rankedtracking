@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { useQuery, useQueryClient } from "react-query";
+import { useQueryClient } from "react-query";
 import { api } from "../../../../utils/api";
-import { Player } from "../../../../types/interfaces";
 
 interface AddPlayerFormProps {
   onSuccess?: () => void;

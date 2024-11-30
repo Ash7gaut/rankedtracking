@@ -2,13 +2,36 @@ import React from "react";
 import { Player } from "frontend/src/types/interfaces";
 import { PlayerCard } from "./PlayerCard";
 import { compareRanks } from "../../../../utils/rankUtils";
+import { useQuery } from "react-query";
+import { supabase } from "../../../../utils/supabase";
 
 interface PlayersListProps {
   players: Player[];
 }
 
 export const PlayersList = ({ players }: PlayersListProps) => {
-  const sortedPlayers = [...players].sort(compareRanks);
+  // Récupérer les données des utilisateurs avec leurs rôles
+  const { data: users } = useQuery("users", async () => {
+    const { data, error } = await supabase.from("usernames").select(`
+        username,
+        role,
+        players (*)
+      `);
+
+    if (error) throw error;
+    return data;
+  });
+
+  // Combiner les données des utilisateurs avec les joueurs
+  const enrichedPlayers = players.map((player) => {
+    const userInfo = users?.find((u) => u.username === player.player_name);
+    return {
+      ...player,
+      role: userInfo?.role,
+    };
+  });
+
+  const sortedPlayers = [...enrichedPlayers].sort(compareRanks);
   const [firstPlace, ...restPlayers] = sortedPlayers;
 
   return (
