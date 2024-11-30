@@ -104,6 +104,7 @@ const Profile = () => {
         return;
       }
 
+      // Vérifier si le username existe déjà
       const { data: existingUser, error: checkError } = await supabase
         .from("usernames")
         .select("user_id")
@@ -119,6 +120,7 @@ const Profile = () => {
         return;
       }
 
+      // 1. Mettre à jour les métadonnées de l'utilisateur
       const { error: userError } = await supabase.auth.updateUser({
         data: {
           username: username,
@@ -128,6 +130,7 @@ const Profile = () => {
 
       if (userError) throw userError;
 
+      // 2. Mettre à jour la table usernames
       const { error: updateError } = await supabase
         .from("usernames")
         .update({
@@ -137,6 +140,20 @@ const Profile = () => {
         .eq("user_id", session.user.id);
 
       if (updateError) throw updateError;
+
+      // 3. Mettre à jour les comptes LoL liés
+      const { error: playersError } = await supabase
+        .from("players")
+        .update({ player_name: username })
+        .eq("player_name", currentUsername);
+
+      if (playersError) {
+        console.error(
+          "Erreur lors de la mise à jour des comptes LoL:",
+          playersError
+        );
+        throw playersError;
+      }
 
       setSuccessMessage("Données mises à jour !");
       await loadProfileData();
