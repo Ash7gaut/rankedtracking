@@ -12,6 +12,7 @@ const LOL_API_BASE_URL = 'https://euw1.api.riotgames.com/lol';
 export const riotService = {
   getSummonerByName: async (gameName: string, tagLine: string) => {
     try {
+      console.log('Fetching account data for:', gameName, tagLine);
       const response = await axios.get(
         `${RIOT_API_BASE_URL}/${gameName}/${tagLine}`,
         {
@@ -22,8 +23,10 @@ export const riotService = {
       );
 
       const accountData = response.data;
+      console.log('Account data received:', accountData);
 
       // Obtenir les données du summoner à partir du PUUID
+      console.log('Fetching summoner data for PUUID:', accountData.puuid);
       const summonerResponse = await axios.get(
         `${LOL_API_BASE_URL}/summoner/v4/summoners/by-puuid/${accountData.puuid}`,
         {
@@ -33,12 +36,19 @@ export const riotService = {
         }
       );
 
-      return {
+      const finalData = {
         ...summonerResponse.data,
         riotId: `${accountData.gameName}#${accountData.tagLine}`
       };
+      console.log('Final summoner data:', finalData);
+
+      return finalData;
     } catch (error) {
       console.error('Error in getSummonerByName:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Response status:', error.response?.status);
+        console.error('Response data:', error.response?.data);
+      }
       throw error;
     }
   },
@@ -193,6 +203,39 @@ export const riotService = {
       if (error.response && error.response.status === 404) {
         return { inGame: false, data: null };
       }
+      throw error;
+    }
+  },
+
+  getSummonerByPUUID: async (puuid: string) => {
+    try {
+      const response = await axios.get(
+        `${LOL_API_BASE_URL}/summoner/v4/summoners/by-puuid/${puuid}`,
+        {
+          headers: {
+            'X-Riot-Token': RIOT_API_KEY
+          }
+        }
+      );
+
+      // Obtenir le Riot ID actuel
+      const accountResponse = await axios.get(
+        `https://europe.api.riotgames.com/riot/account/v1/accounts/by-puuid/${puuid}`,
+        {
+          headers: {
+            'X-Riot-Token': RIOT_API_KEY
+          }
+        }
+      );
+
+      return {
+        ...response.data,
+        gameName: accountResponse.data.gameName,
+        tagLine: accountResponse.data.tagLine,
+        riotId: `${accountResponse.data.gameName}#${accountResponse.data.tagLine}`
+      };
+    } catch (error) {
+      console.error('Error in getSummonerByPUUID:', error);
       throw error;
     }
   },

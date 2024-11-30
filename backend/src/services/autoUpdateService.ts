@@ -1,10 +1,14 @@
 import { supabase } from '../config/supabase.js';
 import { riotService } from './riotService.js';
 
-const UPDATE_INTERVAL = 5 * 60 * 1000;
-const RATE_LIMIT_PER_2_MIN = 30;
-const DELAY_BETWEEN_REQUESTS = 1000;
+const UPDATE_INTERVAL = 5.5 * 60 * 1000;
+const RATE_LIMIT_PER_2_MIN = 100;
+const REQUESTS_PER_PLAYER = 4;
+const SAFE_BATCH_SIZE = Math.floor(RATE_LIMIT_PER_2_MIN / (REQUESTS_PER_PLAYER * 2));
+const DELAY_BETWEEN_REQUESTS = 2000;
+const BATCH_COOLDOWN = 120000;
 const MAX_RETRIES = 3;
+const RETRY_DELAY = 10000;
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -27,6 +31,131 @@ interface UpdateResult {
   error: string | null;
 }
 
+const retryWithDelay = async (fn: () => Promise<any>, context: string, retries = MAX_RETRIES): Promise<any> => {
+  let lastError;
+  
+  for (let i = 0; i < retries; i++) {
+    try {
+      await sleep(DELAY_BETWEEN_REQUESTS);
+      return await fn();
+    } catch (error: any) {
+      lastError = error;
+      console.log(`Tentative ${i + 1}/${retries} échouée pour ${context}`);
+      
+      if (error?.response?.status === 429) {
+        const retryAfter = parseInt(error.response.headers['retry-after']) || 10;
+        console.log(`Rate limit atteint pour ${context}, attente de ${retryAfter} secondes...`);
+        await sleep(retryAfter * 1000);
+        continue;
+      }
+      
+      if (error?.response?.status === 503) {
+        const waitTime = Math.min(RETRY_DELAY * Math.pow(2, i), 30000); // Exponential backoff, max 30s
+        console.log(`Service indisponible pour ${context}, nouvelle tentative dans ${waitTime/1000}s... (${retries - i - 1} essais restants)`);
+        await sleep(waitTime);
+        continue;
+      }
+
+      if (error?.response?.status === 404) {
+        console.log(`Données non trouvées pour ${context}`);
+        throw error;
+      }
+
+      // Pour les autres erreurs, on attend un peu plus longtemps
+      const waitTime = RETRY_DELAY * (i + 1);
+      console.log(`Erreur ${error?.response?.status || 'inconnue'} pour ${context}, nouvelle tentative dans ${waitTime/1000}s...`);
+      await sleep(waitTime);
+    }
+  }
+
+  console.error(`Toutes les tentatives ont échoué pour ${context}`);
+  throw lastError;
+};
+
+const updatePlayer = async (player: any, totalPlayers: number, updatedCount: number): Promise<UpdateResult> => {
+  const [gameName, tagLine] = player.summoner_name.split('#');
+  console.log(`\nMise à jour des données pour ${gameName}#${tagLine}`);
+
+  try {
+    // On utilise toujours le PUUID en premier si disponible
+    let summonerData;
+    if (player.puuid) {
+      try {
+        summonerData = await retryWithDelay(
+          () => riotService.getSummonerByPUUID(player.puuid),
+          `récupération par PUUID de ${player.summoner_name}`
+        );
+      } catch (error: any) {
+        console.log(`Échec de récupération par PUUID pour ${player.summoner_name}, tentative par Riot ID`);
+        summonerData = await retryWithDelay(
+          () => riotService.getSummonerByName(gameName, tagLine),
+          `récupération par Riot ID de ${player.summoner_name}`
+        );
+      }
+    } else {
+      // Si pas de PUUID, on essaie par Riot ID
+      summonerData = await retryWithDelay(
+        () => riotService.getSummonerByName(gameName, tagLine),
+        `récupération par Riot ID de ${player.summoner_name}`
+      );
+    }
+
+    // Mise à jour du Riot ID si différent
+    const currentRiotId = `${summonerData.gameName}#${summonerData.tagLine}`;
+    if (currentRiotId !== player.summoner_name) {
+      console.log(`Mise à jour du Riot ID: ${player.summoner_name} -> ${currentRiotId}`);
+    }
+
+    // On regroupe les requêtes restantes
+    const [rankedStats, activeGame] = await Promise.all([
+      retryWithDelay(
+        () => riotService.getRankedStats(summonerData.id),
+        `stats ranked de ${currentRiotId}`
+      ),
+      retryWithDelay(
+        () => riotService.getActiveGame(summonerData.puuid),
+        `statut en jeu de ${currentRiotId}`
+      )
+    ]);
+
+    const soloQStats = rankedStats.find(
+      (queue: any) => queue.queueType === 'RANKED_SOLO_5x5'
+    );
+
+    const updateData = {
+      summoner_id: summonerData.id,
+      puuid: summonerData.puuid,
+      summoner_name: currentRiotId, // On met à jour le Riot ID
+      profile_icon_id: summonerData.profileIconId,
+      tier: soloQStats?.tier || null,
+      rank: soloQStats?.rank || null,
+      league_points: soloQStats?.leaguePoints || 0,
+      wins: soloQStats?.wins || 0,
+      losses: soloQStats?.losses || 0,
+      in_game: activeGame.inGame || false,
+      last_update: new Date().toISOString()
+    };
+
+    const { error: updateError } = await supabase
+      .from('players')
+      .update(updateData)
+      .eq('id', player.id);
+
+    if (updateError) throw updateError;
+    
+    console.log(`✅ ${currentRiotId} mis à jour (${updatedCount + 1}/${totalPlayers})${activeGame.inGame ? ' (IN GAME)' : ' (NOT IN GAME)'}`);
+    return { success: true, player: currentRiotId, error: null };
+
+  } catch (error: any) {
+    console.error(`❌ Échec de la mise à jour pour ${player.summoner_name}:`, error);
+    return { 
+      success: false, 
+      player: player.summoner_name, 
+      error: error.message || 'Unknown error'
+    };
+  }
+};
+
 const updateAllPlayers = async () => {
   try {
     const { data: players, error: fetchError } = await supabase
@@ -36,71 +165,38 @@ const updateAllPlayers = async () => {
     if (fetchError) throw fetchError;
 
     const totalPlayers = players.length;
-    let updatedCount = 0;
     console.log(`\nDébut de la mise à jour pour ${totalPlayers} joueurs...`);
 
+    // Création de lots plus petits pour respecter le rate limit
     const batches = [];
-    for (let i = 0; i < players.length; i += RATE_LIMIT_PER_2_MIN) {
-      batches.push(players.slice(i, i + RATE_LIMIT_PER_2_MIN));
+    for (let i = 0; i < players.length; i += SAFE_BATCH_SIZE) {
+      batches.push(players.slice(i, i + SAFE_BATCH_SIZE));
     }
 
+    console.log(`Traitement en ${batches.length} lots de ${SAFE_BATCH_SIZE} joueurs maximum`);
+
     const updates: UpdateResult[] = [];
-    for (const batch of batches) {
+    let updatedCount = 0;
+
+    for (let i = 0; i < batches.length; i++) {
+      const batch = batches[i];
+      console.log(`\nTraitement du lot ${i + 1}/${batches.length}`);
+
       for (const player of batch) {
-        let retries = 0;
-        let success = false;
+        const result = await updatePlayer(player, totalPlayers, updatedCount);
+        updates.push(result);
+        if (result.success) updatedCount++;
+        
+        // Petit délai entre chaque joueur
+        await sleep(DELAY_BETWEEN_REQUESTS);
+      }
 
-        while (!success && retries < MAX_RETRIES) {
-          try {
-            await sleep(DELAY_BETWEEN_REQUESTS);
-
-            const rankedStats = await riotService.getRankedStats(player.summoner_id);
-            const activeGame = await riotService.getActiveGame(player.puuid);
-
-            const soloQStats = rankedStats.find(
-              (queue: any) => queue.queueType === 'RANKED_SOLO_5x5'
-            );
-
-            const updateData = {
-              tier: soloQStats?.tier || null,
-              rank: soloQStats?.rank || null,
-              league_points: soloQStats?.leaguePoints || 0,
-              wins: soloQStats?.wins || 0,
-              losses: soloQStats?.losses || 0,
-              in_game: activeGame.inGame || false,
-              last_update: new Date().toISOString()
-            };
-
-            const { error: updateError } = await supabase
-              .from('players')
-              .update(updateData)
-              .eq('id', player.id);
-
-            if (updateError) throw updateError;
-            
-            updatedCount++;
-            console.log(`✅ ${player.summoner_name} mis à jour (${updatedCount}/${totalPlayers})${activeGame.inGame ? ' (IN GAME)' : ' (NOT IN GAME)'}`);
-            updates.push({ success: true, player: player.summoner_name, error: null });
-            success = true;
-          } catch (error: any) {
-            if (error.response?.status === 503) {
-              console.log(`Service indisponible pour ${player.summoner_name}, nouvelle tentative dans 5 secondes...`);
-              await sleep(5000);
-              retries++;
-              continue;
-            }
-            
-            retries++;
-            if (retries === MAX_RETRIES) {
-              console.error(`❌ Échec de la mise à jour pour ${player.summoner_name}:`, error);
-              updates.push({ 
-                success: false, 
-                player: player.summoner_name, 
-                error: error.message || 'Unknown error'
-              });
-            }
-          }
-        }
+      // Si ce n'est pas le dernier lot, on attend le cooldown
+      if (i < batches.length - 1) {
+        const remainingPlayers = totalPlayers - (i + 1) * SAFE_BATCH_SIZE;
+        console.log(`\nPause de ${BATCH_COOLDOWN/1000} secondes pour respecter le rate limit...`);
+        console.log(`Reste ${remainingPlayers} joueurs à traiter`);
+        await sleep(BATCH_COOLDOWN);
       }
     }
 
