@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const COOLDOWN_DURATION = 120000; // 2 minutes en millisecondes
+const COOLDOWN_DURATION = 12000; // 2 minutes en millisecondes
 const COOLDOWN_KEY = 'lastUpdateTimestamp';
 
 export const useUpdateCooldown = () => {
