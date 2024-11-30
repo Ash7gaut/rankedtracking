@@ -103,7 +103,16 @@ const Profile = () => {
         return;
       }
 
-      // 1. Mettre à jour les métadonnées de l'utilisateur
+      // 1. Récupérer l'ancien username
+      const { data: oldUserData } = await supabase
+        .from("usernames")
+        .select("username")
+        .eq("user_id", session.user.id)
+        .single();
+
+      const oldUsername = oldUserData?.username;
+
+      // 2. Mettre à jour les métadonnées de l'utilisateur
       const { error: userError } = await supabase.auth.updateUser({
         data: {
           username: username,
@@ -113,7 +122,7 @@ const Profile = () => {
 
       if (userError) throw userError;
 
-      // 2. Mettre à jour la table usernames
+      // 3. Mettre à jour la table usernames
       const { error: updateError } = await supabase
         .from("usernames")
         .update({
@@ -124,18 +133,20 @@ const Profile = () => {
 
       if (updateError) throw updateError;
 
-      // 3. Mettre à jour les comptes LoL liés
-      const { error: playersError } = await supabase
-        .from("players")
-        .update({ player_name: username })
-        .eq("player_name", session.user.email);
+      // 4. Mettre à jour les comptes LoL liés (en utilisant l'ancien username)
+      if (oldUsername) {
+        const { error: playersError } = await supabase
+          .from("players")
+          .update({ player_name: username })
+          .eq("player_name", oldUsername);
 
-      if (playersError) {
-        console.error(
-          "Erreur lors de la mise à jour des comptes LoL:",
-          playersError
-        );
-        throw playersError;
+        if (playersError) {
+          console.error(
+            "Erreur lors de la mise à jour des comptes LoL:",
+            playersError
+          );
+          throw playersError;
+        }
       }
 
       setSuccessMessage("Données mises à jour !");
