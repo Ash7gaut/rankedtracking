@@ -181,7 +181,7 @@ export default function Auth() {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">
-                  Ou continuer avec
+                  Ou
                 </span>
               </div>
             </div>
