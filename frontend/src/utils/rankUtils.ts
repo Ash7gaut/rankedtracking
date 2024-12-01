@@ -20,25 +20,23 @@ const divisionOrder = {
   'IV': 3
 };
 
-export const compareRanks = (a: Player, b: Player): number => {
-  // Si un joueur n'a pas de rang, le mettre à la fin
-  if (!a.tier && b.tier) return 1;
-  if (a.tier && !b.tier) return -1;
-  if (!a.tier && !b.tier) return 0;
+export const getRankValue = (tier?: string | null, rank?: string | null, lp: number = 0): number => {
+  if (!tier) return 0;
 
-  // Comparer les tiers
-  const tierDiff = rankOrder[a.tier as keyof typeof rankOrder] - rankOrder[b.tier as keyof typeof rankOrder];
-  if (tierDiff !== 0) return tierDiff;
-
-  // Pour Master+, comparer uniquement les LP
-  if (['CHALLENGER', 'GRANDMASTER', 'MASTER'].includes(a.tier!)) {
-    return (b.league_points || 0) - (a.league_points || 0);
+  const baseValue = (9 - (rankOrder[tier as keyof typeof rankOrder] || 0)) * 400;
+  
+  // Pour Master+, on ajoute directement les LP
+  if (['CHALLENGER', 'GRANDMASTER', 'MASTER'].includes(tier)) {
+    return baseValue + lp;
   }
 
-  // Comparer les divisions
-  const divisionDiff = divisionOrder[a.rank as keyof typeof divisionOrder] - divisionOrder[b.rank as keyof typeof divisionOrder];
-  if (divisionDiff !== 0) return divisionDiff;
+  // Pour les autres rangs, on ajoute la division et les LP
+  const divisionValue = rank ? (3 - (divisionOrder[rank as keyof typeof divisionOrder] || 0)) * 100 : 0;
+  return baseValue + divisionValue + lp;
+};
 
-  // Si même division, comparer les LP
-  return (b.league_points || 0) - (a.league_points || 0);
+export const compareRanks = (a: Player, b: Player): number => {
+  const aValue = getRankValue(a.tier, a.rank, a.league_points);
+  const bValue = getRankValue(b.tier, b.rank, b.league_points);
+  return bValue - aValue;
 };
