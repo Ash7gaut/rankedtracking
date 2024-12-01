@@ -119,7 +119,8 @@ const Profile = () => {
       // 3. Mettre à jour la table usernames
       const { error: updateError } = await supabase
         .from("usernames")
-        .update({
+        .upsert({
+          user_id: session.user.id,
           username: username,
           role: userRole,
         })
