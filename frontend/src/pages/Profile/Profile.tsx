@@ -87,70 +87,31 @@ const Profile = () => {
       const {
         data: { session },
       } = await supabase.auth.getSession();
+      if (!session) throw new Error("Session non trouvée");
 
-      if (!session) {
-        throw new Error("Session non trouvée");
-      }
-
-      if (!username.trim()) {
-        setErrorMessage("Le pseudo ne peut pas être vide");
-        return;
-      }
-
-      // 1. Récupérer l'ancien username
-      const { data: oldUserData } = await supabase
+      // 1. Vérifier si l'entrée existe
+      const { data: existingUser } = await supabase
         .from("usernames")
-        .select("username")
+        .select()
         .eq("user_id", session.user.id)
         .single();
 
-      const oldUsername = oldUserData?.username;
-
-      // 2. Mettre à jour les métadonnées de l'utilisateur
-      const { error: userError } = await supabase.auth.updateUser({
-        data: {
-          username: username,
-          role: userRole,
-        },
-      });
-
-      if (userError) throw userError;
-
-      // 3. Mettre à jour la table usernames
+      // 2. Update ou Upsert selon le cas
       const { error: updateError } = await supabase
         .from("usernames")
-        .update({
+        [existingUser ? "update" : "upsert"]({
+          user_id: session.user.id,
           username: username,
+          email: session.user.email,
           role: userRole,
         })
         .eq("user_id", session.user.id);
 
       if (updateError) throw updateError;
 
-      // 4. Mettre à jour les comptes LoL liés (en utilisant l'ancien username)
-      if (oldUsername) {
-        const { error: playersError } = await supabase
-          .from("players")
-          .update({ player_name: username })
-          .eq("player_name", oldUsername);
-
-        if (playersError) {
-          console.error(
-            "Erreur lors de la mise à jour des comptes LoL:",
-            playersError
-          );
-          throw playersError;
-        }
-      }
-
-      setSuccessMessage("Données mises à jour !");
-      await loadProfileData(); // Recharger les données
-
-      setTimeout(() => {
-        setSuccessMessage("");
-      }, 3000);
+      setSuccessMessage("Profil mis à jour !");
     } catch (error: any) {
-      console.error("Erreur complète:", error);
+      console.error("Erreur:", error);
       setErrorMessage(error.message);
     } finally {
       setLoading(false);
