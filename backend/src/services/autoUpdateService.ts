@@ -93,17 +93,32 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
         );
       }
     } else {
-      // Si pas de PUUID, on essaie par Riot ID
       summonerData = await retryWithDelay(
         () => riotService.getSummonerByName(gameName, tagLine),
         `récupération par Riot ID de ${player.summoner_name}`
       );
     }
 
-    // Mise à jour du Riot ID si différent
+    // Vérification de la validité des données
+    if (!summonerData || !summonerData.gameName || !summonerData.tagLine) {
+      console.log(`❌ Données invalides reçues pour ${player.summoner_name}, conservation des anciennes données`);
+      return { 
+        success: false, 
+        player: player.summoner_name, 
+        error: "Données invalides reçues de l'API" 
+      };
+    }
+
     const currentRiotId = `${summonerData.gameName}#${summonerData.tagLine}`;
-    if (currentRiotId !== player.summoner_name) {
-      console.log(`Mise à jour du Riot ID: ${player.summoner_name} -> ${currentRiotId}`);
+    
+    // Vérification supplémentaire pour éviter les undefined#undefined
+    if (currentRiotId === "undefined#undefined") {
+      console.log(`❌ Riot ID invalide reçu pour ${player.summoner_name}, conservation des anciennes données`);
+      return { 
+        success: false, 
+        player: player.summoner_name, 
+        error: "Riot ID invalide reçu" 
+      };
     }
 
     // On regroupe les requêtes restantes
@@ -122,10 +137,12 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
       (queue: any) => queue.queueType === 'RANKED_SOLO_5x5'
     );
 
+    const totalGames = (soloQStats?.wins || 0) + (soloQStats?.losses || 0);
+
     const updateData = {
       summoner_id: summonerData.id,
       puuid: summonerData.puuid,
-      summoner_name: currentRiotId, // On met à jour le Riot ID
+      summoner_name: currentRiotId,
       profile_icon_id: summonerData.profileIconId,
       tier: soloQStats?.tier || null,
       rank: soloQStats?.rank || null,
@@ -135,6 +152,16 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
       in_game: activeGame.inGame || false,
       last_update: new Date().toISOString()
     };
+
+    // Vérification finale des données avant mise à jour
+    if (Object.values(updateData).some(value => value === undefined)) {
+      console.log(`❌ Données incomplètes pour ${player.summoner_name}, conservation des anciennes données`);
+      return { 
+        success: false, 
+        player: player.summoner_name, 
+        error: "Données incomplètes" 
+      };
+    }
 
     const { error: updateError } = await supabase
       .from('players')
