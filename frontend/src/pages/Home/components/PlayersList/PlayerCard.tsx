@@ -81,15 +81,17 @@ export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
         className="relative bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow overflow-hidden"
         onClick={() => navigate(`/player/${player.id}`)}
       >
-        {player.tier && (
-          <div className="absolute inset-0 flex items-center justify-center opacity-15">
-            <img
-              src={`/ranks/${player.tier?.toLowerCase()}.png`}
-              alt={player.tier}
-              className="w-72 h-72 object-contain"
-            />
-          </div>
-        )}
+        <div className="absolute inset-0 flex items-center justify-center opacity-15">
+          <img
+            src={
+              player.tier
+                ? `/ranks/${player.tier.toLowerCase()}.png`
+                : "/ranks/unranked.png"
+            }
+            alt="Rank"
+            className="w-72 h-72 object-contain"
+          />
+        </div>
 
         <div className="relative z-10 flex gap-6">
           <div className="flex-shrink-0">
