@@ -94,7 +94,29 @@ const handleGetPlayerGames: RequestHandler = async (req, res) => {
   }
 };
 
+// Gestionnaire pour obtenir l'historique d'un joueur
+const handleGetPlayerHistory: RequestHandler = async (req, res) => {
+  const { id } = req.params;
+  console.log("Fetching history for player ID:", id);
+  
+  try {
+    const { data, error } = await supabase
+      .from('player_history')
+      .select('*')
+      .eq('player_id', id)
+      .order('timestamp', { ascending: true });
+
+    if (error) throw error;
+    console.log("History data found:", data);
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching player history:', error);
+    res.status(500).json({ error: 'Error fetching player history' });
+  }
+};
+
 // Routes
+router.get('/:id/history', handleGetPlayerHistory);
 router.get('/', handleGetPlayers);
 router.post('/', addPlayer as RequestHandler);
 router.get('/:id', handleGetPlayerById);

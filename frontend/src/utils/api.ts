@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { PlayerHistoryEntry } from '../types/interfaces';
 
 const API_URL = process.env.REACT_APP_API_URL || 'https://rankedtracking-backend.onrender.com' ;
 
@@ -81,6 +82,18 @@ export const api = {
       return response.data;
     } catch (error: any) {
       console.error('API - Erreur complète:', error);
+      throw error;
+    }
+  },
+
+  getPlayerHistory: async (playerId: string): Promise<PlayerHistoryEntry[]> => {
+    try {
+      console.log("Fetching history for player:", playerId);
+      const response = await axios.get(`${API_URL}/api/players/${playerId}/history`);
+      console.log("API Response:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching player history:', error);
       throw error;
     }
   },

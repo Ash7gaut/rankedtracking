@@ -153,6 +153,22 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
       last_update: new Date().toISOString()
     };
 
+    // Avant de mettre à jour le joueur, sauvegarder l'état actuel dans l'historique
+    if (updateData.tier || updateData.rank || updateData.league_points) {
+      const { error: historyError } = await supabase
+        .from('player_history')
+        .insert({
+          player_id: player.id,
+          tier: updateData.tier,
+          rank: updateData.rank,
+          league_points: updateData.league_points,
+          wins: updateData.wins,
+          losses: updateData.losses
+        });
+
+      if (historyError) throw historyError;
+    }
+
     // Vérification finale des données avant mise à jour
     if (Object.values(updateData).some(value => value === undefined)) {
       console.log(`❌ Données incomplètes pour ${player.summoner_name}, conservation des anciennes données`);

@@ -7,6 +7,7 @@ import { PlayerHeader } from "./components/PlayerHeader/PlayerHeader";
 import { PlayerProfile } from "./components/PlayerProfile";
 import { PlayerStats } from "./components/PlayerStats/PlayerStats";
 import { GamesList } from "./components/GamesList/GamesList";
+import { PlayerHistory } from "../Home/components/PlayerHistory/PlayerHistory";
 import { useChampionNames } from "./hooks/useChampionNames";
 import { LinkedAccountsView } from "../Profile/components/LinkedAccountsView";
 
@@ -48,7 +49,10 @@ const PlayerDetails = () => {
     >
       <PlayerHeader playerId={id!} />
       <PlayerProfile player={player} />
-      <PlayerStats player={player} />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <PlayerStats player={player} />
+        <PlayerHistory playerId={id!} />
+      </div>
       <LinkedAccountsView playerName={player.player_name || ""} />
       <GamesList
         games={games || []}

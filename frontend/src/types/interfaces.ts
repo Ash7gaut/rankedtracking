@@ -136,3 +136,14 @@ export interface MatchDetails {
     summonerName: string;
   }>;
 }
+
+export interface PlayerHistoryEntry {
+  id: string;
+  player_id: string;
+  tier: string;
+  rank: string;
+  league_points: number;
+  wins: number;
+  losses: number;
+  timestamp: string;
+}
