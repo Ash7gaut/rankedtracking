@@ -19,13 +19,19 @@ interface LinkedAccountsProps {
 }
 
 export const LinkedAccounts = ({
-  accounts,
+  accounts: initialAccounts,
   username,
   onDelete,
   onRefresh,
 }: LinkedAccountsProps) => {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
+
+  const accounts = [...initialAccounts].sort((a, b) => {
+    if (a.is_main && !b.is_main) return -1;
+    if (!a.is_main && b.is_main) return 1;
+    return 0;
+  });
 
   const handleSetMain = async (
     summonerName: string,

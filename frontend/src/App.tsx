@@ -63,16 +63,9 @@ function App() {
             {/* Routes publiques */}
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/player/:id" element={<PlayerDetails />} />
 
             {/* Routes protégées */}
-            <Route
-              path="/player/:id"
-              element={
-                <ProtectedRoute>
-                  <PlayerDetails />
-                </ProtectedRoute>
-              }
-            />
             <Route
               path="/add"
               element={

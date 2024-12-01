@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { LinkedAccount } from "./LinkedAccounts";
 import { supabase } from "../../../utils/supabase";
+
 interface LinkedAccountsViewProps {
   playerName: string;
 }
@@ -14,7 +15,8 @@ export const LinkedAccountsView = ({ playerName }: LinkedAccountsViewProps) => {
       const { data, error } = await supabase
         .from("players")
         .select("*")
-        .eq("player_name", playerName);
+        .eq("player_name", playerName)
+        .order("is_main", { ascending: false });
 
       if (error) {
         console.error("Erreur:", error);
