@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { LinkedAccount } from "./LinkedAccounts";
 import { supabase } from "../../../utils/supabase";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 interface LinkedAccountsViewProps {
   playerName: string;
@@ -11,6 +11,7 @@ export const LinkedAccountsView = ({ playerName }: LinkedAccountsViewProps) => {
   const [accounts, setAccounts] = useState<LinkedAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
 
   useEffect(() => {
     const fetchLinkedAccounts = async () => {
@@ -53,13 +54,13 @@ export const LinkedAccountsView = ({ playerName }: LinkedAccountsViewProps) => {
         {accounts.map((account) => (
           <div
             key={account.summoner_name}
-            className="relative cursor-pointer"
+            className={`relative cursor-pointer rounded-lg
+              ${account.id.toString() === id ? "p-0.5 bg-blue-500" : "p-0"}`}
             onClick={() => handleAccountClick(account.id.toString())}
           >
             <div
-              className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4
-              ${account.is_main ? "border-2 border-blue-500" : ""}
-              hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors`}
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4
+              hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
               <div className="flex items-center space-x-3">
                 <img
