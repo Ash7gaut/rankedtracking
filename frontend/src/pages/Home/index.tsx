@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useQuery, useQueryClient } from "react-query";
 import { api } from "../../utils/api";
 import { Header } from "./components/Header";
-import { PlayersList } from "./components/PlayersList/index";
+import { PlayersList } from "./components/PlayersList/PlayerList";
 import { SkeletonCard } from "./components/PlayersList/SkeletonCard";
 import { PlayerFilter } from "./components/PlayerFilter/PlayerFilter";
 import { RoleFilter } from "./components/RoleFilter/RoleFilter";

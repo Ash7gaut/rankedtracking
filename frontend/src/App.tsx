@@ -4,7 +4,7 @@ import { supabase } from "./utils/supabase";
 import { Session } from "@supabase/supabase-js";
 import Home from "./pages/Home/index";
 import Login from "./pages/Login";
-import PlayerDetails from "./pages/PlayerDetails/index";
+import PlayerDetails from "./pages/PlayerDetails/PlayerDetails";
 import AddPlayer from "./pages/AddPlayer/AddPlayer";
 import Profile from "./pages/Profile/Profile";
 

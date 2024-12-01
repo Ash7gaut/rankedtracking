@@ -7,11 +7,7 @@ interface GameCardProps {
   playerName: string;
 }
 
-export const GameCard: React.FC<GameCardProps> = ({
-  game,
-  championName,
-  playerName,
-}) => {
+export const GameCard = ({ game, championName, playerName }: GameCardProps) => {
   const formatGameDuration = (seconds: number) => {
     if (!seconds && seconds !== 0) return "0:00";
     const minutes = Math.floor(seconds / 60);

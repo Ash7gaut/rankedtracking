@@ -3,10 +3,10 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "react-query";
 import { api } from "../../utils/api";
 import { Player } from "frontend/src/types/interfaces";
-import { PlayerHeader } from "./components/PlayerHeader";
+import { PlayerHeader } from "./components/PlayerHeader/PlayerHeader";
 import { PlayerProfile } from "./components/PlayerProfile";
-import { PlayerStats } from "./components/PlayerStats";
-import { GamesList } from "./components/GamesList";
+import { PlayerStats } from "./components/PlayerStats/PlayerStats";
+import { GamesList } from "./components/GamesList/GamesList";
 import { useChampionNames } from "./hooks/useChampionNames";
 import { LinkedAccountsView } from "../Profile/components/LinkedAccountsView";
 

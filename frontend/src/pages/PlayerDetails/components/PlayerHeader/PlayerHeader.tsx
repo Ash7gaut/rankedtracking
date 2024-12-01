@@ -5,7 +5,7 @@ interface PlayerHeaderProps {
   playerId: string;
 }
 
-export const PlayerHeader: React.FC<PlayerHeaderProps> = ({ playerId }) => {
+export const PlayerHeader = ({ playerId }: PlayerHeaderProps) => {
   const navigate = useNavigate();
 
   return (

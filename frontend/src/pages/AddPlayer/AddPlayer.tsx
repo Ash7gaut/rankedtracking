@@ -1,4 +1,4 @@
-import { AddPlayerForm } from "../Home/components/AddPlayerForm";
+import { AddPlayerForm } from "../Home/components/AddPlayerForm/AddPlayerForm";
 import { useNavigate } from "react-router-dom";
 
 export const AddPlayer = () => {

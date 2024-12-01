@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../../utils/supabase";
 import { useNavigate } from "react-router-dom";
-import { AddPlayerForm } from "../Home/components/AddPlayerForm";
+import { AddPlayerForm } from "../Home/components/AddPlayerForm/AddPlayerForm";
 import { api } from "../../utils/api";
 import { LinkedAccounts, LinkedAccount } from "./components/LinkedAccounts";
 
