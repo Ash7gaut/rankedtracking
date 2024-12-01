@@ -60,7 +60,7 @@ export const AddPlayerForm = ({
               value={gameName}
               onChange={(e) => setGameName(e.target.value)}
               placeholder="Pseudo"
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:border-blue-500 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-0"
               disabled={isLoading}
               required
             />
@@ -74,7 +74,7 @@ export const AddPlayerForm = ({
               value={tagLine}
               onChange={(e) => setTagLine(e.target.value)}
               placeholder="Tag"
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:border-blue-500 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-0"
               disabled={isLoading}
               required
             />
