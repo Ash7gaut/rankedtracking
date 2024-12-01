@@ -35,9 +35,14 @@ export const LinkedAccountsView = ({ playerName }: LinkedAccountsViewProps) => {
 
   return (
     <div className="mt-8">
-      <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
-        Comptes liés
-      </h2>
+      <div className="flex items-center gap-2 mb-4">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+          {playerName}
+        </h2>
+        <span className="text-sm text-gray-500 dark:text-gray-400">
+          ({accounts.length} compte{accounts.length > 1 ? "s" : ""})
+        </span>
+      </div>
       <div className="space-y-2">
         {accounts.map((account) => (
           <div key={account.summoner_name} className="relative">

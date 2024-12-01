@@ -65,13 +65,25 @@ export const PlayerHistory = ({ playerId }: { playerId: string }) => {
     return `${date.toLocaleDateString()} ${hours}:${minutes}`;
   };
 
-  const tiers = history?.map((entry) => entry.tier) || [];
-  const uniqueTiers = Array.from(new Set(tiers));
+  const calculateTotalValue = (tier: string, rank: string, lp: number) => {
+    const tierValue = TIER_VALUES[tier as keyof typeof TIER_VALUES] || 0;
+    const rankValue = RANK_VALUES[rank as keyof typeof RANK_VALUES] || 0;
+
+    // Si c'est Master ou au-dessus, les LP sont plus importants
+    if (tier === "MASTER" || tier === "GRANDMASTER" || tier === "CHALLENGER") {
+      return tierValue + lp;
+    }
+
+    // Pour les autres tiers, on ajoute le rang et les LP
+    return tierValue + rankValue + lp;
+  };
+
   const data = history?.map((entry) => {
-    const totalValue =
-      (TIER_VALUES[entry.tier as keyof typeof TIER_VALUES] || 0) +
-      (RANK_VALUES[entry.rank as keyof typeof RANK_VALUES] || 0) +
-      entry.league_points;
+    const totalValue = calculateTotalValue(
+      entry.tier,
+      entry.rank,
+      entry.league_points
+    );
 
     return {
       date: formatDate(entry.timestamp),
@@ -79,6 +91,7 @@ export const PlayerHistory = ({ playerId }: { playerId: string }) => {
       tier: entry.tier,
       rank: entry.rank,
       lp: entry.league_points,
+      displayValue: `${entry.tier} ${entry.rank} ${entry.league_points}LP`,
     };
   });
 
@@ -89,13 +102,16 @@ export const PlayerHistory = ({ playerId }: { playerId: string }) => {
         <div className="bg-white dark:bg-gray-800 p-2 border border-gray-200 dark:border-gray-700 rounded shadow">
           <p className="text-sm text-gray-900 dark:text-white">{data.date}</p>
           <p className="text-sm font-bold text-gray-900 dark:text-white">
-            {data.tier} {data.rank} {data.lp} LP
+            {data.displayValue}
           </p>
         </div>
       );
     }
     return null;
   };
+
+  const tiers = history?.map((entry) => entry.tier) || [];
+  const uniqueTiers = Array.from(new Set(tiers));
 
   const formatYAxis = (value: number) => {
     const nearestTier = Object.entries(TIER_VALUES).reduce(
