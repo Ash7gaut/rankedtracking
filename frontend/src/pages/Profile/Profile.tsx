@@ -89,14 +89,14 @@ const Profile = () => {
       } = await supabase.auth.getSession();
       if (!session) throw new Error("Session non trouvée");
 
-      // 1. Vérifier si l'entrée existe
+      // 1. Vérifier si l'entrée existe dans usernames
       const { data: existingUser } = await supabase
         .from("usernames")
         .select()
         .eq("user_id", session.user.id)
         .single();
 
-      // 2. Update ou Upsert selon le cas
+      // 2. Update ou Upsert selon le cas dans usernames
       const { error: updateError } = await supabase
         .from("usernames")
         [existingUser ? "update" : "upsert"]({
@@ -108,6 +108,16 @@ const Profile = () => {
         .eq("user_id", session.user.id);
 
       if (updateError) throw updateError;
+
+      // 3. Mettre à jour le player_name dans la table players si l'ancien username existe
+      if (existingUser?.username) {
+        const { error: playersError } = await supabase
+          .from("players")
+          .update({ player_name: username })
+          .eq("player_name", existingUser.username);
+
+        if (playersError) throw playersError;
+      }
 
       setSuccessMessage("Profil mis à jour !");
     } catch (error: any) {
