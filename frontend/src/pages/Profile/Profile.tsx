@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { AddPlayerForm } from "../Home/components/AddPlayerForm/AddPlayerForm";
 import { api } from "../../utils/api";
 import { LinkedAccounts, LinkedAccount } from "./components/LinkedAccounts";
+import { BackgroundSelector } from "./components/BackgroundSelector";
 
 const Profile = () => {
   const [loading, setLoading] = useState(false);
@@ -16,6 +17,9 @@ const Profile = () => {
   const [isAddPlayerOpen, setIsAddPlayerOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [accountToDelete, setAccountToDelete] = useState<string | null>(null);
+  const [isBackgroundSelectorOpen, setIsBackgroundSelectorOpen] =
+    useState(false);
+  const [backgroundUrl, setBackgroundUrl] = useState("");
   const navigate = useNavigate();
 
   const loadProfileData = useCallback(async () => {
@@ -159,31 +163,98 @@ const Profile = () => {
     setErrorMessage("");
   };
 
+  // Charger le fond au chargement du profil
+  useEffect(() => {
+    const loadBackground = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session) {
+        const { data } = await supabase
+          .from("usernames")
+          .select("background_url")
+          .eq("user_id", session.user.id)
+          .single();
+
+        if (data?.background_url) {
+          setBackgroundUrl(data.background_url);
+        }
+      }
+    };
+    loadBackground();
+  }, []);
+
+  const handleBackgroundSelect = async (url: string) => {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { error } = await supabase
+        .from("usernames")
+        .update({ background_url: url })
+        .eq("user_id", session.user.id);
+
+      if (error) throw error;
+
+      setBackgroundUrl(url);
+      setIsBackgroundSelectorOpen(false);
+      setSuccessMessage("Fond de profil mis à jour !");
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du fond:", error);
+      setErrorMessage("Erreur lors de la mise à jour du fond");
+    }
+  };
+
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Profil
-        </h1>
+    <div className="relative max-w-4xl mx-auto p-6">
+      {/* Messages de succès/erreur */}
+      {successMessage && (
+        <div className="mb-4 p-2 bg-green-100 text-green-700 rounded">
+          {successMessage}
+        </div>
+      )}
+      {errorMessage && (
+        <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+          {errorMessage}
+        </div>
+      )}
+
+      {/* Fond avec overlay */}
+      {backgroundUrl && (
+        <div className="fixed inset-0 -z-10">
+          <img
+            src={backgroundUrl}
+            alt="Background"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black/50" />
+        </div>
+      )}
+
+      {/* En-tête avec les boutons */}
+      <div className="flex justify-between items-center mb-6">
         <button
           onClick={() => navigate("/")}
           className="px-4 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
         >
           ← Retour
         </button>
+
+        <button
+          onClick={() => setIsBackgroundSelectorOpen(true)}
+          className="px-4 py-2 text-sm bg-gray-100/10 backdrop-blur-sm text-white rounded-lg hover:bg-gray-100/20 transition-colors"
+        >
+          Changer le fond
+        </button>
       </div>
 
-      {successMessage && (
-        <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md">
-          {successMessage}
-        </div>
-      )}
-
-      {errorMessage && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
-          {errorMessage}
-        </div>
-      )}
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Profil
+        </h1>
+      </div>
 
       <div className="space-y-6">
         <div>
@@ -306,6 +377,13 @@ const Profile = () => {
           </div>
         )}
       </div>
+
+      {/* Dialog du sélecteur de fond */}
+      <BackgroundSelector
+        isOpen={isBackgroundSelectorOpen}
+        onClose={() => setIsBackgroundSelectorOpen(false)}
+        onSelect={handleBackgroundSelect}
+      />
     </div>
   );
 };

@@ -41,23 +41,25 @@ const PlayerDetails = () => {
   if (!player) return null;
 
   return (
-    <div
-      className={`p-6 ${
-        isFetching ? "opacity-70" : ""
-      } transition-opacity duration-300`}
-    >
-      <PlayerHeader playerId={id!} />
-      <PlayerProfile player={player} />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <PlayerStats player={player} />
-        <PlayerHistory playerId={id!} />
+    <div className="relative">
+      <div
+        className={`p-6 ${
+          isFetching ? "opacity-70" : ""
+        } transition-opacity duration-300`}
+      >
+        <PlayerHeader playerId={id!} />
+        <PlayerProfile player={player} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <PlayerStats player={player} />
+          <PlayerHistory playerId={id!} />
+        </div>
+        <GamesList
+          games={games || []}
+          isLoading={gamesLoading}
+          championNames={championNames}
+          playerName={player.summoner_name}
+        />
       </div>
-      <GamesList
-        games={games || []}
-        isLoading={gamesLoading}
-        championNames={championNames}
-        playerName={player.summoner_name}
-      />
     </div>
   );
 };
