@@ -39,7 +39,8 @@ export const AddPlayerForm = ({
     } catch (err: any) {
       console.error("Erreur complète:", err);
       setError(
-        err.response?.data?.message || "Erreur lors de l'ajout du joueur"
+        err.response?.data?.message ||
+          "Erreur lors de l'ajout du joueur, réessayez une seconde fois"
       );
     } finally {
       setIsLoading(false);
