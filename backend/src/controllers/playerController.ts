@@ -286,7 +286,7 @@ export const updatePlayer = async (player: Player) => {
     const updateData = {
       summoner_name: summonerData.riotId,
       profile_icon_id: summonerData.profileIconId,
-      tier: soloQStats?.tier || null,
+      tier: soloQStats?.tier || "UNRANKED",
       rank: soloQStats?.rank || null,
       league_points: soloQStats?.leaguePoints || 0,
       wins: soloQStats?.wins || 0,

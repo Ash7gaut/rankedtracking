@@ -84,7 +84,7 @@ export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
         {player.tier && (
           <div className="absolute inset-0 flex items-center justify-center opacity-15">
             <img
-              src={`/ranks/${player.tier.toLowerCase()}.png`}
+              src={`/ranks/${player.tier?.toLowerCase()}.png`}
               alt={player.tier}
               className="w-72 h-72 object-contain"
             />
