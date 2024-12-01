@@ -9,7 +9,6 @@ import { PlayerStats } from "./components/PlayerStats/PlayerStats";
 import { GamesList } from "./components/GamesList/GamesList";
 import { PlayerHistory } from "../Home/components/PlayerHistory/PlayerHistory";
 import { useChampionNames } from "./hooks/useChampionNames";
-import { LinkedAccountsView } from "../Profile/components/LinkedAccountsView";
 
 const PlayerDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -53,7 +52,6 @@ const PlayerDetails = () => {
         <PlayerStats player={player} />
         <PlayerHistory playerId={id!} />
       </div>
-      <LinkedAccountsView playerName={player.player_name || ""} />
       <GamesList
         games={games || []}
         isLoading={gamesLoading}
