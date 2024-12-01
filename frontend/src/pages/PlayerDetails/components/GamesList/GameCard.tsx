@@ -15,6 +15,23 @@ export const GameCard = ({ game, championName, playerName }: GameCardProps) => {
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
+  const formatTimeAgo = (timestamp: number) => {
+    const now = Date.now();
+    const diffInMinutes = Math.floor((now - timestamp) / (1000 * 60));
+
+    if (diffInMinutes < 60) {
+      return `Il y a ${diffInMinutes} minute${diffInMinutes > 1 ? "s" : ""}`;
+    }
+
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) {
+      return `Il y a ${diffInHours} heure${diffInHours > 1 ? "s" : ""}`;
+    }
+
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `Il y a ${diffInDays} jour${diffInDays > 1 ? "s" : ""}`;
+  };
+
   const formatKDA = (kills: number, deaths: number, assists: number) => {
     return `${kills}/${deaths}/${assists}`;
   };
@@ -55,7 +72,8 @@ export const GameCard = ({ game, championName, playerName }: GameCardProps) => {
               {game.win ? "Victoire" : "Défaite"}
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              {formatGameDuration(game.gameDuration)}
+              {formatGameDuration(game.gameDuration)} •{" "}
+              {formatTimeAgo(game.gameCreation)}
             </p>
           </div>
         </div>
