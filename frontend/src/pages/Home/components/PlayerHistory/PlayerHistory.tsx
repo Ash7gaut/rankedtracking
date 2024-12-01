@@ -62,7 +62,25 @@ export const PlayerHistory = ({ playerId }: { playerId: string }) => {
     const date = new Date(timestamp);
     const hours = date.getHours().toString().padStart(2, "0");
     const minutes = date.getMinutes().toString().padStart(2, "0");
-    return `${date.toLocaleDateString()} ${hours}:${minutes}`;
+    const day = date.getDate().toString().padStart(2, "0");
+
+    const months = [
+      "jan.",
+      "fév.",
+      "mars",
+      "avr.",
+      "mai",
+      "juin",
+      "juil.",
+      "août",
+      "sept.",
+      "oct.",
+      "nov.",
+      "déc.",
+    ];
+    const month = months[date.getMonth()];
+
+    return `${day} ${month} ${hours}:${minutes}`;
   };
 
   const calculateTotalValue = (tier: string, rank: string, lp: number) => {
@@ -99,8 +117,10 @@ export const PlayerHistory = ({ playerId }: { playerId: string }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-white dark:bg-gray-800 p-2 border border-gray-200 dark:border-gray-700 rounded shadow">
-          <p className="text-sm text-gray-900 dark:text-white">{data.date}</p>
+        <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+            {data.date}
+          </p>
           <p className="text-sm font-bold text-gray-900 dark:text-white">
             {data.displayValue}
           </p>
@@ -136,48 +156,70 @@ export const PlayerHistory = ({ playerId }: { playerId: string }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-      <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 h-[448px]">
+      <h2 className="text-xl font-bold mb-6 text-gray-900 dark:text-white">
         Évolution du rang
       </h2>
-      <div className="h-80">
+      <div className="h-[calc(100%-4rem)]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={data}
-            margin={{
-              top: 5,
-              right: 20,
-              left: 20,
-              bottom: 30,
-            }}
+            margin={{ top: 0, right: 30, left: 0, bottom: 40 }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
+            <defs>
+              <linearGradient id="rankColor" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.2} />
+                <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid
+              strokeDasharray="3 3"
+              vertical={false}
+              stroke="#E5E7EB"
+              className="dark:stroke-gray-700"
+            />
             <XAxis
               dataKey="date"
-              tick={{ fill: "#6B7280" }}
+              tick={{ fill: "#6B7280", fontSize: 12 }}
               angle={-45}
               textAnchor="end"
               height={60}
               interval={0}
-              fontSize={12}
+              stroke="#9CA3AF"
+              className="dark:stroke-gray-600"
             />
             <YAxis
               tickFormatter={formatYAxis}
-              tick={{ fill: "#6B7280" }}
+              tick={{ fill: "#6B7280", fontSize: 12 }}
               domain={getYAxisDomain()}
               ticks={uniqueTiers.map(
                 (tier) => TIER_VALUES[tier as keyof typeof TIER_VALUES]
               )}
-              width={80}
+              width={100}
+              stroke="#9CA3AF"
+              className="dark:stroke-gray-600"
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip
+              content={<CustomTooltip />}
+              cursor={{ stroke: "#3B82F6", strokeWidth: 1 }}
+            />
             <Line
               type="monotone"
               dataKey="value"
               stroke="#3B82F6"
-              strokeWidth={2}
-              dot={{ fill: "#3B82F6", r: 4 }}
-              activeDot={{ r: 6 }}
+              strokeWidth={3}
+              dot={{
+                fill: "#3B82F6",
+                stroke: "#FFFFFF",
+                strokeWidth: 2,
+                r: 4,
+              }}
+              activeDot={{
+                r: 6,
+                stroke: "#FFFFFF",
+                strokeWidth: 2,
+              }}
+              fill="url(#rankColor)"
             />
           </LineChart>
         </ResponsiveContainer>
