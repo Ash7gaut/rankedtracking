@@ -153,20 +153,51 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
       last_update: new Date().toISOString()
     };
 
-    // Avant de mettre à jour le joueur, sauvegarder l'état actuel dans l'historique
-    if (updateData.tier || updateData.rank || updateData.league_points) {
-      const { error: historyError } = await supabase
+    // Vérifier si on doit sauvegarder l'historique (toutes les 6 heures)
+    const shouldSaveHistory = async () => {
+      const SIX_HOURS = 6 * 60 * 60 * 1000; // 6 heures en millisecondes
+      
+      // Récupérer la dernière entrée d'historique pour ce joueur
+      const { data: lastHistory, error } = await supabase
         .from('player_history')
-        .insert({
-          player_id: player.id,
-          tier: updateData.tier,
-          rank: updateData.rank,
-          league_points: updateData.league_points,
-          wins: updateData.wins,
-          losses: updateData.losses
-        });
+        .select('timestamp')
+        .eq('player_id', player.id)
+        .order('timestamp', { ascending: false })
+        .limit(1);
 
-      if (historyError) throw historyError;
+      if (error) {
+        console.error('Erreur en vérifiant l\'historique:', error);
+        return false;
+      }
+
+      // Si pas d'historique ou si le dernier est vieux de plus de 6 heures
+      if (!lastHistory?.length) return true;
+      
+      const lastUpdate = new Date(lastHistory[0].timestamp).getTime();
+      const now = new Date().getTime();
+      
+      return (now - lastUpdate) >= SIX_HOURS;
+    };
+
+    // Avant de mettre à jour le joueur, sauvegarder l'état actuel dans l'historique si nécessaire
+    if (updateData.tier || updateData.rank || updateData.league_points) {
+      const saveHistory = await shouldSaveHistory();
+      
+      if (saveHistory) {
+        const { error: historyError } = await supabase
+          .from('player_history')
+          .insert({
+            player_id: player.id,
+            tier: updateData.tier,
+            rank: updateData.rank,
+            league_points: updateData.league_points,
+            wins: updateData.wins,
+            losses: updateData.losses
+          });
+
+        if (historyError) throw historyError;
+        console.log(`✅ Historique sauvegardé pour ${player.summoner_name}`);
+      }
     }
 
     // Vérification finale des données avant mise à jour
