@@ -77,9 +77,14 @@ export const PlayerStats = ({ player }: PlayerStatsProps) => {
 
           {/* Progression */}
           <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
-              Progression
-            </h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                Progression
+              </h3>
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                toutes les 6h ⏲
+              </span>
+            </div>
             <RankProgression playerId={player.id} />
           </div>
         </div>
