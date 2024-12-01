@@ -12,7 +12,7 @@ export const PlayerStats = ({ player }: PlayerStatsProps) => {
       : "0";
 
   return (
-    <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8 overflow-hidden">
+    <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 h-[448px]">
       {/* Image de fond du rang */}
       {player.tier && (
         <div className="absolute inset-0 flex items-center justify-center opacity-30">
