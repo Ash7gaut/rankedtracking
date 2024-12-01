@@ -65,6 +65,8 @@ export const PlayerHistory = ({ playerId }: { playerId: string }) => {
     return `${date.toLocaleDateString()} ${hours}:${minutes}`;
   };
 
+  const tiers = history?.map((entry) => entry.tier) || [];
+  const uniqueTiers = Array.from(new Set(tiers));
   const data = history?.map((entry) => {
     const totalValue =
       (TIER_VALUES[entry.tier as keyof typeof TIER_VALUES] || 0) +
@@ -96,12 +98,25 @@ export const PlayerHistory = ({ playerId }: { playerId: string }) => {
   };
 
   const formatYAxis = (value: number) => {
-    const tier =
-      Object.entries(TIER_VALUES).find(
-        ([_, tierValue]) => value >= tierValue
-      )?.[0] || "IRON";
+    const nearestTier = Object.entries(TIER_VALUES).reduce(
+      (prev, [tier, tierValue]) => {
+        if (Math.abs(tierValue - value) < Math.abs(prev.value - value)) {
+          return { tier, value: tierValue };
+        }
+        return prev;
+      },
+      { tier: "IRON", value: 0 }
+    );
 
-    return tier;
+    return nearestTier.tier;
+  };
+
+  const getYAxisDomain = () => {
+    if (!data || data.length === 0) return ["auto", "auto"];
+    const minValue = Math.min(...data.map((d) => d.value));
+    const maxValue = Math.max(...data.map((d) => d.value));
+    const padding = 200;
+    return [minValue - padding, maxValue + padding];
   };
 
   return (
@@ -109,9 +124,17 @@ export const PlayerHistory = ({ playerId }: { playerId: string }) => {
       <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
         Évolution du rang
       </h2>
-      <div className="h-64">
+      <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data}>
+          <LineChart
+            data={data}
+            margin={{
+              top: 5,
+              right: 20,
+              left: 20,
+              bottom: 30,
+            }}
+          >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
               dataKey="date"
@@ -125,7 +148,11 @@ export const PlayerHistory = ({ playerId }: { playerId: string }) => {
             <YAxis
               tickFormatter={formatYAxis}
               tick={{ fill: "#6B7280" }}
-              domain={["dataMin - 100", "dataMax + 100"]}
+              domain={getYAxisDomain()}
+              ticks={uniqueTiers.map(
+                (tier) => TIER_VALUES[tier as keyof typeof TIER_VALUES]
+              )}
+              width={80}
             />
             <Tooltip content={<CustomTooltip />} />
             <Line
