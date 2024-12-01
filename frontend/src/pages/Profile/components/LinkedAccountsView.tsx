@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { LinkedAccount } from "./LinkedAccounts";
 import { supabase } from "../../../utils/supabase";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -8,11 +7,18 @@ interface LinkedAccountsViewProps {
 }
 
 export const LinkedAccountsView = ({ playerName }: LinkedAccountsViewProps) => {
-  const [accounts, setAccounts] = useState<LinkedAccount[]>([]);
+  const [accounts, setAccounts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(() => {
+    const stored = localStorage.getItem("linkedAccountsExpanded");
+    return stored ? JSON.parse(stored) : true;
+  });
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+
+  useEffect(() => {
+    localStorage.setItem("linkedAccountsExpanded", JSON.stringify(isOpen));
+  }, [isOpen]);
 
   useEffect(() => {
     const fetchLinkedAccounts = async () => {

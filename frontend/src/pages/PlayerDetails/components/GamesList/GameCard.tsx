@@ -76,55 +76,51 @@ export const GameCard = ({ game, championName, playerName }: GameCardProps) => {
               Alliés
             </h4>
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2 flex-1">
-                  <img
-                    src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${mainPlayer.championId}.png`}
-                    alt={mainPlayer.championName}
-                    className="w-8 h-8 rounded-full"
-                  />
-                  <div className="flex flex-col flex-1">
-                    <span className="text-sm text-gray-600 dark:text-gray-400 font-semibold">
-                      {mainPlayer.summonerName}
-                    </span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                      {mainPlayer.cs} CS •{" "}
-                      {formatDamage(mainPlayer.totalDamageDealtToChampions)}
-                    </span>
-                  </div>
-                  <span className="text-sm text-gray-500 dark:text-gray-400 min-w-[80px] text-center">
-                    {formatKDA(
-                      mainPlayer.kills,
-                      mainPlayer.deaths,
-                      mainPlayer.assists
-                    )}
+              <div className="grid grid-cols-[auto_1fr_minmax(80px,1fr)] items-center justify-items-center gap-1">
+                <img
+                  src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${mainPlayer.championId}.png`}
+                  alt={mainPlayer.championName}
+                  className="w-8 h-8 rounded-full"
+                />
+                <div className="flex flex-col ml-2 w-full">
+                  <span className="text-sm text-gray-600 dark:text-gray-400 font-semibold">
+                    {mainPlayer.summonerName}
+                  </span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    {mainPlayer.cs} CS •{" "}
+                    {formatDamage(mainPlayer.totalDamageDealtToChampions)}
                   </span>
                 </div>
+                <span className="text-sm text-gray-500 dark:text-gray-400 -ml-20">
+                  {formatKDA(
+                    mainPlayer.kills,
+                    mainPlayer.deaths,
+                    mainPlayer.assists
+                  )}
+                </span>
               </div>
               {game.allies?.map((ally) => (
                 <div
                   key={ally.summonerName}
-                  className="flex items-center gap-2"
+                  className="grid grid-cols-[auto_1fr_minmax(60px,1fr)] items-center justify-items-center gap-1"
                 >
-                  <div className="flex items-center gap-2 flex-1">
-                    <img
-                      src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${ally.championId}.png`}
-                      alt={ally.championName}
-                      className="w-8 h-8 rounded-full"
-                    />
-                    <div className="flex flex-col flex-1">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {ally.summonerName}
-                      </span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        {ally.championName} • {ally.cs} CS •{" "}
-                        {formatDamage(ally.totalDamageDealtToChampions)}
-                      </span>
-                    </div>
-                    <span className="text-sm text-gray-500 dark:text-gray-400 min-w-[80px] text-center">
-                      {formatKDA(ally.kills, ally.deaths, ally.assists)}
+                  <img
+                    src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${ally.championId}.png`}
+                    alt={ally.championName}
+                    className="w-8 h-8 rounded-full"
+                  />
+                  <div className="flex flex-col ml-2 w-full">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      {ally.summonerName}
+                    </span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {ally.championName} • {ally.cs} CS •{" "}
+                      {formatDamage(ally.totalDamageDealtToChampions)}
                     </span>
                   </div>
+                  <span className="text-sm text-gray-500 dark:text-gray-400 -ml-20">
+                    {formatKDA(ally.kills, ally.deaths, ally.assists)}
+                  </span>
                 </div>
               ))}
             </div>
@@ -138,27 +134,25 @@ export const GameCard = ({ game, championName, playerName }: GameCardProps) => {
               {game.enemies?.map((enemy) => (
                 <div
                   key={enemy.summonerName}
-                  className="flex items-center gap-2"
+                  className="grid grid-cols-[auto_1fr_minmax(60px,1fr)] items-center justify-items-center gap-1"
                 >
-                  <div className="flex items-center gap-2 flex-1">
-                    <img
-                      src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${enemy.championId}.png`}
-                      alt={enemy.championName}
-                      className="w-8 h-8 rounded-full"
-                    />
-                    <div className="flex flex-col flex-1">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {enemy.summonerName}
-                      </span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        {enemy.championName} • {enemy.cs} CS •{" "}
-                        {formatDamage(enemy.totalDamageDealtToChampions)}
-                      </span>
-                    </div>
-                    <span className="text-sm text-gray-500 dark:text-gray-400 min-w-[80px] text-center">
-                      {formatKDA(enemy.kills, enemy.deaths, enemy.assists)}
+                  <img
+                    src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${enemy.championId}.png`}
+                    alt={enemy.championName}
+                    className="w-8 h-8 rounded-full"
+                  />
+                  <div className="flex flex-col ml-2 w-full">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      {enemy.summonerName}
+                    </span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {enemy.championName} • {enemy.cs} CS •{" "}
+                      {formatDamage(enemy.totalDamageDealtToChampions)}
                     </span>
                   </div>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    {formatKDA(enemy.kills, enemy.deaths, enemy.assists)}
+                  </span>
                 </div>
               ))}
             </div>
