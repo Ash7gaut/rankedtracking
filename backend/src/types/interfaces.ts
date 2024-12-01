@@ -80,6 +80,20 @@ export interface Participant {
   kills: number;
   deaths: number;
   assists: number;
+  totalDamageDealtToChampions: number;
+  totalMinionsKilled: number;
+  neutralMinionsKilled: number;
+  item0: number;
+  item1: number;
+  item2: number;
+  item3: number;
+  item4: number;
+  item5: number;
+  item6: number;
+  summoner1Id: number;
+  summoner2Id: number;
+  riotIdGameName?: string;
+  riotIdTagline?: string;
 }
 
 export interface MatchResponse {
@@ -87,20 +101,7 @@ export interface MatchResponse {
     gameCreation: number;
     gameDuration: number;
     queueId: number;
-    participants: Array<{
-      puuid: string;
-      championId: number;
-      championName: string;
-      summonerName: string;
-      teamId: number;
-      win: boolean;
-      kills: number;
-      deaths: number;
-      assists: number;
-      totalDamageDealtToChampions: number;
-      riotIdGameName?: string;
-      riotIdTagline?: string;
-    }>;
+    participants: Participant[];
   };
 }
 
@@ -109,21 +110,34 @@ export interface MatchDetails {
   gameCreation: number;
   gameDuration: number;
   championId: number;
+  championName: string;
   win: boolean;
   kills: number;
   deaths: number;
   assists: number;
   totalDamageDealtToChampions: number;
+  cs: number;
+  summoner1Id: number;
+  summoner2Id: number;
+  items: number[];
   allies: {
     championId: number;
     championName: string;
     summonerName: string;
     totalDamageDealtToChampions: number;
+    kills: number;
+    deaths: number;
+    assists: number;
+    cs: number;
   }[];
   enemies: {
     championId: number;
     championName: string;
     summonerName: string;
     totalDamageDealtToChampions: number;
+    kills: number;
+    deaths: number;
+    assists: number;
+    cs: number;
   }[];
 }

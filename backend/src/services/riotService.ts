@@ -144,7 +144,6 @@ export const riotService = {
         throw new Error('Participant not found in match');
       }
 
-      // Fonction pour formater le nom du joueur
       const formatPlayerName = (player: any) => {
         if (player.riotIdGameName) {
           return player.riotIdGameName + (player.riotIdTagline ? ` #${player.riotIdTagline}` : '');
@@ -164,22 +163,43 @@ export const riotService = {
         gameCreation: response.data.info.gameCreation,
         gameDuration: response.data.info.gameDuration,
         championId: participant.championId,
+        championName: participant.championName,
         win: participant.win,
         kills: participant.kills,
         deaths: participant.deaths,
         assists: participant.assists,
         totalDamageDealtToChampions: participant.totalDamageDealtToChampions,
+        cs: participant.totalMinionsKilled + (participant.neutralMinionsKilled || 0),
+        summoner1Id: participant.summoner1Id,
+        summoner2Id: participant.summoner2Id,
+        items: [
+          participant.item0,
+          participant.item1,
+          participant.item2,
+          participant.item3,
+          participant.item4,
+          participant.item5,
+          participant.item6
+        ],
         allies: allies.map(ally => ({
           championId: ally.championId,
           championName: ally.championName,
           summonerName: formatPlayerName(ally),
-          totalDamageDealtToChampions: ally.totalDamageDealtToChampions
+          totalDamageDealtToChampions: ally.totalDamageDealtToChampions,
+          kills: ally.kills,
+          deaths: ally.deaths,
+          assists: ally.assists,
+          cs: ally.totalMinionsKilled + (ally.neutralMinionsKilled || 0)
         })),
         enemies: enemies.map(enemy => ({
           championId: enemy.championId,
           championName: enemy.championName,
           summonerName: formatPlayerName(enemy),
-          totalDamageDealtToChampions: enemy.totalDamageDealtToChampions
+          totalDamageDealtToChampions: enemy.totalDamageDealtToChampions,
+          kills: enemy.kills,
+          deaths: enemy.deaths,
+          assists: enemy.assists,
+          cs: enemy.totalMinionsKilled + (enemy.neutralMinionsKilled || 0)
         }))
       };
     } catch (error) {
