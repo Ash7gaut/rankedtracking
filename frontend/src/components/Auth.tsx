@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "../utils/supabase";
 import { useNavigate } from "react-router-dom";
 
@@ -13,6 +13,47 @@ export default function Auth() {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Écouter les changements d'authentification
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === "SIGNED_IN" && session?.provider_token === "discord") {
+        try {
+          const { error: usernamesError } = await supabase
+            .from("usernames")
+            .upsert({
+              user_id: session.user.id,
+              username:
+                session.user.user_metadata.full_name ||
+                session.user.user_metadata.name,
+              email: session.user.email,
+              role: null,
+            })
+            .select()
+            .single();
+
+          if (usernamesError) {
+            console.error(
+              "Erreur lors de la création de l'entrée username:",
+              usernamesError
+            );
+          }
+        } catch (error) {
+          console.error(
+            "Erreur lors de la création de l'entrée username:",
+            error
+          );
+        }
+      }
+    });
+
+    // Cleanup de l'event listener
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
