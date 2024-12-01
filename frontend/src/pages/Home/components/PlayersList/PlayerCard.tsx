@@ -78,7 +78,9 @@ export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
       )}
 
       <div
-        className="relative bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow overflow-hidden group [&:hover_.icon-hover]:opacity-100"
+        className={`relative bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow overflow-hidden group [&:hover_.icon-hover]:opacity-100 ${
+          player.in_game ? "border-l-4 border-green-500" : ""
+        }`}
         onClick={() => navigate(`/player/${player.id}`)}
       >
         <div className="absolute inset-0 flex items-center justify-center opacity-15">
