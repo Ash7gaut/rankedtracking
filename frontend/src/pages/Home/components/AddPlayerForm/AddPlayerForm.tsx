@@ -11,7 +11,8 @@ export const AddPlayerForm = ({
   onSuccess,
   defaultPlayerName,
 }: AddPlayerFormProps) => {
-  const [summonerName, setSummonerName] = useState("");
+  const [gameName, setGameName] = useState("");
+  const [tagLine, setTagLine] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isMain, setIsMain] = useState(false);
@@ -27,9 +28,11 @@ export const AddPlayerForm = ({
         throw new Error("Nom du joueur non défini");
       }
 
-      await api.addPlayer(summonerName, defaultPlayerName, "", isMain);
+      const fullSummonerName = `${gameName}#${tagLine}`;
+      await api.addPlayer(fullSummonerName, defaultPlayerName, "", isMain);
 
-      setSummonerName("");
+      setGameName("");
+      setTagLine("");
       setIsMain(false);
       queryClient.invalidateQueries("players");
 
@@ -40,7 +43,7 @@ export const AddPlayerForm = ({
       console.error("Erreur complète:", err);
       setError(
         err.response?.data?.message ||
-          "Erreur lors de l'ajout du joueur, réessayez une seconde fois"
+          "Erreur lors de l'ajout du joueur, réessayez plusieurs fois"
       );
     } finally {
       setIsLoading(false);
@@ -50,14 +53,33 @@ export const AddPlayerForm = ({
   return (
     <form onSubmit={handleSubmit} className="mb-8 space-y-4">
       <div className="flex flex-col gap-4">
-        <input
-          type="text"
-          value={summonerName}
-          onChange={(e) => setSummonerName(e.target.value)}
-          placeholder="Nom d'invocateur (nom#tag)"
-          className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-          disabled={isLoading}
-        />
+        <div className="flex items-center gap-2">
+          <div className="w-1/2">
+            <input
+              type="text"
+              value={gameName}
+              onChange={(e) => setGameName(e.target.value)}
+              placeholder="Pseudo"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+              disabled={isLoading}
+              required
+            />
+          </div>
+          <span className="text-lg text-gray-500 dark:text-gray-400 font-semibold">
+            #
+          </span>
+          <div className="w-1/2">
+            <input
+              type="text"
+              value={tagLine}
+              onChange={(e) => setTagLine(e.target.value)}
+              placeholder="Tag"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+              disabled={isLoading}
+              required
+            />
+          </div>
+        </div>
 
         <label className="flex items-center space-x-2">
           <input
@@ -74,7 +96,7 @@ export const AddPlayerForm = ({
         <button
           type="submit"
           className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
-          disabled={isLoading || !summonerName.trim()}
+          disabled={isLoading || !gameName.trim() || !tagLine.trim()}
         >
           {isLoading ? "Ajout..." : "Ajouter"}
         </button>
