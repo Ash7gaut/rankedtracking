@@ -78,7 +78,7 @@ export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
       )}
 
       <div
-        className="relative bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow overflow-hidden"
+        className="relative bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow overflow-hidden group [&:hover_.icon-hover]:opacity-100"
         onClick={() => navigate(`/player/${player.id}`)}
       >
         <div className="absolute inset-0 flex items-center justify-center opacity-15">
@@ -136,23 +136,23 @@ export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
             </div>
           </div>
         </div>
-      </div>
 
-      <a
-        href={`https://www.leagueofgraphs.com/fr/summoner/euw/${formatSummonerNameForUrl(
-          player.summoner_name
-        )}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="absolute bottom-2 right-2 text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 hover:underline z-20"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <img
-          src="https://i.imgur.com/TCDG5tK.png"
-          alt="League of Graphs"
-          className="w-7 h-7 opacity-30 hover:opacity-100 transition-opacity duration-300"
-        />
-      </a>
+        <a
+          href={`https://www.leagueofgraphs.com/fr/summoner/euw/${formatSummonerNameForUrl(
+            player.summoner_name
+          )}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="absolute bottom-2 right-2 text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 hover:underline z-20"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <img
+            src="https://i.imgur.com/TCDG5tK.png"
+            alt="League of Graphs"
+            className="w-7 h-7 opacity-0 icon-hover duration-300"
+          />
+        </a>
+      </div>
     </div>
   );
 };
