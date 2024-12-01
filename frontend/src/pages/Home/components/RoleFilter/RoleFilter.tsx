@@ -6,11 +6,31 @@ interface RoleFilterProps {
 }
 
 const roles = [
-  { id: "TOP", icon: "🛡️", name: "Top" },
-  { id: "JUNGLE", icon: "🌲", name: "Jungle" },
-  { id: "MID", icon: "⚔️", name: "Mid" },
-  { id: "ADC", icon: "🎯", name: "ADC" },
-  { id: "SUPPORT", icon: "💝", name: "Support" },
+  {
+    id: "TOP",
+    icon: "https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-top.png",
+    name: "Top",
+  },
+  {
+    id: "JUNGLE",
+    icon: "https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-jungle.png",
+    name: "Jungle",
+  },
+  {
+    id: "MID",
+    icon: "https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-middle.png",
+    name: "Mid",
+  },
+  {
+    id: "ADC",
+    icon: "https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-bottom.png",
+    name: "ADC",
+  },
+  {
+    id: "SUPPORT",
+    icon: "https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-utility.png",
+    name: "Support",
+  },
 ];
 
 export const RoleFilter = ({
@@ -50,7 +70,7 @@ export const RoleFilter = ({
                   : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
               }`}
             >
-              <span className="text-2xl">{role.icon}</span>
+              <img src={role.icon} alt={role.name} className="w-6 h-6" />
               <span className="text-sm mt-1">{role.name}</span>
             </button>
           ))}

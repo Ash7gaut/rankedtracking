@@ -58,7 +58,7 @@ export const LinkedAccountsView = ({ playerName }: LinkedAccountsViewProps) => {
                     </p>
                     {account.is_main && (
                       <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full">
-                        Principal
+                        Main
                       </span>
                     )}
                   </div>
