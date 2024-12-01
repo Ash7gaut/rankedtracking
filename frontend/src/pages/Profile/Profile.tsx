@@ -6,7 +6,7 @@ import { api } from "../../utils/api";
 import { LinkedAccounts, LinkedAccount } from "./components/LinkedAccounts";
 
 const Profile = () => {
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [username, setUsername] = useState("");
   const [userRole, setUserRole] = useState("");
   const [email, setEmail] = useState("");
@@ -78,7 +78,83 @@ const Profile = () => {
 
   const updateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    // ... reste du code pour updateProfile ...
+
+    try {
+      setLoading(true);
+      setSuccessMessage("");
+      setErrorMessage("");
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        throw new Error("Session non trouvée");
+      }
+
+      if (!username.trim()) {
+        setErrorMessage("Le pseudo ne peut pas être vide");
+        return;
+      }
+
+      // 1. Récupérer l'ancien username
+      const { data: oldUserData } = await supabase
+        .from("usernames")
+        .select("username")
+        .eq("user_id", session.user.id)
+        .single();
+
+      const oldUsername = oldUserData?.username;
+
+      // 2. Mettre à jour les métadonnées de l'utilisateur
+      const { error: userError } = await supabase.auth.updateUser({
+        data: {
+          username: username,
+          role: userRole,
+        },
+      });
+
+      if (userError) throw userError;
+
+      // 3. Mettre à jour la table usernames
+      const { error: updateError } = await supabase
+        .from("usernames")
+        .update({
+          username: username,
+          role: userRole,
+        })
+        .eq("user_id", session.user.id);
+
+      if (updateError) throw updateError;
+
+      // 4. Mettre à jour les comptes LoL liés (en utilisant l'ancien username)
+      if (oldUsername) {
+        const { error: playersError } = await supabase
+          .from("players")
+          .update({ player_name: username })
+          .eq("player_name", oldUsername);
+
+        if (playersError) {
+          console.error(
+            "Erreur lors de la mise à jour des comptes LoL:",
+            playersError
+          );
+          throw playersError;
+        }
+      }
+
+      setSuccessMessage("Données mises à jour !");
+      await loadProfileData(); // Recharger les données
+
+      setTimeout(() => {
+        setSuccessMessage("");
+      }, 3000);
+    } catch (error: any) {
+      console.error("Erreur complète:", error);
+      setErrorMessage(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDelete = async (summonerName: string) => {
