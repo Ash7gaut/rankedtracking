@@ -88,12 +88,12 @@ const calculateLPDifference = (
     return newLP - previousLP;
   }
 
-  // Promotion de division dans le même tier (IV -> III, III -> II, etc.)
+  // Promotion de division dans le même tier
   if (previousTier === newTier && ranks.indexOf(previousRank) > ranks.indexOf(newRank)) {
     return (100 - previousLP) + newLP;
   }
 
-  // Rétrogradation de division dans le même tier (III -> IV, II -> III, etc.)
+  // Rétrogradation de division dans le même tier
   if (previousTier === newTier && ranks.indexOf(previousRank) < ranks.indexOf(newRank)) {
     return -(previousLP + (100 - newLP));
   }
@@ -104,7 +104,12 @@ const calculateLPDifference = (
   }
 
   // Rétrogradation de tier
-  return -(previousLP + (100 - newLP));
+  if (tiers.indexOf(previousTier) > tiers.indexOf(newTier)) {
+    return -(previousLP + (100 - newLP));
+  }
+
+  // Cas par défaut
+  return newLP - previousLP;
 };
 
 const updatePlayer = async (player: any, totalPlayers: number, updatedCount: number): Promise<UpdateResult> => {
