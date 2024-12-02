@@ -47,7 +47,7 @@ export const PlayerFilter = ({
                 type="checkbox"
                 checked={selectedPlayers.has(playerName)}
                 onChange={() => onPlayerSelection(playerName)}
-                className="form-checkbox h-5 w-5 text-blue-500"
+                className="form-checkbox h-5 w-5 text-blue-500 custom-checkbox"
               />
               <span className="text-gray-700 dark:text-gray-300">
                 {playerName}

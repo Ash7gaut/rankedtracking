@@ -20,7 +20,7 @@ export const MainAccountFilter = ({
             type="checkbox"
             checked={isMainOnly}
             onChange={onMainAccountToggle}
-            className="form-checkbox h-5 w-5 text-blue-500"
+            className="form-checkbox h-5 w-5 text-blue-500 custom-checkbox"
           />
         </label>
       </div>
