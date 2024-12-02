@@ -10,6 +10,15 @@ const BATCH_COOLDOWN = 30000;
 const MAX_RETRIES = 4;
 const RETRY_DELAY = 10000;
 
+const CIRCUIT_BREAKER = {
+  failureThreshold: 3,        // Nombre d'erreurs 503 avant ouverture
+  resetTimeout: 60000,        // Temps de pause en ms (1 minute)
+  failureWindow: 60000,       // Fenêtre de temps pour compter les erreurs (1 minute)
+  failures: [] as number[],   // Timestamps des erreurs
+  isOpen: false,             // État du circuit
+  lastOpenTime: 0,           // Dernier moment où le circuit s'est ouvert
+};
+
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const startAutoUpdateService = () => {
@@ -31,16 +40,51 @@ interface UpdateResult {
   error: string | null;
 }
 
+const handleCircuitBreaker = async (error: any) => {
+  if (error?.response?.status === 503) {
+    const now = Date.now();
+    // Nettoyer les anciennes erreurs
+    CIRCUIT_BREAKER.failures = CIRCUIT_BREAKER.failures.filter(
+      time => now - time < CIRCUIT_BREAKER.failureWindow
+    );
+    // Ajouter la nouvelle erreur
+    CIRCUIT_BREAKER.failures.push(now);
+
+    // Vérifier si on doit ouvrir le circuit
+    if (CIRCUIT_BREAKER.failures.length >= CIRCUIT_BREAKER.failureThreshold) {
+      CIRCUIT_BREAKER.isOpen = true;
+      CIRCUIT_BREAKER.lastOpenTime = now;
+      console.log(`Circuit breaker ouvert - pause de ${CIRCUIT_BREAKER.resetTimeout/1000}s`);
+      await sleep(CIRCUIT_BREAKER.resetTimeout);
+      CIRCUIT_BREAKER.isOpen = false;
+      CIRCUIT_BREAKER.failures = [];
+      console.log('Circuit breaker fermé - reprise des requêtes');
+    }
+  }
+};
+
 const retryWithDelay = async (fn: () => Promise<any>, context: string, retries = MAX_RETRIES): Promise<any> => {
   let lastError;
   
   for (let i = 0; i < retries; i++) {
     try {
+      // Vérifier si le circuit est ouvert
+      if (CIRCUIT_BREAKER.isOpen) {
+        const timeLeft = CIRCUIT_BREAKER.resetTimeout - (Date.now() - CIRCUIT_BREAKER.lastOpenTime);
+        if (timeLeft > 0) {
+          console.log(`Circuit breaker ouvert - attente de ${Math.ceil(timeLeft/1000)}s`);
+          await sleep(timeLeft);
+        }
+      }
+
       await sleep(DELAY_BETWEEN_REQUESTS);
       return await fn();
     } catch (error: any) {
       lastError = error;
       console.log(`Tentative ${i + 1}/${retries} échouée pour ${context}`);
+      
+      // Gérer le circuit breaker avant les autres cas
+      await handleCircuitBreaker(error);
       
       if (error?.response?.status === 429) {
         const retryAfter = parseInt(error.response.headers['retry-after']) || 10;
@@ -50,7 +94,7 @@ const retryWithDelay = async (fn: () => Promise<any>, context: string, retries =
       }
       
       if (error?.response?.status === 503) {
-        const waitTime = Math.min(RETRY_DELAY * Math.pow(2, i), 30000); // Exponential backoff, max 30s
+        const waitTime = Math.min(RETRY_DELAY * Math.pow(2, i), 30000);
         console.log(`Service indisponible pour ${context}, nouvelle tentative dans ${waitTime/1000}s... (${retries - i - 1} essais restants)`);
         await sleep(waitTime);
         continue;
