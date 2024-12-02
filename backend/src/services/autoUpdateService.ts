@@ -5,9 +5,9 @@ const UPDATE_INTERVAL = 5.5 * 60 * 1000;
 const RATE_LIMIT_PER_2_MIN = 100;
 const REQUESTS_PER_PLAYER = 4;
 const SAFE_BATCH_SIZE = Math.floor(RATE_LIMIT_PER_2_MIN / (REQUESTS_PER_PLAYER * 2));
-const DELAY_BETWEEN_REQUESTS = 2000;
+const DELAY_BETWEEN_REQUESTS = 3000;
 const BATCH_COOLDOWN = 30000;
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 4;
 const RETRY_DELAY = 10000;
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
