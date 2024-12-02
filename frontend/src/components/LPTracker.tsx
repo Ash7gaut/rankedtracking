@@ -122,7 +122,7 @@ export const LPTracker = ({
   }, [selectedPlayers, showNegativeOnly, negativeWinratePlayers]);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 sticky top-4 h-[calc(250vh-200px)]">
+    <div className="bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md p-4 sticky top-4 h-[calc(250vh-200px)]">
       <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
         Suivi des LP (7 derniers jours)
       </h2>
@@ -136,7 +136,7 @@ export const LPTracker = ({
             return (
               <div
                 key={change.id}
-                className="flex items-center justify-between p-2 border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                className="flex items-center justify-between p-2 border-b dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer transition-colors"
                 onClick={() => navigate(`/player/${change.player_id}`)}
               >
                 <div className="flex flex-col">

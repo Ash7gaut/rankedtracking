@@ -49,7 +49,7 @@ function App() {
     <BrowserRouter>
       <div
         className={`min-h-screen transition-colors duration-200 ${
-          darkMode ? "dark bg-gray-900" : "bg-gray-100"
+          darkMode ? "dark bg-gray-900" : "bg-gray-200"
         }`}
       >
         <div className="container mx-auto px-4 py-8 max-w-full sm:max-w-[720px] md:max-w-[860px] lg:max-w-[1100px] xl:max-w-[1400px] 2xl:max-w-[1600px]">

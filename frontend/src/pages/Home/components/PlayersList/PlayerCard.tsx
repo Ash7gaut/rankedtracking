@@ -89,7 +89,7 @@ export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
                 : "/ranks/unranked.png"
             }
             alt="Rank"
-            className="w-60 h-60 object-contain"
+            className="w-80 h- object-contain"
           />
         </div>
 
