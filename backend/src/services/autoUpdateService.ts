@@ -87,10 +87,11 @@ const calculateLPDifference = (
     return newLP - previousLP;
   }
 
-  if (
-    (previousTier === newTier && ranks.indexOf(previousRank) > ranks.indexOf(newRank)) ||
-    tiers.indexOf(previousTier) < tiers.indexOf(newTier)
-  ) {
+  if (previousTier === newTier && ranks.indexOf(previousRank) > ranks.indexOf(newRank)) {
+    return (100 - previousLP) + newLP;
+  }
+
+  if (tiers.indexOf(previousTier) < tiers.indexOf(newTier)) {
     return (100 - previousLP) + newLP;
   }
 
