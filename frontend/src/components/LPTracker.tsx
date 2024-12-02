@@ -6,7 +6,6 @@ interface LPChange {
   player_id: string;
   previous_lp: number;
   current_lp: number;
-  difference: number;
   timestamp: string;
   tier: string;
   rank: string;
@@ -26,7 +25,6 @@ export const LPTracker = () => {
           player_id,
           previous_lp,
           current_lp,
-          difference,
           timestamp,
           tier,
           rank,
@@ -39,7 +37,13 @@ export const LPTracker = () => {
       if (!error && data) {
         const uniqueData = data.filter(
           (change, index, self) =>
-            index === self.findIndex((t) => t.id === change.id)
+            index ===
+            self.findIndex(
+              (t) =>
+                t.id === change.id &&
+                t.player_id === change.player_id &&
+                t.timestamp === change.timestamp
+            )
         );
 
         setChanges(uniqueData);
@@ -75,41 +79,48 @@ export const LPTracker = () => {
             Aucun changement de LP détecté
           </p>
         ) : (
-          changes.map((change) => (
-            <div
-              key={change.id}
-              className="flex items-center justify-between p-2 border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
-            >
-              <div className="flex flex-col">
-                <span className="font-medium text-gray-900 dark:text-white">
-                  {change.summoner_name || "Unknown"}
-                </span>
-                <span className="text-sm text-gray-600 dark:text-gray-300">
-                  {new Date(change.timestamp).toLocaleString("fr-FR", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    day: "2-digit",
-                    month: "2-digit",
-                  })}
-                </span>
-                <span className="text-sm text-gray-500 dark:text-gray-400">
-                  {change.tier} {change.rank}
-                </span>
-              </div>
+          changes.map((change) => {
+            const lpDifference = change.current_lp - change.previous_lp;
+
+            return (
               <div
-                className={`font-bold ${
-                  change.difference > 0
-                    ? "text-green-500"
-                    : change.difference < 0
-                    ? "text-red-500"
-                    : "text-gray-500"
-                }`}
+                key={change.id}
+                className="flex items-center justify-between p-2 border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
               >
-                {change.difference > 0 ? "+" : ""}
-                {change.difference} LP
+                <div className="flex flex-col">
+                  <span className="font-medium text-gray-900 dark:text-white">
+                    {change.summoner_name || "Unknown"}
+                  </span>
+                  <span className="text-sm text-gray-600 dark:text-gray-300">
+                    {new Date(change.timestamp).toLocaleString("fr-FR", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      day: "2-digit",
+                      month: "2-digit",
+                    })}
+                  </span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    {change.tier} {change.rank}
+                  </span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    {change.previous_lp} LP ⇒ {change.current_lp} LP
+                  </span>
+                </div>
+                <div
+                  className={`font-bold ${
+                    lpDifference > 0
+                      ? "text-green-500"
+                      : lpDifference < 0
+                      ? "text-red-500"
+                      : "text-gray-500"
+                  }`}
+                >
+                  {lpDifference > 0 ? "+" : ""}
+                  {lpDifference} LP
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>
