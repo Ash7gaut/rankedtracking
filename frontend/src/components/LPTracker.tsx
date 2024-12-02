@@ -32,13 +32,21 @@ export const LPTracker = () => {
           timestamp,
           tier,
           rank,
-          players(summoner_name)
+          players:player_id (
+            summoner_name
+          )
         `
         )
-        .order("timestamp", { ascending: false });
+        .order("timestamp", { ascending: false })
+        .limit(50);
 
       if (!error && data) {
-        const typedData = data.map((item) => ({
+        const uniqueData = data.filter(
+          (change, index, self) =>
+            index === self.findIndex((t) => t.id === change.id)
+        );
+
+        const typedData = uniqueData.map((item) => ({
           ...item,
           players:
             item.players && (item.players as any)[0]
