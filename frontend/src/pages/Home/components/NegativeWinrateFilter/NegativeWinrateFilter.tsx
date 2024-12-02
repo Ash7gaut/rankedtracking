@@ -22,7 +22,7 @@ export const NegativeWinrateFilter = ({
   });
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-2">
       <button
         onClick={() => onFilterChange(!isActive)}
         className={`w-full flex items-center justify-between p-2 rounded ${
