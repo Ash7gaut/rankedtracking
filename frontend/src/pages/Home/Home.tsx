@@ -5,8 +5,8 @@ import { Header } from "./components/Header";
 import { PlayersList } from "./components/PlayersList/PlayerList";
 import { SkeletonCard } from "./components/PlayersList/SkeletonCard";
 import { PlayerFilter } from "./components/PlayerFilter/PlayerFilter";
-import { RoleFilter } from "./components/RoleFilter/RoleFilter";
 import { MainAccountFilter } from "./components/MainAccountFilter/MainAccountFilter";
+import { NegativeWinrateFilter } from "./components/NegativeWinrateFilter/NegativeWinrateFilter";
 import { Player } from "../../types/interfaces";
 import { LPTracker } from "../../components/LPTracker";
 
@@ -19,6 +19,7 @@ const Home = () => {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const queryClient = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showNegativeOnly, setShowNegativeOnly] = useState(false);
 
   const { data: players, error } = useQuery<Player[]>(
     "players",
@@ -56,7 +57,15 @@ const Home = () => {
       selectedPlayers.size === 0 || selectedPlayers.has(player.player_name);
     const matchesRole = !selectedRole || player.role === selectedRole;
     const matchesMainAccount = !isMainOnly || player.is_main;
-    return matchesPlayer && matchesRole && matchesMainAccount;
+
+    const totalGames = (player.wins || 0) + (player.losses || 0);
+    const isNegative =
+      totalGames >= 20 && ((player.wins || 0) / totalGames) * 100 < 50;
+    const matchesNegative = !showNegativeOnly || isNegative;
+
+    return (
+      matchesPlayer && matchesRole && matchesMainAccount && matchesNegative
+    );
   });
 
   const handleRefresh = async () => {
@@ -100,9 +109,10 @@ const Home = () => {
                 />
               </div>
               <div className="flex-1 min-w-[300px]">
-                <RoleFilter
-                  selectedRole={selectedRole}
-                  onRoleSelection={handleRoleSelection}
+                <NegativeWinrateFilter
+                  players={players || []}
+                  onFilterChange={setShowNegativeOnly}
+                  isActive={showNegativeOnly}
                 />
               </div>
               <div className="flex-1 min-w-[300px]">
