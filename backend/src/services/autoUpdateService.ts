@@ -185,9 +185,9 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
       last_update: new Date().toISOString()
     };
 
-    // Vérifier si on doit sauvegarder l'historique (toutes les 24 heures)
+    // Vérifier si on doit sauvegarder l'historique (toutes les 12 heures)
     const shouldSaveHistory = async () => {
-      const SIX_HOURS = 24 * 60 * 60 * 1000; // 24 heures en millisecondes
+      const SIX_HOURS = 12 * 60 * 60 * 1000; // 12 heures en millisecondes
       
       // Récupérer la dernière entrée d'historique pour ce joueur
       const { data: lastHistory, error } = await supabase
