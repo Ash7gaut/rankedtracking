@@ -101,7 +101,7 @@ export const LPTracker = ({ selectedPlayers }: LPTrackerProps) => {
       <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
         Suivi des LP (7 derniers jours)
       </h2>
-      <div className="space-y-2 h-[calc(235vh-200px)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600">
+      <div className="space-y-2 h-[calc(235vh-200px)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-500 dark:scrollbar-thumb-gray-700 scrollbar-track-gray-200 dark:scrollbar-track-gray-800">
         {changes.length === 0 ? (
           <p className="text-gray-500 dark:text-gray-400 text-center py-4">
             Aucun changement de LP détecté
