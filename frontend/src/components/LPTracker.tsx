@@ -18,6 +18,8 @@ interface LPChange {
 
 interface LPTrackerProps {
   selectedPlayers?: string[];
+  showNegativeOnly?: boolean;
+  negativeWinratePlayers?: Set<string>;
 }
 
 // Fonction utilitaire pour obtenir l'abréviation du tier
@@ -36,7 +38,11 @@ const getTierAbbreviation = (tier: string) => {
   return abbreviations[tier] || tier;
 };
 
-export const LPTracker = ({ selectedPlayers }: LPTrackerProps) => {
+export const LPTracker = ({
+  selectedPlayers = [],
+  showNegativeOnly = false,
+  negativeWinratePlayers = new Set(),
+}: LPTrackerProps) => {
   const navigate = useNavigate();
   const [changes, setChanges] = useState<LPChange[]>([]);
 
@@ -63,18 +69,26 @@ export const LPTracker = ({ selectedPlayers }: LPTrackerProps) => {
         .limit(50);
 
       if (!error && data) {
-        const uniqueData = data.filter(
-          (change, index, self) =>
-            index ===
-            self.findIndex(
-              (t) =>
-                t.id === change.id &&
-                t.player_id === change.player_id &&
-                t.timestamp === change.timestamp
-            )
-        );
+        let filteredData = data;
 
-        setChanges(uniqueData);
+        // Filtre simple : si un joueur est sélectionné, on montre tous ses comptes
+        if (selectedPlayers.length > 0) {
+          const { data: linkedAccounts } = await supabase
+            .from("players")
+            .select("summoner_name, player_name")
+            .in("player_name", selectedPlayers);
+
+          if (linkedAccounts) {
+            const linkedSummonerNames = linkedAccounts.map(
+              (acc) => acc.summoner_name
+            );
+            filteredData = filteredData.filter((change) =>
+              linkedSummonerNames.includes(change.summoner_name)
+            );
+          }
+        }
+
+        setChanges(filteredData);
       }
     };
 
@@ -86,7 +100,18 @@ export const LPTracker = ({ selectedPlayers }: LPTrackerProps) => {
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "lp_tracker" },
         (payload) => {
-          setChanges((prev) => [payload.new as LPChange, ...prev]);
+          const newChange = payload.new as LPChange;
+
+          // Appliquer les mêmes filtres aux nouvelles données
+          const shouldAdd =
+            (selectedPlayers.length === 0 ||
+              selectedPlayers.includes(newChange.summoner_name)) &&
+            (!showNegativeOnly ||
+              negativeWinratePlayers.has(newChange.summoner_name));
+
+          if (shouldAdd) {
+            setChanges((prev) => [newChange, ...prev]);
+          }
         }
       )
       .subscribe();
@@ -94,7 +119,7 @@ export const LPTracker = ({ selectedPlayers }: LPTrackerProps) => {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [selectedPlayers, showNegativeOnly, negativeWinratePlayers]);
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 sticky top-4 h-[calc(250vh-200px)]">

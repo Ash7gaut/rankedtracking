@@ -95,13 +95,19 @@ const Home = () => {
     }
   };
 
-  const selectedPlayerIds = players
-    ? Array.from(selectedPlayers)
-        .map(
-          (playerName) => players.find((p) => p.player_name === playerName)?.id
-        )
-        .filter((id): id is string => id !== undefined)
-    : [];
+  // Calculer les joueurs avec winrate négatif
+  const negativeWinratePlayers = new Set(
+    players
+      ?.filter((player) => {
+        const totalGames = (player.wins || 0) + (player.losses || 0);
+        if (totalGames >= 20) {
+          const winrate = ((player.wins || 0) / totalGames) * 100;
+          return winrate < 50;
+        }
+        return false;
+      })
+      .map((player) => player.player_name) || []
+  );
 
   return (
     <div>
@@ -142,7 +148,11 @@ const Home = () => {
           </div>
 
           <div className="lg:col-span-1">
-            <LPTracker selectedPlayers={selectedPlayerIds} />
+            <LPTracker
+              selectedPlayers={Array.from(selectedPlayers)}
+              showNegativeOnly={showNegativeOnly}
+              negativeWinratePlayers={negativeWinratePlayers}
+            />
           </div>
         </div>
       )}
