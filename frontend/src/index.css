@@ -5,7 +5,7 @@
 /* Styles pour Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgb(107 114 128) rgb(229 231 235);
+  scrollbar-color: rgb(107 114 128) transparent;
 }
 
 /* Styles pour Chrome, Edge, et Safari */
@@ -14,7 +14,7 @@
 }
 
 *::-webkit-scrollbar-track {
-  background: rgb(229 231 235);
+  background: transparent;
 }
 
 *::-webkit-scrollbar-thumb {
@@ -25,7 +25,7 @@
 /* Mode sombre */
 @media (prefers-color-scheme: dark) {
   *::-webkit-scrollbar-track {
-    background: rgb(31 41 55);
+    background: transparent;
   }
 
   *::-webkit-scrollbar-thumb {
