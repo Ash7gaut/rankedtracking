@@ -252,7 +252,19 @@ export const deletePlayer = async (req: Request, res: Response): Promise<void> =
 
     console.log('Joueur trouvé, ID:', player.id);
 
-    // Suppression par ID plutôt que par nom
+    // D'abord supprimer les entrées dans lp_tracker
+    const { error: trackerError } = await supabase
+      .from('lp_tracker')
+      .delete()
+      .eq('player_id', player.id);
+
+    if (trackerError) {
+      console.error('Erreur lors de la suppression des LP:', trackerError);
+      res.status(500).json({ error: 'Erreur lors de la suppression des LP' });
+      return;
+    }
+
+    // Ensuite supprimer le joueur
     const { error: deleteError } = await supabase
       .from('players')
       .delete()
