@@ -83,33 +83,24 @@ const calculateLPDifference = (
   const tiers = ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'DIAMOND'];
   const ranks = ['IV', 'III', 'II', 'I'];
 
-  // Debug logs pour voir ce qui se passe
-  console.log('Previous:', previousTier, previousRank, previousLP);
-  console.log('New:', newTier, newRank, newLP);
-  console.log('Tier comparison:', tiers.indexOf(previousTier), tiers.indexOf(newTier));
   
   // Même tier et rank = calcul simple
   if (previousTier === newTier && previousRank === newRank) {
-    console.log('Même tier et rank');
     return newLP - previousLP;
   }
 
   // Promotion de tier
   if (tiers.indexOf(previousTier) < tiers.indexOf(newTier)) {
-    console.log('Promotion de tier');
     const difference = (100 - previousLP) + newLP;
-    console.log('Différence calculée:', difference);
     return difference;
   }
 
   // Promotion de division dans le même tier
   if (previousTier === newTier && ranks.indexOf(previousRank) > ranks.indexOf(newRank)) {
-    console.log('Promotion de division');
     return (100 - previousLP) + newLP;
   }
 
   // Rétrogradation
-  console.log('Rétrogradation');
   return -(previousLP + (100 - newLP));
 };
 

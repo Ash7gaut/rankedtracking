@@ -11,6 +11,7 @@ interface LPChange {
   tier: string;
   rank: string;
   summoner_name: string;
+  difference: number;
 }
 
 interface LPTrackerProps {
@@ -31,6 +32,7 @@ export const LPTracker = ({ selectedPlayers }: LPTrackerProps) => {
           player_id,
           previous_lp,
           current_lp,
+          difference,
           timestamp,
           tier,
           rank,
@@ -86,8 +88,6 @@ export const LPTracker = ({ selectedPlayers }: LPTrackerProps) => {
           </p>
         ) : (
           changes.map((change) => {
-            const lpDifference = change.current_lp - change.previous_lp;
-
             return (
               <div
                 key={change.id}
@@ -115,15 +115,15 @@ export const LPTracker = ({ selectedPlayers }: LPTrackerProps) => {
                 </div>
                 <div
                   className={`font-bold ${
-                    lpDifference > 0
+                    change.difference > 0
                       ? "text-green-500"
-                      : lpDifference < 0
+                      : change.difference < 0
                       ? "text-red-500"
                       : "text-gray-500"
                   }`}
                 >
-                  {lpDifference > 0 ? "+" : ""}
-                  {lpDifference} LP
+                  {change.difference > 0 ? "+" : ""}
+                  {change.difference} LP
                 </div>
               </div>
             );
