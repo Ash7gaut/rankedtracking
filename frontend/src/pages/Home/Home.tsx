@@ -1,25 +1,46 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "react-query";
 import { api } from "../../utils/api";
 import { Header } from "./components/Header";
 import { PlayersList } from "./components/PlayersList/PlayerList";
 import { SkeletonCard } from "./components/PlayersList/SkeletonCard";
-import { PlayerFilter } from "./components/PlayerFilter/PlayerFilter";
+import { EnhancedPlayerFilter } from "./components/PlayerFilter/EnhancedPlayerFilter";
 import { MainAccountFilter } from "./components/MainAccountFilter/MainAccountFilter";
-import { NegativeWinrateFilter } from "./components/NegativeWinrateFilter/NegativeWinrateFilter";
 import { Player } from "../../types/interfaces";
 import { LPTracker } from "../../components/LPTracker";
 
 const Home = () => {
-  const [selectedPlayers, setSelectedPlayers] = useState<Set<string>>(
-    new Set()
-  );
-  const [selectedRole, setSelectedRole] = useState<string | null>(null);
-  const [isMainOnly, setIsMainOnly] = useState(false);
+  const [selectedPlayers, setSelectedPlayers] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem("selectedPlayers");
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
+
+  const [isMainOnly, setIsMainOnly] = useState(() => {
+    const saved = localStorage.getItem("isMainOnly");
+    return saved ? JSON.parse(saved) : false;
+  });
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const queryClient = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [showNegativeOnly, setShowNegativeOnly] = useState(false);
+  const [showNegativeOnly, setShowNegativeOnly] = useState(() => {
+    const saved = localStorage.getItem("showNegativeOnly");
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(
+      "selectedPlayers",
+      JSON.stringify(Array.from(selectedPlayers))
+    );
+  }, [selectedPlayers]);
+
+  useEffect(() => {
+    localStorage.setItem("isMainOnly", JSON.stringify(isMainOnly));
+  }, [isMainOnly]);
+
+  useEffect(() => {
+    localStorage.setItem("showNegativeOnly", JSON.stringify(showNegativeOnly));
+  }, [showNegativeOnly]);
 
   const { data: players, error } = useQuery<Player[]>(
     "players",
@@ -48,14 +69,9 @@ const Home = () => {
     });
   };
 
-  const handleRoleSelection = (role: string | null) => {
-    setSelectedRole(role);
-  };
-
   const filteredPlayers = players?.filter((player) => {
     const matchesPlayer =
       selectedPlayers.size === 0 || selectedPlayers.has(player.player_name);
-    const matchesRole = !selectedRole || player.role === selectedRole;
     const matchesMainAccount = !isMainOnly || player.is_main;
 
     const totalGames = (player.wins || 0) + (player.losses || 0);
@@ -63,9 +79,7 @@ const Home = () => {
       totalGames >= 20 && ((player.wins || 0) / totalGames) * 100 < 50;
     const matchesNegative = !showNegativeOnly || isNegative;
 
-    return (
-      matchesPlayer && matchesRole && matchesMainAccount && matchesNegative
-    );
+    return matchesPlayer && matchesMainAccount && matchesNegative;
   });
 
   const handleRefresh = async () => {
@@ -102,17 +116,12 @@ const Home = () => {
           <div className="lg:col-span-3 space-y-4">
             <div className="flex flex-wrap gap-4">
               <div className="flex-1 min-w-[300px]">
-                <PlayerFilter
+                <EnhancedPlayerFilter
                   players={players || []}
                   selectedPlayers={selectedPlayers}
                   onPlayerSelection={handlePlayerSelection}
-                />
-              </div>
-              <div className="flex-1 min-w-[300px]">
-                <NegativeWinrateFilter
-                  players={players || []}
-                  onFilterChange={setShowNegativeOnly}
-                  isActive={showNegativeOnly}
+                  showNegativeOnly={showNegativeOnly}
+                  onNegativeFilterChange={setShowNegativeOnly}
                 />
               </div>
               <div className="flex-1 min-w-[300px]">
