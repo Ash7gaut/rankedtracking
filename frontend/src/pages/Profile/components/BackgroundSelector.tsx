@@ -1,4 +1,4 @@
-import { useState, useEffect, KeyboardEvent } from "react";
+import { useState, useEffect, KeyboardEvent, useRef } from "react";
 import { getAllChampions, getSkinsByChampion } from "../../../data/backgrounds";
 
 interface BackgroundSelectorProps {
@@ -15,6 +15,7 @@ export const BackgroundSelector = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedChampion, setSelectedChampion] = useState<string>("");
   const [preloadedSkins, setPreloadedSkins] = useState<string[]>([]);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   // Obtenir la liste des champions
   const champions = getAllChampions();
@@ -27,6 +28,13 @@ export const BackgroundSelector = ({
       setPreloadedSkins(firstChampionSkins);
     }
   }, []);
+
+  // Gérer les clics en dehors du modal
+  const handleOutsideClick = (e: React.MouseEvent) => {
+    if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
+      onClose();
+    }
+  };
 
   // Gérer la recherche quand on appuie sur Entrée
   const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -49,11 +57,17 @@ export const BackgroundSelector = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="fixed inset-0 bg-black/50" onClick={onClose} />
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto"
+      onClick={handleOutsideClick}
+    >
+      <div className="fixed inset-0 bg-black/50" />
 
       <div className="relative min-h-full flex items-center justify-center p-4">
-        <div className="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-lg p-6">
+        <div
+          ref={modalRef}
+          className="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-lg p-6"
+        >
           <div className="flex flex-col gap-4 mb-4">
             {/* Barre de recherche des champions */}
             <div className="flex items-center justify-between">

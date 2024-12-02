@@ -35,18 +35,18 @@ export const PlayersList = ({ players }: PlayersListProps) => {
   const [firstPlace, ...restPlayers] = sortedPlayers;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Premier joueur (podium) */}
       {firstPlace && (
         <div className="flex justify-center">
-          <div className="w-[500px]">
+          <div className="w-[400px]">
             <PlayerCard player={firstPlace} rank={1} />
           </div>
         </div>
       )}
 
       {/* Reste des joueurs */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-3">
         {restPlayers.map((player, index) => (
           <div key={player.id}>
             <PlayerCard player={player} rank={index + 2} />

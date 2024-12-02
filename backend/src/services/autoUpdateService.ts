@@ -200,6 +200,22 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
       }
     }
 
+    // Ajouter ici le nouveau code pour le tracking des LP
+    if (player.league_points !== updateData.league_points) {
+      const { error: trackerError } = await supabase
+        .from('lp_tracker')
+        .insert({
+          player_id: player.id,
+          previous_lp: player.league_points,
+          current_lp: updateData.league_points,
+          difference: updateData.league_points - player.league_points,
+          tier: updateData.tier,
+          rank: updateData.rank
+        });
+
+      if (trackerError) console.error('Erreur lors du tracking des LP:', trackerError);
+    }
+
     // Vérification finale des données avant mise à jour
     if (Object.values(updateData).some(value => value === undefined)) {
       console.log(`❌ Données incomplètes pour ${player.summoner_name}, conservation des anciennes données`);

@@ -8,6 +8,7 @@ import { PlayerFilter } from "./components/PlayerFilter/PlayerFilter";
 import { RoleFilter } from "./components/RoleFilter/RoleFilter";
 import { MainAccountFilter } from "./components/MainAccountFilter/MainAccountFilter";
 import { Player } from "../../types/interfaces";
+import { LPTracker } from "../../components/LPTracker";
 
 const Home = () => {
   const [selectedPlayers, setSelectedPlayers] = useState<Set<string>>(
@@ -79,6 +80,46 @@ const Home = () => {
         isRefreshing={isRefreshing}
       />
 
+      {!isInitialLoading && (
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
+          <div className="lg:col-span-3 space-y-4">
+            <div className="flex flex-wrap gap-4">
+              <div className="flex-1 min-w-[300px]">
+                <PlayerFilter
+                  players={players || []}
+                  selectedPlayers={selectedPlayers}
+                  onPlayerSelection={handlePlayerSelection}
+                />
+              </div>
+              <div className="flex-1 min-w-[300px]">
+                <RoleFilter
+                  selectedRole={selectedRole}
+                  onRoleSelection={handleRoleSelection}
+                />
+              </div>
+              <div className="flex-1 min-w-[300px]">
+                <MainAccountFilter
+                  isMainOnly={isMainOnly}
+                  onMainAccountToggle={() => setIsMainOnly(!isMainOnly)}
+                />
+              </div>
+            </div>
+
+            {error ? (
+              <div className="text-red-500 dark:text-red-400">
+                Erreur de chargement des données
+              </div>
+            ) : (
+              <PlayersList players={filteredPlayers || []} />
+            )}
+          </div>
+
+          <div className="lg:col-span-1">
+            <LPTracker />
+          </div>
+        </div>
+      )}
+
       {isInitialLoading && (
         <>
           <div className="flex flex-col items-center justify-center mt-20 mb-8">
@@ -93,39 +134,6 @@ const Home = () => {
               <SkeletonCard key={index} />
             ))}
           </div>
-        </>
-      )}
-
-      {!isInitialLoading && (
-        <>
-          <div className="flex flex-wrap gap-4 mb-6">
-            <div className="flex-1 min-w-[300px]">
-              <PlayerFilter
-                players={players || []}
-                selectedPlayers={selectedPlayers}
-                onPlayerSelection={handlePlayerSelection}
-              />
-            </div>
-            <div className="flex-1 min-w-[300px]">
-              <RoleFilter
-                selectedRole={selectedRole}
-                onRoleSelection={handleRoleSelection}
-              />
-            </div>
-            <div className="flex-1 min-w-[300px]">
-              <MainAccountFilter
-                isMainOnly={isMainOnly}
-                onMainAccountToggle={() => setIsMainOnly(!isMainOnly)}
-              />
-            </div>
-          </div>
-          {error ? (
-            <div className="text-red-500 dark:text-red-400">
-              Erreur de chargement des données
-            </div>
-          ) : (
-            <PlayersList players={filteredPlayers || []} />
-          )}
         </>
       )}
     </div>
