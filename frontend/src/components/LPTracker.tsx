@@ -12,11 +12,29 @@ interface LPChange {
   rank: string;
   summoner_name: string;
   difference: number;
+  previous_tier: string;
+  previous_rank: string;
 }
 
 interface LPTrackerProps {
   selectedPlayers?: string[];
 }
+
+// Fonction utilitaire pour obtenir l'abréviation du tier
+const getTierAbbreviation = (tier: string) => {
+  const abbreviations: { [key: string]: string } = {
+    IRON: "I",
+    BRONZE: "B",
+    SILVER: "S",
+    GOLD: "G",
+    PLATINUM: "P",
+    DIAMOND: "D",
+    MASTER: "M",
+    GRANDMASTER: "GM",
+    CHALLENGER: "C",
+  };
+  return abbreviations[tier] || tier;
+};
 
 export const LPTracker = ({ selectedPlayers }: LPTrackerProps) => {
   const navigate = useNavigate();
@@ -36,7 +54,9 @@ export const LPTracker = ({ selectedPlayers }: LPTrackerProps) => {
           timestamp,
           tier,
           rank,
-          summoner_name
+          summoner_name,
+          previous_tier,
+          previous_rank
         `
         )
         .order("timestamp", { ascending: false })
@@ -107,10 +127,10 @@ export const LPTracker = ({ selectedPlayers }: LPTrackerProps) => {
                     })}
                   </span>
                   <span className="text-sm text-gray-500 dark:text-gray-400">
-                    {change.tier} {change.rank}
-                  </span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    {change.previous_lp} LP ⇒ {change.current_lp} LP
+                    {getTierAbbreviation(change.previous_tier)}{" "}
+                    {change.previous_rank} {change.previous_lp}LP ⇒{" "}
+                    {getTierAbbreviation(change.tier)} {change.rank}{" "}
+                    {change.current_lp}LP
                   </span>
                 </div>
                 <div

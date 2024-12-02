@@ -267,6 +267,8 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
             previous_lp: player.league_points,
             current_lp: updateData.league_points,
             difference: lpDifference,
+            previous_tier: player.tier,
+            previous_rank: player.rank,
             tier: updateData.tier,
             rank: updateData.rank,
             summoner_name: player.summoner_name
