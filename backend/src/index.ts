@@ -20,6 +20,14 @@ app.use(cors({
   optionsSuccessStatus: 200
 }));
 
+app.use((req, res, next) => {
+  res.setHeader(
+    'Permissions-Policy',
+    'private-state-token-redemption=(), private-state-token-issuance=(), browsing-topics=()'
+  );
+  next();
+});
+
 app.use(express.json());
 app.use('/api/players', playerRoutes);
 
