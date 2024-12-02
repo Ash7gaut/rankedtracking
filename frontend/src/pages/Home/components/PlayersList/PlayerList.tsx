@@ -39,7 +39,7 @@ export const PlayersList = ({ players }: PlayersListProps) => {
       {/* Premier joueur (podium) */}
       {firstPlace && (
         <div className="flex justify-center">
-          <div className="w-[1000px]">
+          <div className="w-[1700px]">
             <PlayerCard player={firstPlace} rank={1} />
           </div>
         </div>
