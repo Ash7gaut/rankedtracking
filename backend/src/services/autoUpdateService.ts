@@ -238,8 +238,8 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
         updateData.league_points
       );
 
-      // Vérifier les entrées dans les 5 dernières minutes
-      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+      // Vérifier les entrées dans l'heure précédente
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
       
       const { data: existingEntry } = await supabase
         .from('lp_tracker')
@@ -248,7 +248,7 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
         .eq('current_lp', updateData.league_points)
         .eq('tier', updateData.tier)
         .eq('rank', updateData.rank)
-        .gte('timestamp', fiveMinutesAgo)
+        .gte('timestamp', oneHourAgo)
         .order('timestamp', { ascending: false })
         .limit(1);
 
