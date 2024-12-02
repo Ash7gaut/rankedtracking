@@ -52,7 +52,7 @@ function App() {
           darkMode ? "dark bg-gray-900" : "bg-gray-100"
         }`}
       >
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8 max-w-[1350px]">
           <button
             onClick={() => setDarkMode(!darkMode)}
             className="fixed bottom-4 right-4 p-3 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
