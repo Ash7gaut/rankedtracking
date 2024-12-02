@@ -210,7 +210,8 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
           current_lp: updateData.league_points,
           difference: updateData.league_points - player.league_points,
           tier: updateData.tier,
-          rank: updateData.rank
+          rank: updateData.rank,
+          summoner_name: player.summoner_name
         });
 
       if (trackerError) console.error('Erreur lors du tracking des LP:', trackerError);

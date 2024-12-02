@@ -10,9 +10,7 @@ interface LPChange {
   timestamp: string;
   tier: string;
   rank: string;
-  players: {
-    summoner_name: string;
-  } | null;
+  summoner_name: string;
 }
 
 export const LPTracker = () => {
@@ -32,9 +30,7 @@ export const LPTracker = () => {
           timestamp,
           tier,
           rank,
-          players:player_id (
-            summoner_name
-          )
+          summoner_name
         `
         )
         .order("timestamp", { ascending: false })
@@ -46,15 +42,7 @@ export const LPTracker = () => {
             index === self.findIndex((t) => t.id === change.id)
         );
 
-        const typedData = uniqueData.map((item) => ({
-          ...item,
-          players:
-            item.players && (item.players as any)[0]
-              ? { summoner_name: (item.players as any)[0].summoner_name }
-              : null,
-        })) as LPChange[];
-
-        setChanges(typedData);
+        setChanges(uniqueData);
       }
     };
 
@@ -94,7 +82,7 @@ export const LPTracker = () => {
             >
               <div className="flex flex-col">
                 <span className="font-medium text-gray-900 dark:text-white">
-                  {change.players?.summoner_name}
+                  {change.summoner_name || "Unknown"}
                 </span>
                 <span className="text-sm text-gray-600 dark:text-gray-300">
                   {new Date(change.timestamp).toLocaleString("fr-FR", {
