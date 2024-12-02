@@ -72,6 +72,14 @@ const Home = () => {
     }
   };
 
+  const selectedPlayerIds = players
+    ? Array.from(selectedPlayers)
+        .map(
+          (playerName) => players.find((p) => p.player_name === playerName)?.id
+        )
+        .filter((id): id is string => id !== undefined)
+    : [];
+
   return (
     <div>
       <Header
@@ -115,7 +123,7 @@ const Home = () => {
           </div>
 
           <div className="lg:col-span-1">
-            <LPTracker />
+            <LPTracker selectedPlayers={selectedPlayerIds} />
           </div>
         </div>
       )}

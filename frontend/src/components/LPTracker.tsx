@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../utils/supabase";
+import { useNavigate } from "react-router-dom";
 
 interface LPChange {
   id: string;
@@ -12,7 +13,12 @@ interface LPChange {
   summoner_name: string;
 }
 
-export const LPTracker = () => {
+interface LPTrackerProps {
+  selectedPlayers?: string[];
+}
+
+export const LPTracker = ({ selectedPlayers }: LPTrackerProps) => {
+  const navigate = useNavigate();
   const [changes, setChanges] = useState<LPChange[]>([]);
 
   useEffect(() => {
@@ -85,7 +91,8 @@ export const LPTracker = () => {
             return (
               <div
                 key={change.id}
-                className="flex items-center justify-between p-2 border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                className="flex items-center justify-between p-2 border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                onClick={() => navigate(`/player/${change.player_id}`)}
               >
                 <div className="flex flex-col">
                   <span className="font-medium text-gray-900 dark:text-white">
