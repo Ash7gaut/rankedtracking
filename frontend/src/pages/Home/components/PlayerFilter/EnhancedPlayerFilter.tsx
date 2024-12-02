@@ -31,14 +31,19 @@ export const EnhancedPlayerFilter = ({
     new Set(players.map((p) => p.player_name))
   ).filter(Boolean);
 
+  const isFilterActive = selectedPlayers.size > 0 || showNegativeOnly;
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center justify-between w-full text-left"
       >
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
           Filtrer par joueur
+          {isFilterActive && (
+            <span className="ml-2 text-blue-500 text-xl">●</span>
+          )}
         </h3>
         <span
           className="transform transition-transform duration-200"
