@@ -72,6 +72,31 @@ const retryWithDelay = async (fn: () => Promise<any>, context: string, retries =
   throw lastError;
 };
 
+const calculateLPDifference = (
+  previousTier: string,
+  previousRank: string,
+  previousLP: number,
+  newTier: string,
+  newRank: string,
+  newLP: number
+): number => {
+  const tiers = ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'DIAMOND'];
+  const ranks = ['IV', 'III', 'II', 'I'];
+
+  if (previousTier === newTier && previousRank === newRank) {
+    return newLP - previousLP;
+  }
+
+  if (
+    (previousTier === newTier && ranks.indexOf(previousRank) > ranks.indexOf(newRank)) ||
+    tiers.indexOf(previousTier) < tiers.indexOf(newTier)
+  ) {
+    return (100 - previousLP) + newLP;
+  }
+
+  return -(previousLP + (100 - newLP));
+};
+
 const updatePlayer = async (player: any, totalPlayers: number, updatedCount: number): Promise<UpdateResult> => {
   const [gameName, tagLine] = player.summoner_name.split('#');
   console.log(`\nMise à jour des données pour ${gameName}#${tagLine}`);
@@ -200,21 +225,44 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
       }
     }
 
-    // Ajouter ici le nouveau code pour le tracking des LP
-    if (player.league_points !== updateData.league_points) {
-      const { error: trackerError } = await supabase
-        .from('lp_tracker')
-        .insert({
-          player_id: player.id,
-          previous_lp: player.league_points,
-          current_lp: updateData.league_points,
-          difference: updateData.league_points - player.league_points,
-          tier: updateData.tier,
-          rank: updateData.rank,
-          summoner_name: player.summoner_name
-        });
+    if (player.league_points !== updateData.league_points || 
+        player.tier !== updateData.tier || 
+        player.rank !== updateData.rank) {
 
-      if (trackerError) console.error('Erreur lors du tracking des LP:', trackerError);
+      const lpDifference = calculateLPDifference(
+        player.tier,
+        player.rank,
+        player.league_points,
+        updateData.tier,
+        updateData.rank,
+        updateData.league_points
+      );
+
+      const { data: existingEntry } = await supabase
+        .from('lp_tracker')
+        .select('*')
+        .eq('player_id', player.id)
+        .eq('current_lp', updateData.league_points)
+        .eq('tier', updateData.tier)
+        .eq('rank', updateData.rank)
+        .order('timestamp', { ascending: false })
+        .limit(1);
+
+      if (!existingEntry?.length) {
+        const { error: trackerError } = await supabase
+          .from('lp_tracker')
+          .insert({
+            player_id: player.id,
+            previous_lp: player.league_points,
+            current_lp: updateData.league_points,
+            difference: lpDifference,
+            tier: updateData.tier,
+            rank: updateData.rank,
+            summoner_name: player.summoner_name
+          });
+
+        if (trackerError) console.error('Erreur lors du tracking des LP:', trackerError);
+      }
     }
 
     // Vérification finale des données avant mise à jour
