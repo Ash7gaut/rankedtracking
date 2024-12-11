@@ -155,6 +155,27 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
       (queue: any) => queue.queueType === 'RANKED_SOLO_5x5'
     );
 
+    if (soloQStats?.leaguePoints === 0 && soloQStats?.tier === null) {
+      console.log(`Données suspectes reçues pour ${player.summoner_name}: tous les LP à 0 sans tier`);
+      return {
+        success: false,
+        player: player.summoner_name,
+        error: "Données suspectes de l'API Riot"
+      };
+    }
+
+    if (soloQStats?.leaguePoints === 0 && 
+        player.league_points > 0 && 
+        soloQStats?.wins === player.wins && 
+        soloQStats?.losses === player.losses) {
+      console.log(`Changement suspect de LP pour ${player.summoner_name}: passage à 0 LP sans nouvelle partie`);
+      return {
+        success: false,
+        player: player.summoner_name,
+        error: "Changement de LP suspect sans nouvelle partie"
+      };
+    }
+
     const totalGames = (soloQStats?.wins || 0) + (soloQStats?.losses || 0);
 
     const updateData = {
