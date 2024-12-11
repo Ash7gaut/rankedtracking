@@ -27,7 +27,7 @@ export const BackgroundSelector = ({
       const firstChampionSkins = getSkinsByChampion(firstChampion).slice(0, 10);
       setPreloadedSkins(firstChampionSkins);
     }
-  }, []);
+  }, [champions]);
 
   // Gérer les clics en dehors du modal
   const handleOutsideClick = (e: React.MouseEvent) => {
