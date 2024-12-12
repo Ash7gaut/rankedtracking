@@ -77,6 +77,7 @@ const calculateLPDifference = (
       return -(previousLP + (100 - newLP));
     }
   }
+  
 
   // Si la différence est trop grande, c'est probablement une erreur
   const calculatedDiff = newLP - previousLP;
