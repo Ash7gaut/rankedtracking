@@ -39,12 +39,7 @@ const calculateLPDifference = (
   newRank: string,
   newLP: number
 ): number => {
-  // Si les données sont invalides, retourner 0
-  if (!previousTier || !previousRank || !newTier || !newRank) {
-    return 0;
-  }
-
-  const tiers = ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'EMERALD', 'DIAMOND', 'MASTER', 'GRANDMASTER', 'CHALLENGER'];
+  const tiers = ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'DIAMOND', 'MASTER', 'GRANDMASTER', 'CHALLENGER'];
   const ranks = ['IV', 'III', 'II', 'I'];
 
   // Même tier et rank = calcul simple
@@ -52,43 +47,28 @@ const calculateLPDifference = (
     return newLP - previousLP;
   }
 
-  // Pour les rangs Master+, calcul direct
-  if (['MASTER', 'GRANDMASTER', 'CHALLENGER'].includes(previousTier) ||
-      ['MASTER', 'GRANDMASTER', 'CHALLENGER'].includes(newTier)) {
-    return newLP - previousLP;
+  // Promotion de division dans le même tier
+  if (previousTier === newTier && ranks.indexOf(previousRank) > ranks.indexOf(newRank)) {
+    return (100 - previousLP) + newLP;
   }
 
-  // Promotion/Rétrogradation dans le même tier
-  if (previousTier === newTier) {
-    const rankDiff = ranks.indexOf(previousRank) - ranks.indexOf(newRank);
-    if (rankDiff === 1) { // Promotion
-      return newLP + (100 - previousLP);
-    } else if (rankDiff === -1) { // Rétrogradation
-      return -(previousLP + (100 - newLP));
-    }
+  // Rétrogradation de division dans le même tier
+  if (previousTier === newTier && ranks.indexOf(previousRank) < ranks.indexOf(newRank)) {
+    return -(previousLP + (100 - newLP));
   }
 
-  // Promotion/Rétrogradation de tier
-  const tierDiff = tiers.indexOf(newTier) - tiers.indexOf(previousTier);
-  if (Math.abs(tierDiff) === 1) {
-    if (tierDiff > 0) { // Promotion
-      return newLP + (100 - previousLP);
-    } else { // Rétrogradation
-      return -(previousLP + (100 - newLP));
-    }
-  }
-  
-
-  // Si la différence est trop grande, c'est probablement une erreur
-  const calculatedDiff = newLP - previousLP;
-  if (Math.abs(calculatedDiff) > 40) {
-    console.log(`Différence suspecte détectée: ${calculatedDiff} LP`);
-    console.log(`Précédent: ${previousTier} ${previousRank} ${previousLP}LP`);
-    console.log(`Nouveau: ${newTier} ${newRank} ${newLP}LP`);
-    return 0; // Retourner 0 pour éviter les faux changements
+  // Promotion de tier
+  if (tiers.indexOf(previousTier) < tiers.indexOf(newTier)) {
+    return (100 - previousLP) + newLP;
   }
 
-  return calculatedDiff;
+  // Rétrogradation de tier
+  if (tiers.indexOf(previousTier) > tiers.indexOf(newTier)) {
+    return -(previousLP + (100 - newLP));
+  }
+
+  // Cas par défaut
+  return newLP - previousLP;
 };
 
 const updatePlayer = async (player: any, totalPlayers: number, updatedCount: number): Promise<UpdateResult> => {
@@ -155,27 +135,6 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
     const soloQStats = rankedStats.find(
       (queue: any) => queue.queueType === 'RANKED_SOLO_5x5'
     );
-
-    if (soloQStats?.leaguePoints === 0 && soloQStats?.tier === null) {
-      console.log(`Données suspectes reçues pour ${player.summoner_name}: tous les LP à 0 sans tier`);
-      return {
-        success: false,
-        player: player.summoner_name,
-        error: "Données suspectes de l'API Riot"
-      };
-    }
-
-    if (soloQStats?.leaguePoints === 0 && 
-        player.league_points > 0 && 
-        soloQStats?.wins === player.wins && 
-        soloQStats?.losses === player.losses) {
-      console.log(`Changement suspect de LP pour ${player.summoner_name}: passage à 0 LP sans nouvelle partie`);
-      return {
-        success: false,
-        player: player.summoner_name,
-        error: "Changement de LP suspect sans nouvelle partie"
-      };
-    }
 
     const totalGames = (soloQStats?.wins || 0) + (soloQStats?.losses || 0);
 
