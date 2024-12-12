@@ -370,6 +370,7 @@ const updateAllPlayers = async () => {
   }
 };
 
+// Fonction de retry avec délai exponentiel
 const retryWithDelay = async (fn: () => Promise<any>, context: string, retries = MAX_RETRIES): Promise<any> => {
   let lastError;
   
