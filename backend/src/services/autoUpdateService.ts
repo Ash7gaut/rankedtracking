@@ -39,7 +39,7 @@ const calculateLPDifference = (
   newRank: string,
   newLP: number
 ): number => {
-  // Si les données sont invalides, retourner 0
+  // Validation des entrées
   if (!previousTier || !previousRank || !newTier || !newRank) {
     return 0;
   }
@@ -47,36 +47,39 @@ const calculateLPDifference = (
   const tiers = ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'EMERALD', 'DIAMOND', 'MASTER', 'GRANDMASTER', 'CHALLENGER'];
   const ranks = ['IV', 'III', 'II', 'I'];
 
-  // Même tier et rank = calcul simple
-  if (previousTier === newTier && previousRank === newRank) {
-    return newLP - previousLP;
-  }
-
   // Pour les rangs Master+, calcul direct
   if (['MASTER', 'GRANDMASTER', 'CHALLENGER'].includes(previousTier) ||
       ['MASTER', 'GRANDMASTER', 'CHALLENGER'].includes(newTier)) {
     return newLP - previousLP;
   }
 
-  // Promotion/Rétrogradation dans le même tier
-  if (previousTier === newTier) {
-    const rankDiff = ranks.indexOf(previousRank) - ranks.indexOf(newRank);
-    if (rankDiff === 1) { // Promotion
-      return newLP + (100 - previousLP);
-    } else if (rankDiff === -1) { // Rétrogradation
-      return -(previousLP + (100 - newLP));
-    }
+  // Même tier et rank = calcul simple
+  if (previousTier === newTier && previousRank === newRank) {
+    return newLP - previousLP;
   }
 
-  // Promotion/Rétrogradation de tier
-  const tierDiff = tiers.indexOf(newTier) - tiers.indexOf(previousTier);
-  if (Math.abs(tierDiff) === 1) {
-    if (tierDiff > 0) { // Promotion
-      return newLP + (100 - previousLP);
-    } else { // Rétrogradation
-      return -(previousLP + (100 - newLP));
-    }
+  // Promotion de division dans le même tier
+  if (previousTier === newTier && ranks.indexOf(previousRank) > ranks.indexOf(newRank)) {
+    return (100 - previousLP) + newLP;
   }
+
+  // Rétrogradation de division dans le même tier
+  if (previousTier === newTier && ranks.indexOf(previousRank) < ranks.indexOf(newRank)) {
+    return -(previousLP + (100 - newLP));
+  }
+
+  // Promotion de tier
+  if (tiers.indexOf(previousTier) < tiers.indexOf(newTier)) {
+    return (100 - previousLP) + newLP;
+  }
+
+  // Rétrogradation de tier
+  if (tiers.indexOf(previousTier) > tiers.indexOf(newTier)) {
+    return -(previousLP + (100 - newLP));
+  }
+
+  // Cas par défaut
+  return newLP - previousLP;
 
   // Si la différence est trop grande, c'est probablement une erreur
   const calculatedDiff = newLP - previousLP;
