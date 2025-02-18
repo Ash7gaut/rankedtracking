@@ -41,7 +41,7 @@ const PlayerDetails = () => {
   if (!player) return null;
 
   return (
-    <div className="relative">
+    <div className="relative overflow-x-hidden">
       <div
         className={`p-6 ${
           isFetching ? "opacity-70" : ""

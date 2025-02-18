@@ -53,16 +53,16 @@ export const GameCard = ({ game, championName, playerName }: GameCardProps) => {
 
   return (
     <div
-      className={`bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 sm:p-6 ${
+      className={`bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 sm:p-4 overflow-hidden ${
         game.win ? "border-l-4 border-green-500" : "border-l-4 border-red-500"
       }`}
     >
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-0 mb-4">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 mb-3">
+        <div className="flex items-center gap-3">
           <img
             src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${game.championId}.png`}
             alt={championName}
-            className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg"
+            className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg"
           />
           <div>
             <h3 className="font-semibold text-gray-900 dark:text-white">
@@ -87,13 +87,13 @@ export const GameCard = ({ game, championName, playerName }: GameCardProps) => {
         </div>
       </div>
 
-      <div className="mt-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="mt-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
               Alliés
             </h4>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <div className="flex items-center gap-2">
                 <img
                   src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${mainPlayer.championId}.png`}
@@ -152,11 +152,11 @@ export const GameCard = ({ game, championName, playerName }: GameCardProps) => {
             </div>
           </div>
 
-          <div className="mt-4 sm:mt-0">
-            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          <div className="mt-3 sm:mt-0">
+            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
               Adversaires
             </h4>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {game.enemies?.map((enemy) => (
                 <div
                   key={enemy.summonerName}

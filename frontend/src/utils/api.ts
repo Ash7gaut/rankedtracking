@@ -88,9 +88,9 @@ export const api = {
 
   getPlayerHistory: async (playerId: string): Promise<PlayerHistoryEntry[]> => {
     try {
-      console.log("Fetching history for player:", playerId);
+      // console.log("Fetching history for player:", playerId);
       const response = await axios.get(`${API_URL}/api/players/${playerId}/history`);
-      console.log("API Response:", response.data);
+      // console.log("API Response:", response.data);
       return response.data;
     } catch (error) {
       console.error('Error fetching player history:', error);

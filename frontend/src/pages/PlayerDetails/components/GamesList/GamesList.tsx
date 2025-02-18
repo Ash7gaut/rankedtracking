@@ -15,8 +15,6 @@ export const GamesList = ({
   championNames,
   playerName,
 }: GamesListProps) => {
-  console.log("Games data:", games); // Ajout du log
-
   if (isLoading) {
     return <div>Chargement des parties...</div>;
   }
@@ -29,7 +27,6 @@ export const GamesList = ({
       {games && games.length > 0 ? (
         <div className="space-y-4">
           {games.map((game) => {
-            console.log("Game details:", game); // Log pour chaque partie
             return (
               <GameCard
                 key={game.gameId}
