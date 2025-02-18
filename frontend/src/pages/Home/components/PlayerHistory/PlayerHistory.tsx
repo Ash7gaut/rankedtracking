@@ -1,14 +1,32 @@
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
 import { useQuery } from "react-query";
 import { api } from "../../../../utils/api";
+import { Line } from "react-chartjs-2";
+import { format } from "date-fns";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Filler,
+  ChartOptions,
+  ScaleType,
+  Scale,
+  CoreScaleOptions,
+} from "chart.js";
+
+// Enregistrer les composants nécessaires de Chart.js
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Filler
+);
 
 interface PlayerHistoryEntry {
   id: string;
@@ -96,38 +114,74 @@ export const PlayerHistory = ({ playerId }: { playerId: string }) => {
     return tierValue + rankValue + lp;
   };
 
-  const data = history?.map((entry) => {
-    const totalValue = calculateTotalValue(
-      entry.tier,
-      entry.rank,
-      entry.league_points
-    );
+  const data = history?.map((entry) => ({
+    date: formatDate(entry.timestamp),
+    value: calculateTotalValue(entry.tier, entry.rank, entry.league_points),
+    tier: entry.tier,
+    rank: entry.rank,
+    lp: entry.league_points,
+  }));
 
-    return {
-      date: formatDate(entry.timestamp),
-      value: totalValue,
-      tier: entry.tier,
-      rank: entry.rank,
-      lp: entry.league_points,
-      displayValue: `${entry.tier} ${entry.rank} ${entry.league_points}LP`,
-    };
-  });
+  const chartData = {
+    labels: data?.map((d) => d.date),
+    datasets: [
+      {
+        label: "Rang",
+        data: data?.map((d) => d.value),
+        borderColor: "rgb(59, 130, 246)",
+        backgroundColor: "rgba(59, 130, 246, 0.1)",
+        tension: 0.3,
+        fill: true,
+      },
+    ],
+  };
 
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
-            {data.date}
-          </p>
-          <p className="text-sm font-bold text-gray-900 dark:text-white">
-            {data.displayValue}
-          </p>
-        </div>
-      );
-    }
-    return null;
+  const chartOptions: ChartOptions<"line"> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        callbacks: {
+          label: (context: any) => {
+            const dataPoint = data?.[context.dataIndex];
+            return `${dataPoint?.tier} ${dataPoint?.rank} ${dataPoint?.lp}LP`;
+          },
+        },
+      },
+    },
+    scales: {
+      y: {
+        type: "linear" as const,
+        position: "left" as const,
+        ticks: {
+          callback: function (
+            this: Scale<CoreScaleOptions>,
+            value: number | string
+          ) {
+            if (typeof value === "number") {
+              return formatYAxis(value);
+            }
+            return value;
+          },
+          stepSize: 400,
+          autoSkip: true,
+          maxTicksLimit: 10,
+        },
+        min: Math.min(...(data?.map((d) => d.value) || [0])) - 200,
+        max: Math.max(...(data?.map((d) => d.value) || [0])) + 200,
+      },
+      x: {
+        type: "category" as const,
+        position: "bottom" as const,
+        ticks: {
+          maxRotation: 45,
+          minRotation: 45,
+        },
+      },
+    },
   };
 
   const tiers = history?.map((entry) => entry.tier) || [];
@@ -147,82 +201,13 @@ export const PlayerHistory = ({ playerId }: { playerId: string }) => {
     return nearestTier.tier;
   };
 
-  const getYAxisDomain = () => {
-    if (!data || data.length === 0) return ["auto", "auto"];
-    const minValue = Math.min(...data.map((d) => d.value));
-    const maxValue = Math.max(...data.map((d) => d.value));
-    const padding = 200;
-    return [minValue - padding, maxValue + padding];
-  };
-
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 h-[448px]">
       <h2 className="text-xl font-bold mb-6 text-gray-900 dark:text-white">
         Évolution du rang
       </h2>
       <div className="h-[calc(100%-4rem)]">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart
-            data={data}
-            margin={{ top: 0, right: 30, left: 0, bottom: 40 }}
-          >
-            <defs>
-              <linearGradient id="rankColor" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.2} />
-                <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid
-              strokeDasharray="3 3"
-              vertical={false}
-              stroke="#E5E7EB"
-              className="dark:stroke-gray-700"
-            />
-            <XAxis
-              dataKey="date"
-              tick={{ fill: "#6B7280", fontSize: 12 }}
-              angle={-45}
-              textAnchor="end"
-              height={60}
-              interval={0}
-              stroke="#9CA3AF"
-              className="dark:stroke-gray-600"
-            />
-            <YAxis
-              tickFormatter={formatYAxis}
-              tick={{ fill: "#6B7280", fontSize: 12 }}
-              domain={getYAxisDomain()}
-              ticks={uniqueTiers.map(
-                (tier) => TIER_VALUES[tier as keyof typeof TIER_VALUES]
-              )}
-              width={100}
-              stroke="#9CA3AF"
-              className="dark:stroke-gray-600"
-            />
-            <Tooltip
-              content={<CustomTooltip />}
-              cursor={{ stroke: "#3B82F6", strokeWidth: 1 }}
-            />
-            <Line
-              type="monotone"
-              dataKey="value"
-              stroke="#3B82F6"
-              strokeWidth={3}
-              dot={{
-                fill: "#3B82F6",
-                stroke: "#FFFFFF",
-                strokeWidth: 2,
-                r: 4,
-              }}
-              activeDot={{
-                r: 6,
-                stroke: "#FFFFFF",
-                strokeWidth: 2,
-              }}
-              fill="url(#rankColor)"
-            />
-          </LineChart>
-        </ResponsiveContainer>
+        <Line data={chartData} options={chartOptions} />
       </div>
     </div>
   );
