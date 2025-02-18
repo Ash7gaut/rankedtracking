@@ -113,7 +113,7 @@ export const riotService = {
           }
         }
       );
-      return response.data.slice(0, 5);
+      return response.data.slice(0, 10);
     } catch (error) {
       console.error('Error in getMatchHistory:', error);
       throw error;
