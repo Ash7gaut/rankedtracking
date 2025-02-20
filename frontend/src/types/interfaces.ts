@@ -45,6 +45,7 @@ export interface Game {
   summoner1Id: number;
   summoner2Id: number;
   items: number[];
+  lpChange?: number;
   allies: Array<{
     championId: number;
     championName: string;

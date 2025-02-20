@@ -77,6 +77,15 @@ const handleGetPlayerGames: RequestHandler = async (req, res) => {
   const { puuid } = req.params;
   
   try {
+    // Récupérer d'abord le player_id à partir du puuid
+    const { data: player, error: playerError } = await supabase
+      .from('players')
+      .select('id')
+      .eq('puuid', puuid)
+      .single();
+
+    if (playerError) throw playerError;
+
     const matchIds = await riotService.getMatchHistory(puuid);
     const games = await Promise.all(
       matchIds.map(matchId => riotService.getMatchDetails(matchId, puuid))
@@ -87,7 +96,30 @@ const handleGetPlayerGames: RequestHandler = async (req, res) => {
       .filter((game): game is MatchDetails => game !== null)
       .slice(0, 5);
 
-    res.json(rankedGames);
+    // Pour chaque partie, récupérer le changement de LP correspondant
+    const gamesWithLP = await Promise.all(
+      rankedGames.map(async (game) => {
+        // Chercher un changement de LP dans l'heure suivant la partie
+        const gameTime = new Date(game.gameCreation);
+        const oneHourLater = new Date(gameTime.getTime() + 60 * 60 * 1000);
+
+        const { data: lpChange } = await supabase
+          .from('lp_tracker')
+          .select('difference')
+          .eq('player_id', player.id)
+          .gte('timestamp', gameTime.toISOString())
+          .lt('timestamp', oneHourLater.toISOString())
+          .order('timestamp', { ascending: true })
+          .limit(1);
+
+        return {
+          ...game,
+          lpChange: lpChange?.[0]?.difference || undefined
+        };
+      })
+    );
+
+    res.json(gamesWithLP);
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Error fetching games' });

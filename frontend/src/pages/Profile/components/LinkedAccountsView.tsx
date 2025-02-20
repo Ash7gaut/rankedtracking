@@ -54,21 +54,23 @@ export const LinkedAccountsView = ({ playerName }: LinkedAccountsViewProps) => {
 
   return (
     <div className="mt-8">
-      <div
-        className="flex items-center gap-2 mb-4 cursor-pointer"
-        onClick={toggleMenu}
-      >
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-          {playerName}
-        </h2>
-        <span className="text-sm text-gray-500 dark:text-gray-400">
-          ({accounts.length} compte{accounts.length > 1 ? "s" : ""})
-        </span>
-        {accounts.length > 1 && (
-          <span className="ml-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm">
-            {isOpen ? "▼" : "▲"}
+      <div className="flex items-center mb-4">
+        <div
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={toggleMenu}
+        >
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+            {playerName}
+          </h2>
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            ({accounts.length} compte{accounts.length > 1 ? "s" : ""})
           </span>
-        )}
+          {accounts.length > 1 && (
+            <span className="ml-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm">
+              {isOpen ? "▼" : "▲"}
+            </span>
+          )}
+        </div>
       </div>
       <div
         className={`space-y-2 transition-all duration-300 ease-in-out overflow-hidden ${

@@ -7,6 +7,8 @@ interface GamesListProps {
   isLoading: boolean;
   championNames: { [key: number]: string };
   playerName: string;
+  tier?: string | null;
+  rank?: string | null;
 }
 
 export const GamesList = ({
@@ -14,6 +16,8 @@ export const GamesList = ({
   isLoading,
   championNames,
   playerName,
+  tier,
+  rank,
 }: GamesListProps) => {
   if (isLoading) {
     return <div>Chargement des parties...</div>;
@@ -33,6 +37,8 @@ export const GamesList = ({
                 game={game}
                 playerName={playerName}
                 championName={championNames[game.championId] || "Unknown"}
+                tier={tier}
+                rank={rank}
               />
             );
           })}

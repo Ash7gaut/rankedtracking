@@ -65,6 +65,8 @@ const PlayerDetails = () => {
             isLoading={gamesLoading}
             championNames={championNames}
             playerName={player.summoner_name}
+            tier={player.tier}
+            rank={player.rank}
           />
         </div>
       </div>

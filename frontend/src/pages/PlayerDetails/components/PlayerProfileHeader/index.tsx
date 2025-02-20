@@ -1,5 +1,7 @@
 import { Player } from "frontend/src/types/interfaces";
 import { LinkedAccountsView } from "../../../Profile/components/LinkedAccountsView";
+import { Link } from "react-router-dom";
+import { Person } from "@mui/icons-material";
 
 interface PlayerProfileHeaderProps {
   player: Player;
@@ -21,6 +23,15 @@ export const PlayerProfileHeader = ({ player }: PlayerProfileHeaderProps) => {
           <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
             {player.summoner_name}
           </h1>
+          {player.player_name && (
+            <Link
+              to={`/profile/${encodeURIComponent(player.player_name)}`}
+              className="inline-flex items-center gap-2 mt-2 text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+            >
+              <Person className="w-4 h-4" />
+              {player.player_name}
+            </Link>
+          )}
           {player.tier && (
             <div className="mt-2 flex items-center gap-3">
               <span className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded-lg font-medium text-sm">

@@ -1,19 +1,35 @@
 import React, { useState } from "react";
 import { Game } from "frontend/src/types/interfaces";
+import {
+  AccessTime,
+  Visibility,
+  LocalFireDepartment,
+  Timeline,
+  BarChart,
+  People,
+} from "@mui/icons-material";
 
 interface GameCardProps {
   game: Game;
   championName: string;
   playerName: string;
+  tier?: string | null;
+  rank?: string | null;
 }
 
-export const GameCard = ({ game, championName, playerName }: GameCardProps) => {
+export const GameCard = ({
+  game,
+  championName,
+  playerName,
+  tier,
+  rank,
+}: GameCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const formatGameDuration = (seconds: number) => {
-    if (!seconds && seconds !== 0) return "0:00";
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
+  const formatGameDuration = (duration: number): string => {
+    if (!duration && duration !== 0) return "0:00";
+    const minutes = Math.floor(duration / 60);
+    const remainingSeconds = duration % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
@@ -39,8 +55,31 @@ export const GameCard = ({ game, championName, playerName }: GameCardProps) => {
   };
 
   const formatDamage = (damage: number) => {
-    return `${(damage / 1000).toFixed(1)}k dmg`;
+    return `${(damage / 1000).toFixed(1)}k`;
   };
+
+  // Calculer le total des dégâts de l'équipe
+  const calculateTeamDamage = () => {
+    const allyDamages =
+      game.allies?.reduce(
+        (sum, ally) => sum + ally.totalDamageDealtToChampions,
+        0
+      ) || 0;
+    return allyDamages + game.totalDamageDealtToChampions;
+  };
+
+  // Calculer la participation aux kills
+  const calculateKillParticipation = () => {
+    const teamKills =
+      game.allies?.reduce((sum, ally) => sum + ally.kills, game.kills) ||
+      game.kills;
+    return teamKills === 0
+      ? 0
+      : ((game.kills + game.assists) / teamKills) * 100;
+  };
+
+  const teamDamage = calculateTeamDamage();
+  const killParticipation = calculateKillParticipation();
 
   const mainPlayer = {
     championId: game.championId,
@@ -60,39 +99,152 @@ export const GameCard = ({ game, championName, playerName }: GameCardProps) => {
       }`}
     >
       <div
-        className="flex-1 p-3 sm:p-4 cursor-pointer"
+        className="flex-1 p-3 sm:p-4 cursor-pointer relative"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 mb-3">
-          <div className="flex items-center gap-3">
-            <img
-              src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${game.championId}.png`}
-              alt={championName}
-              className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg"
-            />
+        {/* En-tête avec champion et résultat */}
+        <div className="flex items-center justify-between mb-4 relative">
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <img
+                src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${game.championId}.png`}
+                alt={championName}
+                className="w-14 h-14 rounded-lg"
+              />
+              <div
+                className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white ${
+                  game.win ? "bg-green-500" : "bg-red-500"
+                }`}
+              >
+                {game.win ? "V" : "D"}
+              </div>
+            </div>
             <div>
               <h3 className="font-semibold text-gray-900 dark:text-white">
                 {championName}
               </h3>
-              <p className={game.win ? "text-green-500" : "text-red-500"}>
-                {game.win ? "Victoire" : "Défaite"}
-              </p>
-              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                {formatGameDuration(game.gameDuration)} •{" "}
-                {formatTimeAgo(game.gameCreation)}
-              </p>
+              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                <AccessTime className="w-4 h-4" />
+                <span>{formatGameDuration(game.gameDuration)}</span>
+                <span>•</span>
+                <span>{formatTimeAgo(game.gameCreation)}</span>
+                {tier && rank && (
+                  <>
+                    <span>•</span>
+                    <span className="font-medium">
+                      {tier} {rank}
+                    </span>
+                    {game.lpChange !== undefined && (
+                      <>
+                        <span>•</span>
+                        <span
+                          className={`font-medium ${
+                            game.lpChange > 0
+                              ? "text-green-500 dark:text-green-400"
+                              : "text-red-500 dark:text-red-400"
+                          }`}
+                        >
+                          {game.lpChange > 0 ? "+" : ""}
+                          {game.lpChange} LP
+                        </span>
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
-          </div>
-          <div className="text-right">
-            <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
-              {formatKDA(game.kills, game.deaths, game.assists)}
-            </p>
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-              {game.cs} CS • {formatDamage(game.totalDamageDealtToChampions)}
-            </p>
           </div>
         </div>
 
+        {/* Statistiques principales */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
+            <div className="text-sm text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-1">
+              <Timeline className="w-4 h-4" />
+              KDA
+            </div>
+            <div className="font-semibold text-gray-900 dark:text-white">
+              {formatKDA(game.kills, game.deaths, game.assists)}
+            </div>
+          </div>
+
+          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
+            <div className="text-sm text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-1">
+              <LocalFireDepartment className="w-4 h-4" />
+              CS
+            </div>
+            <div className="font-semibold text-gray-900 dark:text-white">
+              {game.cs} ({(game.cs / (game.gameDuration / 60)).toFixed(1)}/min)
+            </div>
+          </div>
+
+          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
+            <div className="text-sm text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-1">
+              <BarChart className="w-4 h-4" />
+              Dégâts
+            </div>
+            <div className="font-semibold text-gray-900 dark:text-white">
+              {formatDamage(game.totalDamageDealtToChampions)}
+              <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full mt-1">
+                <div
+                  className="h-full bg-blue-500 rounded-full"
+                  style={{
+                    width: `${
+                      (game.totalDamageDealtToChampions / teamDamage) * 100
+                    }%`,
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
+            <div className="text-sm text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-1">
+              <People className="w-4 h-4" />
+              Kill Part.
+            </div>
+            <div className="font-semibold text-gray-900 dark:text-white">
+              {killParticipation.toFixed(0)}%
+              <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full mt-1">
+                <div
+                  className="h-full bg-purple-500 rounded-full"
+                  style={{ width: `${killParticipation}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Aperçu des champions */}
+        <div className="flex gap-2 mb-4">
+          <div className="flex -space-x-2">
+            <img
+              src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${game.championId}.png`}
+              alt={championName}
+              className="w-8 h-8 rounded-full border-2 border-blue-500 relative z-10"
+            />
+            {game.allies?.map((ally) => (
+              <img
+                key={ally.summonerName}
+                src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${ally.championId}.png`}
+                alt={ally.championName}
+                className="w-8 h-8 rounded-full border-2 border-blue-500 relative"
+              />
+            ))}
+          </div>
+          <div className="flex -space-x-2 ml-4">
+            {game.enemies?.map((enemy) => (
+              <img
+                key={enemy.summonerName}
+                src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${enemy.championId}.png`}
+                alt={enemy.championName}
+                className="w-8 h-8 rounded-full border-2 border-red-500 relative"
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Section détaillée (dépliable) */}
         <div
           className={`overflow-hidden transition-[max-height] duration-300 ease-in-out ${
             isExpanded ? "max-h-[1000px]" : "max-h-0"
@@ -130,6 +282,18 @@ export const GameCard = ({ game, championName, playerName }: GameCardProps) => {
                           {formatDamage(mainPlayer.totalDamageDealtToChampions)}
                         </span>
                       </div>
+                      <div className="w-full h-1 bg-gray-200 dark:bg-gray-600 rounded-full mt-1">
+                        <div
+                          className="h-full bg-blue-500 rounded-full"
+                          style={{
+                            width: `${
+                              (mainPlayer.totalDamageDealtToChampions /
+                                teamDamage) *
+                              100
+                            }%`,
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
                   {game.allies?.map((ally) => (
@@ -157,13 +321,25 @@ export const GameCard = ({ game, championName, playerName }: GameCardProps) => {
                             {formatDamage(ally.totalDamageDealtToChampions)}
                           </span>
                         </div>
+                        <div className="w-full h-1 bg-gray-200 dark:bg-gray-600 rounded-full mt-1">
+                          <div
+                            className="h-full bg-blue-500 rounded-full"
+                            style={{
+                              width: `${
+                                (ally.totalDamageDealtToChampions /
+                                  teamDamage) *
+                                100
+                              }%`,
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="mt-3 sm:mt-0">
+              <div>
                 <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
                   Adversaires
                 </h4>
@@ -197,6 +373,18 @@ export const GameCard = ({ game, championName, playerName }: GameCardProps) => {
                             {formatDamage(enemy.totalDamageDealtToChampions)}
                           </span>
                         </div>
+                        <div className="w-full h-1 bg-gray-200 dark:bg-gray-600 rounded-full mt-1">
+                          <div
+                            className="h-full bg-red-500 rounded-full"
+                            style={{
+                              width: `${
+                                (enemy.totalDamageDealtToChampions /
+                                  teamDamage) *
+                                100
+                              }%`,
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -212,7 +400,9 @@ export const GameCard = ({ game, championName, playerName }: GameCardProps) => {
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <svg
-          className="w-6 h-6 text-gray-400"
+          className={`w-6 h-6 text-gray-400 transform transition-transform duration-300 ${
+            isExpanded ? "rotate-180" : ""
+          }`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
