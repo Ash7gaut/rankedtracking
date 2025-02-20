@@ -12,9 +12,7 @@ import PlayerProfile from "./pages/PlayerProfile/PlayerProfile";
 function App() {
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem("darkMode");
-    return saved
-      ? JSON.parse(saved)
-      : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    return saved ? JSON.parse(saved) : true;
   });
 
   const [session, setSession] = useState<Session | null>(null);
