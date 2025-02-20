@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useQuery, useQueryClient } from "react-query";
+import { useQuery } from "react-query";
 import { api } from "../../utils/api";
 import { Header } from "./components/Header";
 import { PlayersList } from "./components/PlayersList/PlayerList";
@@ -20,8 +20,6 @@ const Home = () => {
     return saved ? JSON.parse(saved) : false;
   });
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const queryClient = useQueryClient();
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [showNegativeOnly, setShowNegativeOnly] = useState(() => {
     const saved = localStorage.getItem("showNegativeOnly");
     return saved ? JSON.parse(saved) : false;
@@ -82,19 +80,6 @@ const Home = () => {
     return matchesPlayer && matchesMainAccount && matchesNegative;
   });
 
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-
-    try {
-      await api.updateAllPlayers();
-      await queryClient.invalidateQueries("players");
-    } catch (error) {
-      console.error("Erreur lors de la mise à jour:", error);
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
-
   // Calculer les joueurs avec winrate négatif
   const negativeWinratePlayers = new Set(
     players
@@ -111,11 +96,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Header
-        title="Classement"
-        onRefresh={handleRefresh}
-        isRefreshing={isRefreshing}
-      />
+      <Header title="Classement" />
 
       {!isInitialLoading && (
         <div className="container mx-auto px-4 py-6">

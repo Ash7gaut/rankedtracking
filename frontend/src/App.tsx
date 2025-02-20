@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import PlayerDetails from "./pages/PlayerDetails/PlayerDetails";
 import AddPlayer from "./pages/AddPlayer/AddPlayer";
 import Profile from "./pages/Profile/Profile";
+import PlayerProfile from "./pages/PlayerProfile/PlayerProfile";
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => {
@@ -64,6 +65,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/player/:id" element={<PlayerDetails />} />
+            <Route path="/profile/:playerName" element={<PlayerProfile />} />
 
             {/* Routes protégées */}
             <Route

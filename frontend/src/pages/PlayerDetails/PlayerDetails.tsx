@@ -4,7 +4,7 @@ import { useQuery } from "react-query";
 import { api } from "../../utils/api";
 import { Player } from "frontend/src/types/interfaces";
 import { PlayerHeader } from "./components/PlayerHeader/PlayerHeader";
-import { PlayerProfile } from "./components/PlayerProfile";
+import { PlayerProfileHeader } from "./components/PlayerProfileHeader";
 import { PlayerStats } from "./components/PlayerStats/PlayerStats";
 import { GamesList } from "./components/GamesList/GamesList";
 import { PlayerHistory } from "../Home/components/PlayerHistory/PlayerHistory";
@@ -41,7 +41,7 @@ const PlayerDetails = () => {
   if (!player) return null;
 
   return (
-    <div className="relative overflow-x-hidden min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="relative overflow-x-hidden min-h-screen bg-gray-50 dark:bg-gray-900">
       <div
         className={`container mx-auto px-4 py-8 ${
           isFetching ? "opacity-70" : ""
@@ -49,7 +49,7 @@ const PlayerDetails = () => {
       >
         <PlayerHeader playerId={id!} />
         <div className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg p-6 mb-8 border border-gray-100 dark:border-gray-700">
-          <PlayerProfile player={player} />
+          <PlayerProfileHeader player={player} />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           <div className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">

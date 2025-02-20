@@ -1,11 +1,11 @@
 import { Player } from "frontend/src/types/interfaces";
 import { LinkedAccountsView } from "../../../Profile/components/LinkedAccountsView";
 
-interface PlayerProfileProps {
+interface PlayerProfileHeaderProps {
   player: Player;
 }
 
-export const PlayerProfile = ({ player }: PlayerProfileProps) => {
+export const PlayerProfileHeader = ({ player }: PlayerProfileHeaderProps) => {
   return (
     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
       <div className="flex items-center gap-8">
