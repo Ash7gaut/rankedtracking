@@ -142,7 +142,7 @@ export const LPTracker = ({
   );
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-[300vh]">
       <div className="flex items-center gap-3 mb-6">
         <Timeline className="w-6 h-6 text-blue-500" />
         <h2 className="text-lg font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
@@ -185,10 +185,10 @@ export const LPTracker = ({
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden">
-        <div className="h-full overflow-y-auto space-y-2 pr-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+      <div className="overflow-y-auto flex-1 min-h-0">
+        <div className="space-y-2 pr-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
           {changes.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400">
+            <div className="flex flex-col items-center justify-center py-8 text-gray-500 dark:text-gray-400">
               <Timeline className="w-8 h-8 mb-2 opacity-50" />
               <p className="text-center">
                 Aucun changement de LP détecté sur les 7 derniers jours

@@ -110,7 +110,7 @@ const Home = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header
         title="Classement"
         onRefresh={handleRefresh}
@@ -122,7 +122,7 @@ const Home = () => {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
             <div className="lg:col-span-3 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
                   <EnhancedPlayerFilter
                     players={players || []}
                     selectedPlayers={selectedPlayers}
@@ -131,7 +131,7 @@ const Home = () => {
                     onNegativeFilterChange={setShowNegativeOnly}
                   />
                 </div>
-                <div className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
                   <MainAccountFilter
                     isMainOnly={isMainOnly}
                     onMainAccountToggle={() => setIsMainOnly(!isMainOnly)}
@@ -144,14 +144,14 @@ const Home = () => {
                   Erreur de chargement des données
                 </div>
               ) : (
-                <div className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
                   <PlayersList players={filteredPlayers || []} />
                 </div>
               )}
             </div>
 
             <div className="lg:col-span-1">
-              <div className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700 sticky top-6">
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700 sticky top-6">
                 <LPTracker
                   selectedPlayers={Array.from(selectedPlayers)}
                   showNegativeOnly={showNegativeOnly}

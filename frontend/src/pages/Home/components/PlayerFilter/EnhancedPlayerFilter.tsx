@@ -62,6 +62,50 @@ export const EnhancedPlayerFilter = ({
         </button>
       </div>
 
+      {/* Aperçu des 3 premiers joueurs */}
+      {!isOpen && uniquePlayerNames.length > 0 && (
+        <div className="relative">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            {uniquePlayerNames.slice(0, 3).map((playerName) => (
+              <label
+                key={playerName}
+                className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-all duration-300 ${
+                  selectedPlayers.has(playerName)
+                    ? "bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-200 dark:border-blue-800"
+                    : "bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 border border-gray-200 dark:border-gray-700"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedPlayers.has(playerName)}
+                  onChange={() => onPlayerSelection(playerName)}
+                  className="sr-only peer"
+                />
+                <Person
+                  className={`w-5 h-5 flex-shrink-0 ${
+                    selectedPlayers.has(playerName)
+                      ? "text-blue-500 dark:text-blue-400"
+                      : "text-gray-400 dark:text-gray-500"
+                  }`}
+                />
+                <span
+                  className={`font-medium truncate ${
+                    selectedPlayers.has(playerName)
+                      ? "text-blue-700 dark:text-blue-300"
+                      : "text-gray-700 dark:text-gray-300"
+                  }`}
+                >
+                  {playerName}
+                </span>
+              </label>
+            ))}
+          </div>
+          {uniquePlayerNames.length > 3 && (
+            <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white dark:from-gray-800 to-transparent pointer-events-none" />
+          )}
+        </div>
+      )}
+
       {isOpen && (
         <div className="space-y-6">
           <div className="relative">
@@ -127,14 +171,14 @@ export const EnhancedPlayerFilter = ({
                     className="sr-only peer"
                   />
                   <Person
-                    className={`w-5 h-5 ${
+                    className={`w-5 h-5 flex-shrink-0 ${
                       selectedPlayers.has(playerName)
                         ? "text-blue-500 dark:text-blue-400"
                         : "text-gray-400 dark:text-gray-500"
                     }`}
                   />
                   <span
-                    className={`font-medium ${
+                    className={`font-medium truncate ${
                       selectedPlayers.has(playerName)
                         ? "text-blue-700 dark:text-blue-300"
                         : "text-gray-700 dark:text-gray-300"

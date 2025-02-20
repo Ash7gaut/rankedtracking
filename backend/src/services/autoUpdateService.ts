@@ -48,12 +48,12 @@ const calculateLPDifference = (
   }
 
   // Promotion de division dans le même tier
-  if (previousTier === newTier && ranks.indexOf(previousRank) > ranks.indexOf(newRank)) {
+  if (previousTier === newTier && ranks.indexOf(previousRank) < ranks.indexOf(newRank)) {
     return (100 - previousLP) + newLP;
   }
 
   // Rétrogradation de division dans le même tier
-  if (previousTier === newTier && ranks.indexOf(previousRank) < ranks.indexOf(newRank)) {
+  if (previousTier === newTier && ranks.indexOf(previousRank) > ranks.indexOf(newRank)) {
     return -(previousLP + (100 - newLP));
   }
 
