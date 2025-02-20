@@ -39,7 +39,7 @@ const calculateLPDifference = (
   newRank: string,
   newLP: number
 ): number => {
-  const tiers = ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'DIAMOND', 'MASTER', 'GRANDMASTER', 'CHALLENGER'];
+  const tiers = ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'EMERALD', 'DIAMOND', 'MASTER', 'GRANDMASTER', 'CHALLENGER'];
   const ranks = ['IV', 'III', 'II', 'I'];
 
   // Même tier et rank = calcul simple
