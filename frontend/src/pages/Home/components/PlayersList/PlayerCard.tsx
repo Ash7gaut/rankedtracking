@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Player } from "frontend/src/types/interfaces";
+import { Person } from "@mui/icons-material";
 
 interface PlayerCardProps {
   player: Player;
@@ -124,6 +125,21 @@ export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
                   </span>
                 )}
               </h2>
+              {player.player_name && (
+                <a
+                  href={`/profile/${encodeURIComponent(player.player_name)}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(
+                      `/profile/${encodeURIComponent(player.player_name)}`
+                    );
+                  }}
+                  className="inline-flex items-center gap-1 mb-2 text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                >
+                  <Person className="w-4 h-4" />
+                  {player.player_name}
+                </a>
+              )}
               <div className="text-gray-600 dark:text-gray-300 truncate flex items-center gap-2">
                 <div className="bg-gray-100/70 dark:bg-gray-700/50 px-2 py-1 rounded-md flex items-center gap-2 min-w-0">
                   {player.tier ? (
