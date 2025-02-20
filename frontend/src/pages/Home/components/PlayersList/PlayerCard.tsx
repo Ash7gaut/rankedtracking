@@ -47,7 +47,7 @@ export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
   };
 
   return (
-    <div className="relative h-[160px]">
+    <div className="relative h-[180px] group">
       {player.in_game && (
         <a
           href={`https://porofessor.gg/fr/live/euw/${formatSummonerNameForUrl(
@@ -55,9 +55,9 @@ export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
           )}`}
           target="_blank"
           rel="noopener noreferrer"
-          className={`absolute top-2 right-2 ${getInGameBadgeColor(
+          className={`absolute top-3 right-3 ${getInGameBadgeColor(
             Number(winRate)
-          )} text-white px-2 py-0.5 rounded-full text-xs font-semibold animate-pulse z-50 hover:brightness-110 transition-all`}
+          )} text-white px-3 py-1 rounded-full text-xs font-semibold animate-pulse z-50 hover:brightness-110 transition-all duration-300 backdrop-blur-sm shadow-lg`}
           onClick={(e) => e.stopPropagation()}
         >
           IN GAME
@@ -66,22 +66,28 @@ export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
 
       {rank && rank <= 3 && (
         <div
-          className={`absolute left-1/2 transform -translate-x-1/2 ${getBadgeColor(
+          className={`absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 ${getBadgeColor(
             rank
-          )} w-6 h-6 rounded-full flex items-center justify-center text-white font-bold shadow-lg z-20 text-sm`}
-          style={{ top: "-0.75rem" }}
+          )} w-8 h-8 rounded-full flex items-center justify-center text-white font-bold shadow-xl z-20 text-sm ring-2 ring-white dark:ring-gray-800`}
+          style={{ top: "0" }}
         >
           {rank}
         </div>
       )}
 
       <div
-        className={`relative bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 cursor-pointer hover:shadow-lg transition-shadow overflow-hidden group [&:hover_.icon-hover]:opacity-100 h-full ${
-          player.in_game ? "border-l-4 border-green-500" : ""
+        className={`relative bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg p-5 cursor-pointer 
+        hover:shadow-xl transition-all duration-300 overflow-hidden group 
+        [&:hover_.icon-hover]:opacity-100 h-full 
+        hover:scale-[1.02] hover:-translate-y-1
+        ${
+          player.in_game
+            ? "border-l-4 border-green-500/70 dark:border-green-500/50"
+            : "border border-gray-100 dark:border-gray-700"
         }`}
         onClick={() => navigate(`/player/${player.id}`)}
       >
-        <div className="absolute inset-0 flex items-center justify-center opacity-15">
+        <div className="absolute inset-0 flex items-center justify-center opacity-[0.07] group-hover:opacity-[0.09] transition-opacity duration-300">
           <img
             src={
               player.tier
@@ -89,33 +95,35 @@ export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
                 : "/ranks/unranked.png"
             }
             alt="Rank"
-            className="w-80 h- object-contain"
+            className="w-80 h-80 object-contain"
           />
         </div>
 
         <div className="relative z-10 flex flex-col h-full">
-          <div className="flex gap-4 mb-4">
+          <div className="flex gap-5 mb-4">
             <div className="flex-shrink-0">
               <img
                 src={`https://opgg-static.akamaized.net/meta/images/profile_icons/profileIcon${player.profile_icon_id}.jpg?image=e_upscale,q_auto:good,f_webp,w_auto&v=1729058249`}
                 alt="Profile Icon"
-                className="w-16 h-16 rounded-full border-2 border-gray-200 dark:border-gray-600"
+                className="w-16 h-16 rounded-full border-2 border-gray-200/70 dark:border-gray-600/50 shadow-md group-hover:shadow-lg transition-all duration-300"
               />
             </div>
             <div className="flex-grow min-w-0">
               <h2 className="text-lg font-bold mb-2 text-gray-900 dark:text-white flex items-center gap-2 truncate">
-                <span className="truncate">{player.summoner_name}</span>
+                <span className="truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
+                  {player.summoner_name}
+                </span>
                 {isNegativeWinrate && (
                   <span
-                    className="flex-shrink-0"
+                    className="flex-shrink-0 transform group-hover:scale-110 transition-transform duration-300"
                     title="Winrate négatif (20+ games)"
                   >
                     💩
                   </span>
                 )}
               </h2>
-              <div className="text-gray-600 dark:text-gray-300 truncate flex items-center gap-2">
-                <span>
+              <div className="text-gray-600 dark:text-gray-300 truncate flex items-center gap-2 font-medium">
+                <span className="bg-gray-100/70 dark:bg-gray-700/50 px-2 py-1 rounded-md">
                   {player.tier ? (
                     <>
                       {player.tier} {player.rank}
@@ -124,16 +132,24 @@ export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
                     "UNRANKED"
                   )}
                 </span>
-                <span>{player.league_points} LP</span>
+                <span className="text-blue-600/90 dark:text-blue-400/90">
+                  {player.league_points} LP
+                </span>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 text-sm mt-auto">
-            <div className="text-gray-600 dark:text-gray-300 truncate">
+          <div className="grid grid-cols-2 gap-4 text-sm mt-auto">
+            <div className="text-gray-600 dark:text-gray-300 truncate bg-gray-50/50 dark:bg-gray-700/30 px-3 py-1.5 rounded-lg font-medium">
               W/L: {player.wins}/{player.losses}
             </div>
-            <div className="text-gray-600 dark:text-gray-300 truncate text-right">
+            <div
+              className={`truncate text-right px-3 py-1.5 rounded-lg font-medium ${
+                Number(winRate) >= 50
+                  ? "text-green-600 dark:text-green-400 bg-green-50/50 dark:bg-green-900/20"
+                  : "text-red-600 dark:text-red-400 bg-red-50/50 dark:bg-red-900/20"
+              }`}
+            >
               {winRate}% WR
             </div>
           </div>
@@ -145,13 +161,13 @@ export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
           )}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="absolute bottom-2 right-2 text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 hover:underline z-20"
+          className="absolute bottom-3 right-3 text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 hover:underline z-20 group"
           onClick={(e) => e.stopPropagation()}
         >
           <img
             src="https://i.imgur.com/TCDG5tK.png"
             alt="League of Graphs"
-            className="w-6 h-6 opacity-0 icon-hover duration-300"
+            className="w-6 h-6 opacity-0 icon-hover duration-300 transform group-hover:rotate-12 transition-all"
           />
         </a>
       </div>

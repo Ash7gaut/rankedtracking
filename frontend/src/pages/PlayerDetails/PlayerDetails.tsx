@@ -41,24 +41,32 @@ const PlayerDetails = () => {
   if (!player) return null;
 
   return (
-    <div className="relative overflow-x-hidden">
+    <div className="relative overflow-x-hidden min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div
-        className={`p-6 ${
+        className={`container mx-auto px-4 py-8 ${
           isFetching ? "opacity-70" : ""
         } transition-opacity duration-300`}
       >
         <PlayerHeader playerId={id!} />
-        <PlayerProfile player={player} />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <PlayerStats player={player} />
-          <PlayerHistory playerId={id!} />
+        <div className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg p-6 mb-8 border border-gray-100 dark:border-gray-700">
+          <PlayerProfile player={player} />
         </div>
-        <GamesList
-          games={games || []}
-          isLoading={gamesLoading}
-          championNames={championNames}
-          playerName={player.summoner_name}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          <div className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
+            <PlayerStats player={player} />
+          </div>
+          <div className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
+            <PlayerHistory playerId={id!} />
+          </div>
+        </div>
+        <div className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
+          <GamesList
+            games={games || []}
+            isLoading={gamesLoading}
+            championNames={championNames}
+            playerName={player.summoner_name}
+          />
+        </div>
       </div>
     </div>
   );

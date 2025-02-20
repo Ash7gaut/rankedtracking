@@ -110,7 +110,7 @@ const Home = () => {
   );
 
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Header
         title="Classement"
         onRefresh={handleRefresh}
@@ -118,41 +118,47 @@ const Home = () => {
       />
 
       {!isInitialLoading && (
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
-          <div className="lg:col-span-3 space-y-4">
-            <div className="flex flex-wrap gap-4">
-              <div className="flex-1 min-w-[300px]">
-                <EnhancedPlayerFilter
-                  players={players || []}
-                  selectedPlayers={selectedPlayers}
-                  onPlayerSelection={handlePlayerSelection}
-                  showNegativeOnly={showNegativeOnly}
-                  onNegativeFilterChange={setShowNegativeOnly}
-                />
+        <div className="container mx-auto px-4 py-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+            <div className="lg:col-span-3 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
+                  <EnhancedPlayerFilter
+                    players={players || []}
+                    selectedPlayers={selectedPlayers}
+                    onPlayerSelection={handlePlayerSelection}
+                    showNegativeOnly={showNegativeOnly}
+                    onNegativeFilterChange={setShowNegativeOnly}
+                  />
+                </div>
+                <div className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
+                  <MainAccountFilter
+                    isMainOnly={isMainOnly}
+                    onMainAccountToggle={() => setIsMainOnly(!isMainOnly)}
+                  />
+                </div>
               </div>
-              <div className="flex-1 min-w-[300px]">
-                <MainAccountFilter
-                  isMainOnly={isMainOnly}
-                  onMainAccountToggle={() => setIsMainOnly(!isMainOnly)}
+
+              {error ? (
+                <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-xl border border-red-200 dark:border-red-800">
+                  Erreur de chargement des données
+                </div>
+              ) : (
+                <div className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
+                  <PlayersList players={filteredPlayers || []} />
+                </div>
+              )}
+            </div>
+
+            <div className="lg:col-span-1">
+              <div className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700 sticky top-6">
+                <LPTracker
+                  selectedPlayers={Array.from(selectedPlayers)}
+                  showNegativeOnly={showNegativeOnly}
+                  negativeWinratePlayers={negativeWinratePlayers}
                 />
               </div>
             </div>
-
-            {error ? (
-              <div className="text-red-500 dark:text-red-400">
-                Erreur de chargement des données
-              </div>
-            ) : (
-              <PlayersList players={filteredPlayers || []} />
-            )}
-          </div>
-
-          <div className="lg:col-span-1">
-            <LPTracker
-              selectedPlayers={Array.from(selectedPlayers)}
-              showNegativeOnly={showNegativeOnly}
-              negativeWinratePlayers={negativeWinratePlayers}
-            />
           </div>
         </div>
       )}

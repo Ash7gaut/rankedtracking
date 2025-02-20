@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Player } from "../../../../types/interfaces";
+import { FilterAlt, Person, Warning } from "@mui/icons-material";
 
 interface EnhancedPlayerFilterProps {
   players: Player[];
@@ -34,62 +35,116 @@ export const EnhancedPlayerFilter = ({
   const isFilterActive = selectedPlayers.size > 0 || showNegativeOnly;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between w-full text-left"
-      >
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-          Filtrer par joueur
-          {isFilterActive && (
-            <span className="ml-2 text-blue-500 text-xl">●</span>
-          )}
-        </h3>
-        <span
-          className="transform transition-transform duration-200"
-          style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+    <div className="flex flex-col space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <FilterAlt
+            className={`w-6 h-6 ${
+              isFilterActive
+                ? "text-blue-500"
+                : "text-gray-400 dark:text-gray-600"
+            }`}
+          />
+          <h3 className="text-lg font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+            Filtrer les joueurs
+          </h3>
+        </div>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
         >
-          ▼
-        </span>
-      </button>
+          <span
+            className="block transform transition-transform duration-300"
+            style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+          >
+            ▼
+          </span>
+        </button>
+      </div>
 
       {isOpen && (
-        <div className="mt-4 space-y-4">
-          <button
-            onClick={() => onNegativeFilterChange(!showNegativeOnly)}
-            className={`w-full p-2 rounded-lg transition-colors ${
-              showNegativeOnly
-                ? "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200"
-                : "hover:bg-gray-100 dark:hover:bg-gray-700"
-            }`}
-          >
-            <span className="flex items-center gap-2">
-              Filtrer les 💩
+        <div className="space-y-6">
+          <div className="relative">
+            <button
+              onClick={() => onNegativeFilterChange(!showNegativeOnly)}
+              className={`w-full p-3 rounded-xl transition-all duration-300 flex items-center justify-between ${
+                showNegativeOnly
+                  ? "bg-red-50 dark:bg-red-900/30 border-2 border-red-200 dark:border-red-800"
+                  : "bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 border border-gray-200 dark:border-gray-700"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <Warning
+                  className={`w-5 h-5 ${
+                    showNegativeOnly
+                      ? "text-red-500 dark:text-red-400"
+                      : "text-gray-400 dark:text-gray-500"
+                  }`}
+                />
+                <span
+                  className={`font-medium ${
+                    showNegativeOnly
+                      ? "text-red-700 dark:text-red-300"
+                      : "text-gray-700 dark:text-gray-300"
+                  }`}
+                >
+                  Winrate négatif
+                </span>
+              </div>
               {negativeWinratePlayers.length > 0 && (
-                <span className="text-sm bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded-full">
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    showNegativeOnly
+                      ? "bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200"
+                      : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                  }`}
+                >
                   {negativeWinratePlayers.length}
                 </span>
               )}
-            </span>
-          </button>
+            </button>
+          </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-            {uniquePlayerNames.map((playerName) => (
-              <label
-                key={playerName}
-                className="flex items-center space-x-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded"
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedPlayers.has(playerName)}
-                  onChange={() => onPlayerSelection(playerName)}
-                  className="custom-checkbox"
-                />
-                <span className="text-gray-700 dark:text-gray-300">
-                  {playerName}
-                </span>
-              </label>
-            ))}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 px-1">
+              <span>Sélectionner les joueurs</span>
+              <span>{selectedPlayers.size} sélectionné(s)</span>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-[200px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent pr-2">
+              {uniquePlayerNames.map((playerName) => (
+                <label
+                  key={playerName}
+                  className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-all duration-300 ${
+                    selectedPlayers.has(playerName)
+                      ? "bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-200 dark:border-blue-800"
+                      : "bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 border border-gray-200 dark:border-gray-700"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedPlayers.has(playerName)}
+                    onChange={() => onPlayerSelection(playerName)}
+                    className="sr-only peer"
+                  />
+                  <Person
+                    className={`w-5 h-5 ${
+                      selectedPlayers.has(playerName)
+                        ? "text-blue-500 dark:text-blue-400"
+                        : "text-gray-400 dark:text-gray-500"
+                    }`}
+                  />
+                  <span
+                    className={`font-medium ${
+                      selectedPlayers.has(playerName)
+                        ? "text-blue-700 dark:text-blue-300"
+                        : "text-gray-700 dark:text-gray-300"
+                    }`}
+                  >
+                    {playerName}
+                  </span>
+                </label>
+              ))}
+            </div>
           </div>
         </div>
       )}
