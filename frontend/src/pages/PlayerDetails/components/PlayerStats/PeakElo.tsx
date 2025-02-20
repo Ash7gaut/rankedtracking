@@ -30,17 +30,17 @@ export const PeakElo = ({ playerId }: PeakEloProps) => {
   if (!peakElo) return null;
 
   return (
-    <div className="mt-2 flex items-center gap-2">
+    <div className="mt-2 flex items-center gap-4">
       <img
         src={`/ranks/${peakElo.tier?.toLowerCase() || "unranked"}.png`}
         alt={peakElo.tier || "UNRANKED"}
-        className="w-8 h-8"
+        className="w-12 h-12 sm:w-8 sm:h-8"
       />
       <div className="flex flex-col">
-        <span className="text-lg font-semibold text-gray-900 dark:text-white">
+        <span className="text-xl sm:text-lg font-semibold text-gray-900 dark:text-white">
           {peakElo.tier} {peakElo.rank}
         </span>
-        <span className="text-sm text-gray-500 dark:text-gray-400">
+        <span className="text-base sm:text-sm text-gray-500 dark:text-gray-400">
           {peakElo.league_points} LP
         </span>
       </div>

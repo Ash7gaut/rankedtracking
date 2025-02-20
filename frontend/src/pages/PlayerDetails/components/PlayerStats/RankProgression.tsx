@@ -41,7 +41,7 @@ export const RankProgression = ({ playerId }: RankProgressionProps) => {
     <div className="mt-2">
       <div className="flex items-center gap-2">
         <span
-          className={`text-lg font-semibold ${
+          className={`text-xl sm:text-lg font-semibold ${
             difference > 0
               ? "text-green-500"
               : difference < 0
@@ -53,7 +53,7 @@ export const RankProgression = ({ playerId }: RankProgressionProps) => {
           {difference} LP
         </span>
       </div>
-      <span className="text-sm text-gray-500 dark:text-gray-400">
+      <span className="text-base sm:text-sm text-gray-500 dark:text-gray-400">
         depuis la dernière mise à jour
       </span>
     </div>

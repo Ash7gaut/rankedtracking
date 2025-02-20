@@ -106,20 +106,20 @@ export const GameCard = ({
       }`}
     >
       <div
-        className="flex-1 p-3 sm:p-4 cursor-pointer relative"
+        className="flex-1 p-4 sm:p-6 cursor-pointer relative space-y-6"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         {/* En-tête avec champion et résultat */}
-        <div className="flex items-center justify-between mb-4 relative">
-          <div className="flex items-center gap-4">
+        <div className="flex items-start justify-between relative">
+          <div className="flex items-start gap-4">
             <div className="relative">
               <img
                 src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${game.championId}.png`}
                 alt={championName}
-                className="w-14 h-14 rounded-lg"
+                className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg object-cover"
               />
               <div
-                className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white ${
+                className={`absolute -bottom-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-xs font-bold text-white ${
                   game.win ? "bg-green-500" : "bg-red-500"
                 }`}
               >
@@ -127,12 +127,14 @@ export const GameCard = ({
               </div>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white">
+              <h3 className="font-semibold text-gray-900 dark:text-white text-base sm:text-lg">
                 {championName}
               </h3>
-              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                <AccessTime className="w-4 h-4" />
-                <span>{formatGameDuration(game.gameDuration)}</span>
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <div className="flex items-center gap-1">
+                  <AccessTime className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <span>{formatGameDuration(game.gameDuration)}</span>
+                </div>
                 <span>•</span>
                 <span>{formatTimeAgo(game.gameCreation)}</span>
                 {tier && rank && (
@@ -142,7 +144,7 @@ export const GameCard = ({
                       <img
                         src={`/ranks/${tier.toLowerCase()}.png`}
                         alt={tier}
-                        className="w-4 h-4"
+                        className="w-4 h-4 sm:w-5 sm:h-5 object-contain"
                       />
                       {tier} {rank}
                     </span>
@@ -169,35 +171,35 @@ export const GameCard = ({
         </div>
 
         {/* Statistiques principales */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
-          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
-            <div className="text-sm text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-1">
-              <Timeline className="w-4 h-4" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 sm:p-4">
+            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1">
+              <Timeline className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               KDA
             </div>
-            <div className="font-semibold text-gray-900 dark:text-white">
+            <div className="font-semibold text-gray-900 dark:text-white text-base sm:text-lg">
               {formatKDA(game.kills, game.deaths, game.assists)}
             </div>
           </div>
 
-          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
-            <div className="text-sm text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-1">
-              <LocalFireDepartment className="w-4 h-4" />
+          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 sm:p-4">
+            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1">
+              <LocalFireDepartment className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               CS
             </div>
-            <div className="font-semibold text-gray-900 dark:text-white">
-              {game.cs} ({(game.cs / (game.gameDuration / 60)).toFixed(1)}/min)
+            <div className="font-semibold text-gray-900 dark:text-white text-base sm:text-lg">
+              {game.cs} ({(game.cs / (game.gameDuration / 60)).toFixed(1)})
             </div>
           </div>
 
-          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
-            <div className="text-sm text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-1">
-              <BarChart className="w-4 h-4" />
+          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 sm:p-4">
+            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1">
+              <BarChart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               Dégâts
             </div>
-            <div className="font-semibold text-gray-900 dark:text-white">
+            <div className="font-semibold text-gray-900 dark:text-white text-base sm:text-lg">
               {formatDamage(game.totalDamageDealtToChampions)}
-              <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full mt-1">
+              <div className="w-full h-1.5 sm:h-2 bg-gray-200 dark:bg-gray-600 rounded-full mt-1.5">
                 <div
                   className="h-full bg-blue-500 rounded-full"
                   style={{
@@ -210,14 +212,14 @@ export const GameCard = ({
             </div>
           </div>
 
-          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
-            <div className="text-sm text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-1">
-              <People className="w-4 h-4" />
+          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 sm:p-4">
+            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1">
+              <People className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               Kill Part.
             </div>
-            <div className="font-semibold text-gray-900 dark:text-white">
+            <div className="font-semibold text-gray-900 dark:text-white text-base sm:text-lg">
               {killParticipation.toFixed(0)}%
-              <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full mt-1">
+              <div className="w-full h-1.5 sm:h-2 bg-gray-200 dark:bg-gray-600 rounded-full mt-1.5">
                 <div
                   className="h-full bg-purple-500 rounded-full"
                   style={{ width: `${killParticipation}%` }}
@@ -228,15 +230,16 @@ export const GameCard = ({
         </div>
 
         {/* Aperçu des champions */}
-        <div className="flex gap-2 mb-4">
-          <div className="flex -space-x-2">
+        <div className="flex flex-col gap-4">
+          {/* Équipe alliée */}
+          <div className="flex gap-2">
             <div className="group relative">
               <img
                 src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${game.championId}.png`}
                 alt={championName}
-                className="w-8 h-8 rounded-full border-2 border-blue-500 relative z-10"
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-blue-500 relative z-10 object-cover"
               />
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-50">
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 sm:px-3 sm:py-1.5 bg-gray-900 text-white text-xs sm:text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-50">
                 {championName} ({playerName})
               </div>
             </div>
@@ -245,23 +248,24 @@ export const GameCard = ({
                 <img
                   src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${ally.championId}.png`}
                   alt={ally.championName}
-                  className="w-8 h-8 rounded-full border-2 border-blue-500 relative"
+                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-blue-500 relative object-cover"
                 />
-                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-50">
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 sm:px-3 sm:py-1.5 bg-gray-900 text-white text-xs sm:text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-50">
                   {ally.championName} ({ally.summonerName})
                 </div>
               </div>
             ))}
           </div>
-          <div className="flex -space-x-2 ml-4">
+          {/* Équipe ennemie */}
+          <div className="flex gap-2">
             {game.enemies?.map((enemy) => (
               <div key={enemy.summonerName} className="group relative">
                 <img
                   src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${enemy.championId}.png`}
                   alt={enemy.championName}
-                  className="w-8 h-8 rounded-full border-2 border-red-500 relative"
+                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-red-500 relative object-cover"
                 />
-                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-50">
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 sm:px-3 sm:py-1.5 bg-gray-900 text-white text-xs sm:text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-50">
                   {enemy.championName} ({enemy.summonerName})
                 </div>
               </div>
@@ -278,36 +282,39 @@ export const GameCard = ({
           <div className="mt-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                <h4 className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Alliés
                 </h4>
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-4">
                     <img
                       src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${mainPlayer.championId}.png`}
                       alt={mainPlayer.championName}
-                      className="w-8 h-8 rounded-full flex-shrink-0"
+                      className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex-shrink-0 object-cover"
                     />
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600 dark:text-gray-400 font-semibold truncate">
-                          {mainPlayer.summonerName}
-                        </span>
-                        <span className="text-sm text-gray-500 dark:text-gray-400 ml-2 flex-shrink-0">
+                      <span className="text-sm sm:text-base text-gray-600 dark:text-gray-400 font-semibold truncate">
+                        {mainPlayer.summonerName}
+                      </span>
+                      <div className="mt-1 grid grid-cols-3 gap-x-4 gap-y-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                        <div className="flex items-center gap-1">
+                          <Timeline className="w-3.5 h-3.5" />
                           {formatKDA(
                             mainPlayer.kills,
                             mainPlayer.deaths,
                             mainPlayer.assists
                           )}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                        <span className="truncate">
-                          {mainPlayer.cs} CS •{" "}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <LocalFireDepartment className="w-3.5 h-3.5" />
+                          {mainPlayer.cs} CS
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <BarChart className="w-3.5 h-3.5" />
                           {formatDamage(mainPlayer.totalDamageDealtToChampions)}
-                        </span>
+                        </div>
                       </div>
-                      <div className="w-full h-1 bg-gray-200 dark:bg-gray-600 rounded-full mt-1">
+                      <div className="mt-1.5 w-full h-1 sm:h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full">
                         <div
                           className="h-full bg-blue-500 rounded-full"
                           style={{
@@ -321,98 +328,110 @@ export const GameCard = ({
                       </div>
                     </div>
                   </div>
-                  {game.allies?.map((ally) => (
-                    <div
-                      key={ally.summonerName}
-                      className="flex items-center gap-2"
-                    >
-                      <img
-                        src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${ally.championId}.png`}
-                        alt={ally.championName}
-                        className="w-8 h-8 rounded-full flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600 dark:text-gray-400 truncate">
+
+                  {/* Alliés */}
+                  <div className="grid grid-cols-1 gap-2 mt-4">
+                    {game.allies?.map((ally) => (
+                      <div
+                        key={ally.summonerName}
+                        className="flex items-center gap-4"
+                      >
+                        <img
+                          src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${ally.championId}.png`}
+                          alt={ally.championName}
+                          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex-shrink-0 object-cover"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <span className="text-sm sm:text-base text-gray-600 dark:text-gray-400 font-semibold truncate">
                             {ally.summonerName}
                           </span>
-                          <span className="text-sm text-gray-500 dark:text-gray-400 ml-2 flex-shrink-0">
-                            {formatKDA(ally.kills, ally.deaths, ally.assists)}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                          <span className="truncate">
-                            {ally.championName} • {ally.cs} CS •{" "}
-                            {formatDamage(ally.totalDamageDealtToChampions)}
-                          </span>
-                        </div>
-                        <div className="w-full h-1 bg-gray-200 dark:bg-gray-600 rounded-full mt-1">
-                          <div
-                            className="h-full bg-blue-500 rounded-full"
-                            style={{
-                              width: `${
-                                (ally.totalDamageDealtToChampions /
-                                  maxTeamDamage) *
-                                100
-                              }%`,
-                            }}
-                          />
+                          <div className="mt-1 grid grid-cols-3 gap-x-4 gap-y-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                            <div className="flex items-center gap-1">
+                              <Timeline className="w-3.5 h-3.5" />
+                              {formatKDA(ally.kills, ally.deaths, ally.assists)}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <LocalFireDepartment className="w-3.5 h-3.5" />
+                              {ally.cs} CS
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <BarChart className="w-3.5 h-3.5" />
+                              {formatDamage(ally.totalDamageDealtToChampions)}
+                            </div>
+                          </div>
+                          <div className="mt-1.5 w-full h-1 sm:h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full">
+                            <div
+                              className="h-full bg-blue-500 rounded-full"
+                              style={{
+                                width: `${
+                                  (ally.totalDamageDealtToChampions /
+                                    maxTeamDamage) *
+                                  100
+                                }%`,
+                              }}
+                            />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </div>
 
               <div>
-                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                <h4 className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Adversaires
                 </h4>
-                <div className="space-y-1.5">
-                  {game.enemies?.map((enemy) => (
-                    <div
-                      key={enemy.summonerName}
-                      className="flex items-center gap-2"
-                    >
-                      <img
-                        src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${enemy.championId}.png`}
-                        alt={enemy.championName}
-                        className="w-8 h-8 rounded-full flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                <div className="space-y-2">
+                  <div className="grid grid-cols-1 gap-2">
+                    {game.enemies?.map((enemy) => (
+                      <div
+                        key={enemy.summonerName}
+                        className="flex items-center gap-4"
+                      >
+                        <img
+                          src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${enemy.championId}.png`}
+                          alt={enemy.championName}
+                          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex-shrink-0 object-cover"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <span className="text-sm sm:text-base text-gray-600 dark:text-gray-400 font-semibold truncate">
                             {enemy.summonerName}
                           </span>
-                          <span className="text-sm text-gray-500 dark:text-gray-400 ml-2 flex-shrink-0">
-                            {formatKDA(
-                              enemy.kills,
-                              enemy.deaths,
-                              enemy.assists
-                            )}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                          <span className="truncate">
-                            {enemy.championName} • {enemy.cs} CS •{" "}
-                            {formatDamage(enemy.totalDamageDealtToChampions)}
-                          </span>
-                        </div>
-                        <div className="w-full h-1 bg-gray-200 dark:bg-gray-600 rounded-full mt-1">
-                          <div
-                            className="h-full bg-red-500 rounded-full"
-                            style={{
-                              width: `${
-                                (enemy.totalDamageDealtToChampions /
-                                  maxEnemyDamage) *
-                                100
-                              }%`,
-                            }}
-                          />
+                          <div className="mt-1 grid grid-cols-3 gap-x-4 gap-y-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                            <div className="flex items-center gap-1">
+                              <Timeline className="w-3.5 h-3.5" />
+                              {formatKDA(
+                                enemy.kills,
+                                enemy.deaths,
+                                enemy.assists
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <LocalFireDepartment className="w-3.5 h-3.5" />
+                              {enemy.cs} CS
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <BarChart className="w-3.5 h-3.5" />
+                              {formatDamage(enemy.totalDamageDealtToChampions)}
+                            </div>
+                          </div>
+                          <div className="mt-1.5 w-full h-1 sm:h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full">
+                            <div
+                              className="h-full bg-red-500 rounded-full"
+                              style={{
+                                width: `${
+                                  (enemy.totalDamageDealtToChampions /
+                                    maxEnemyDamage) *
+                                  100
+                                }%`,
+                              }}
+                            />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
