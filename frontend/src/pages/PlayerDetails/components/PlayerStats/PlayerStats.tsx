@@ -15,73 +15,116 @@ export const PlayerStats = ({ player }: PlayerStatsProps) => {
 
   return (
     <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 sm:p-6 overflow-hidden">
-      {/* Image de fond du rang */}
+      {/* Image de fond avec un meilleur effet */}
       {player.tier && (
-        <div className="absolute inset-0 flex items-center justify-center opacity-30 overflow-hidden">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute inset-0 bg-gradient-to-br from-transparent to-white/10 dark:to-black/10" />
           <img
             src={`/ranks/${player.tier.toLowerCase()}.png`}
             alt={player.tier}
-            className="w-full h-full object-contain"
+            className="w-full h-full object-contain opacity-[0.07] dark:opacity-[0.05] transform scale-150"
           />
         </div>
       )}
 
-      {/* Contenu des statistiques */}
+      {/* Cartes de stats avec un design plus moderne */}
       <div className="relative z-10">
-        <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white">
+        <h2 className="text-lg sm:text-xl font-bold mb-4 text-gray-900 dark:text-white">
           Statistiques
         </h2>
-        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 gap-4">
           {/* Elo Actuel */}
-          <div className="bg-gray-50 dark:bg-gray-700 p-3 sm:p-4 rounded-lg">
-            <h3 className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-600 hover:shadow-lg transition-shadow">
+            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
               Elo Actuel
             </h3>
-            <div className="mt-1.5 sm:mt-2 flex items-center gap-2">
-              <img
-                src={`/ranks/${player.tier?.toLowerCase() || "unranked"}.png`}
-                alt={player.tier || "UNRANKED"}
-                className="w-6 h-6 sm:w-8 sm:h-8"
-              />
-              <span className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
-                {player.tier ? `${player.tier} ${player.rank}` : "UNRANKED"}
-              </span>
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <div className="absolute inset-0 bg-blue-500/10 dark:bg-blue-500/20 rounded-full transform scale-150" />
+                <img
+                  src={`/ranks/${player.tier?.toLowerCase() || "unranked"}.png`}
+                  alt={player.tier || "UNRANKED"}
+                  className="w-10 h-10 relative z-10"
+                />
+              </div>
+              <div>
+                <span className="text-lg font-bold text-gray-900 dark:text-white block">
+                  {player.tier ? `${player.tier} ${player.rank}` : "UNRANKED"}
+                </span>
+                <span className="text-sm text-blue-500 dark:text-blue-400 font-semibold">
+                  {player.league_points} LP
+                </span>
+              </div>
             </div>
-            <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-              {player.league_points} LP
-            </span>
+          </div>
+
+          {/* Winrate avec un design circulaire amélioré */}
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-600 hover:shadow-lg transition-shadow">
+            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">
+              Winrate
+            </h3>
+            <div className="flex items-center gap-4">
+              <div className="relative w-16 h-16">
+                {/* Cercle de fond */}
+                <svg className="w-full h-full transform -rotate-90">
+                  <circle
+                    className="text-gray-200 dark:text-gray-600"
+                    strokeWidth="4"
+                    stroke="currentColor"
+                    fill="transparent"
+                    r="26"
+                    cx="32"
+                    cy="32"
+                  />
+                  {/* Cercle de progression */}
+                  <circle
+                    className={`${
+                      Number(winRate) >= 50 ? "text-green-500" : "text-red-500"
+                    }`}
+                    strokeWidth="4"
+                    strokeDasharray={`${Number(winRate) * 1.64} 164`}
+                    strokeLinecap="round"
+                    stroke="currentColor"
+                    fill="transparent"
+                    r="26"
+                    cx="32"
+                    cy="32"
+                  />
+                </svg>
+                {/* Texte au centre */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-lg font-bold text-gray-900 dark:text-white">
+                    {winRate}%
+                  </span>
+                </div>
+              </div>
+              {/* Stats de W/L */}
+              <div className="flex flex-col">
+                <span className="text-green-500 font-medium">
+                  {player.wins} Victoires
+                </span>
+                <span className="text-red-500 font-medium">
+                  {player.losses} Défaites
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Peak Elo */}
-          <div className="bg-gray-50 dark:bg-gray-700 p-3 sm:p-4 rounded-lg">
-            <h3 className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-600 hover:shadow-lg transition-shadow">
+            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
               Peak Elo
             </h3>
             <PeakElo playerId={player.id} />
           </div>
 
-          {/* Winrate */}
-          <div className="bg-gray-50 dark:bg-gray-700 p-3 sm:p-4 rounded-lg">
-            <h3 className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
-              Winrate
-            </h3>
-            <div className="mt-1.5 sm:mt-2">
-              <span className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
-                {winRate}%
-              </span>
-            </div>
-            <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-              {player.wins}W {player.losses}L
-            </span>
-          </div>
-
           {/* Progression */}
-          <div className="bg-gray-50 dark:bg-gray-700 p-3 sm:p-4 rounded-lg">
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-600 hover:shadow-lg transition-shadow">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
+              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
                 Progression
               </h3>
-              <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
+              <span className="text-sm text-gray-500 dark:text-gray-400">
                 toutes les 12h ⏲
               </span>
             </div>
