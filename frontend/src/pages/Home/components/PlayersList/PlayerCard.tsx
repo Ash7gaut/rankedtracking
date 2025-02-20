@@ -109,10 +109,12 @@ export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
               />
             </div>
             <div className="flex-grow min-w-0">
-              <h2 className="text-lg font-bold mb-2 text-gray-900 dark:text-white flex items-center gap-2 truncate">
-                <span className="truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
-                  {player.summoner_name}
-                </span>
+              <h2 className="text-lg font-bold mb-2 text-gray-900 dark:text-white flex items-center gap-2">
+                <div className="flex-1 min-w-0">
+                  <span className="truncate block group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
+                    {player.summoner_name}
+                  </span>
+                </div>
                 {isNegativeWinrate && (
                   <span
                     className="flex-shrink-0 transform group-hover:scale-110 transition-transform duration-300"
@@ -122,22 +124,19 @@ export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
                   </span>
                 )}
               </h2>
-              <div className="text-gray-600 dark:text-gray-300 truncate flex items-center gap-2 font-medium">
-                <span className="bg-gray-100/70 dark:bg-gray-700/50 px-2 py-1 rounded-md flex items-center gap-2">
+              <div className="text-gray-600 dark:text-gray-300 truncate flex items-center gap-2">
+                <div className="bg-gray-100/70 dark:bg-gray-700/50 px-2 py-1 rounded-md flex items-center gap-2 min-w-0">
                   {player.tier ? (
-                    <>
-                      <img
-                        src={`/ranks/${player.tier.toLowerCase()}.png`}
-                        alt={player.tier}
-                        className="w-4 h-4"
-                      />
-                      {player.tier} {player.rank}
-                    </>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span>
+                        {player.tier} {player.rank}
+                      </span>
+                    </div>
                   ) : (
                     "UNRANKED"
                   )}
-                </span>
-                <span className="text-blue-600/90 dark:text-blue-400/90">
+                </div>
+                <span className="flex-shrink-0 text-blue-600/90 dark:text-blue-400/90">
                   {player.league_points} LP
                 </span>
               </div>
