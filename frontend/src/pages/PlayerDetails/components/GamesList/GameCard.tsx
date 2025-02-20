@@ -58,14 +58,20 @@ export const GameCard = ({
     return `${(damage / 1000).toFixed(1)}k`;
   };
 
-  // Calculer le total des dégâts de l'équipe
-  const calculateTeamDamage = () => {
-    const allyDamages =
-      game.allies?.reduce(
-        (sum, ally) => sum + ally.totalDamageDealtToChampions,
-        0
-      ) || 0;
-    return allyDamages + game.totalDamageDealtToChampions;
+  // Calculer le meilleur score de dégâts de l'équipe
+  const calculateMaxTeamDamage = () => {
+    const alliesDamages =
+      game.allies?.map((ally) => ally.totalDamageDealtToChampions) || [];
+    return Math.max(game.totalDamageDealtToChampions, ...alliesDamages);
+  };
+
+  // Calculer le meilleur score de dégâts des ennemis
+  const calculateMaxEnemyDamage = () => {
+    return Math.max(
+      ...(game.enemies?.map((enemy) => enemy.totalDamageDealtToChampions) || [
+        0,
+      ])
+    );
   };
 
   // Calculer la participation aux kills
@@ -78,7 +84,8 @@ export const GameCard = ({
       : ((game.kills + game.assists) / teamKills) * 100;
   };
 
-  const teamDamage = calculateTeamDamage();
+  const maxTeamDamage = calculateMaxTeamDamage();
+  const maxEnemyDamage = calculateMaxEnemyDamage();
   const killParticipation = calculateKillParticipation();
 
   const mainPlayer = {
@@ -131,7 +138,12 @@ export const GameCard = ({
                 {tier && rank && (
                   <>
                     <span>•</span>
-                    <span className="font-medium">
+                    <span className="font-medium flex items-center gap-1">
+                      <img
+                        src={`/ranks/${tier.toLowerCase()}.png`}
+                        alt={tier}
+                        className="w-4 h-4"
+                      />
                       {tier} {rank}
                     </span>
                     {game.lpChange !== undefined && (
@@ -190,7 +202,7 @@ export const GameCard = ({
                   className="h-full bg-blue-500 rounded-full"
                   style={{
                     width: `${
-                      (game.totalDamageDealtToChampions / teamDamage) * 100
+                      (game.totalDamageDealtToChampions / maxTeamDamage) * 100
                     }%`,
                   }}
                 />
@@ -218,28 +230,41 @@ export const GameCard = ({
         {/* Aperçu des champions */}
         <div className="flex gap-2 mb-4">
           <div className="flex -space-x-2">
-            <img
-              src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${game.championId}.png`}
-              alt={championName}
-              className="w-8 h-8 rounded-full border-2 border-blue-500 relative z-10"
-            />
-            {game.allies?.map((ally) => (
+            <div className="group relative">
               <img
-                key={ally.summonerName}
-                src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${ally.championId}.png`}
-                alt={ally.championName}
-                className="w-8 h-8 rounded-full border-2 border-blue-500 relative"
+                src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${game.championId}.png`}
+                alt={championName}
+                className="w-8 h-8 rounded-full border-2 border-blue-500 relative z-10"
               />
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-50">
+                {championName} ({playerName})
+              </div>
+            </div>
+            {game.allies?.map((ally) => (
+              <div key={ally.summonerName} className="group relative">
+                <img
+                  src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${ally.championId}.png`}
+                  alt={ally.championName}
+                  className="w-8 h-8 rounded-full border-2 border-blue-500 relative"
+                />
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-50">
+                  {ally.championName} ({ally.summonerName})
+                </div>
+              </div>
             ))}
           </div>
           <div className="flex -space-x-2 ml-4">
             {game.enemies?.map((enemy) => (
-              <img
-                key={enemy.summonerName}
-                src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${enemy.championId}.png`}
-                alt={enemy.championName}
-                className="w-8 h-8 rounded-full border-2 border-red-500 relative"
-              />
+              <div key={enemy.summonerName} className="group relative">
+                <img
+                  src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${enemy.championId}.png`}
+                  alt={enemy.championName}
+                  className="w-8 h-8 rounded-full border-2 border-red-500 relative"
+                />
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-50">
+                  {enemy.championName} ({enemy.summonerName})
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -288,7 +313,7 @@ export const GameCard = ({
                           style={{
                             width: `${
                               (mainPlayer.totalDamageDealtToChampions /
-                                teamDamage) *
+                                maxTeamDamage) *
                               100
                             }%`,
                           }}
@@ -327,7 +352,7 @@ export const GameCard = ({
                             style={{
                               width: `${
                                 (ally.totalDamageDealtToChampions /
-                                  teamDamage) *
+                                  maxTeamDamage) *
                                 100
                               }%`,
                             }}
@@ -379,7 +404,7 @@ export const GameCard = ({
                             style={{
                               width: `${
                                 (enemy.totalDamageDealtToChampions /
-                                  teamDamage) *
+                                  maxEnemyDamage) *
                                 100
                               }%`,
                             }}

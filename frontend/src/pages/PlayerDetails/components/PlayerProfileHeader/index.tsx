@@ -34,7 +34,12 @@ export const PlayerProfileHeader = ({ player }: PlayerProfileHeaderProps) => {
           )}
           {player.tier && (
             <div className="mt-2 flex items-center gap-3">
-              <span className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded-lg font-medium text-sm">
+              <span className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded-lg font-medium text-sm flex items-center gap-2">
+                <img
+                  src={`/ranks/${player.tier.toLowerCase()}.png`}
+                  alt={player.tier}
+                  className="w-4 h-4"
+                />
                 {player.tier} {player.rank}
               </span>
               <span className="bg-gray-100 dark:bg-gray-700/50 px-3 py-1.5 rounded-lg text-gray-700 dark:text-gray-300 font-medium text-sm">

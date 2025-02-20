@@ -106,9 +106,19 @@ export const LinkedAccountsView = ({ playerName }: LinkedAccountsViewProps) => {
                     )}
                   </div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {account.tier
-                      ? `${account.tier} ${account.rank} • ${account.league_points} LP`
-                      : "UNRANKED"}
+                    {account.tier ? (
+                      <span className="flex items-center gap-2">
+                        <img
+                          src={`/ranks/${account.tier.toLowerCase()}.png`}
+                          alt={account.tier}
+                          className="w-4 h-4"
+                        />
+                        {account.tier} {account.rank} • {account.league_points}{" "}
+                        LP
+                      </span>
+                    ) : (
+                      "UNRANKED"
+                    )}
                   </p>
                 </div>
               </div>

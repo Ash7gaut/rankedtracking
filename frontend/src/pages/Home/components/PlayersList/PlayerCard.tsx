@@ -123,9 +123,14 @@ export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
                 )}
               </h2>
               <div className="text-gray-600 dark:text-gray-300 truncate flex items-center gap-2 font-medium">
-                <span className="bg-gray-100/70 dark:bg-gray-700/50 px-2 py-1 rounded-md">
+                <span className="bg-gray-100/70 dark:bg-gray-700/50 px-2 py-1 rounded-md flex items-center gap-2">
                   {player.tier ? (
                     <>
+                      <img
+                        src={`/ranks/${player.tier.toLowerCase()}.png`}
+                        alt={player.tier}
+                        className="w-4 h-4"
+                      />
                       {player.tier} {player.rank}
                     </>
                   ) : (

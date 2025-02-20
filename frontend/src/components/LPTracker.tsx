@@ -215,9 +215,19 @@ export const LPTracker = ({
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600 dark:text-gray-300">
+                  <span className="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-2">
+                    <img
+                      src={`/ranks/${change.previous_tier.toLowerCase()}.png`}
+                      alt={change.previous_tier}
+                      className="w-4 h-4"
+                    />
                     {getTierAbbreviation(change.previous_tier)}{" "}
                     {change.previous_rank} {change.previous_lp}LP →{" "}
+                    <img
+                      src={`/ranks/${change.tier.toLowerCase()}.png`}
+                      alt={change.tier}
+                      className="w-4 h-4"
+                    />
                     {getTierAbbreviation(change.tier)} {change.rank}{" "}
                     {change.current_lp}LP
                   </span>
