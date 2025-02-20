@@ -172,6 +172,7 @@ export const GameCard = ({
 
         {/* Statistiques principales */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* KDA */}
           <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 sm:p-4">
             <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1">
               <Timeline className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -182,6 +183,7 @@ export const GameCard = ({
             </div>
           </div>
 
+          {/* CS */}
           <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 sm:p-4">
             <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1">
               <LocalFireDepartment className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -192,6 +194,7 @@ export const GameCard = ({
             </div>
           </div>
 
+          {/* Dégâts */}
           <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 sm:p-4">
             <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1">
               <BarChart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -212,6 +215,7 @@ export const GameCard = ({
             </div>
           </div>
 
+          {/* Kill Participation */}
           <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 sm:p-4">
             <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1">
               <People className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -230,14 +234,14 @@ export const GameCard = ({
         </div>
 
         {/* Aperçu des champions */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-4 sm:gap-8">
           {/* Équipe alliée */}
-          <div className="flex gap-2">
+          <div className="flex justify-center gap-2 sm:gap-3">
             <div className="group relative">
               <img
                 src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${game.championId}.png`}
                 alt={championName}
-                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-blue-500 relative z-10 object-cover"
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-blue-500 relative z-10 object-cover"
               />
               <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 sm:px-3 sm:py-1.5 bg-gray-900 text-white text-xs sm:text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-50">
                 {championName} ({playerName})
@@ -248,7 +252,7 @@ export const GameCard = ({
                 <img
                   src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${ally.championId}.png`}
                   alt={ally.championName}
-                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-blue-500 relative object-cover"
+                  className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-blue-500 relative object-cover"
                 />
                 <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 sm:px-3 sm:py-1.5 bg-gray-900 text-white text-xs sm:text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-50">
                   {ally.championName} ({ally.summonerName})
@@ -257,13 +261,13 @@ export const GameCard = ({
             ))}
           </div>
           {/* Équipe ennemie */}
-          <div className="flex gap-2">
+          <div className="flex justify-center gap-2 sm:gap-3">
             {game.enemies?.map((enemy) => (
               <div key={enemy.summonerName} className="group relative">
                 <img
                   src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${enemy.championId}.png`}
                   alt={enemy.championName}
-                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-red-500 relative object-cover"
+                  className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-red-500 relative object-cover"
                 />
                 <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 sm:px-3 sm:py-1.5 bg-gray-900 text-white text-xs sm:text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-50">
                   {enemy.championName} ({enemy.summonerName})
