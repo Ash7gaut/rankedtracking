@@ -5,6 +5,17 @@ import { AddPlayerForm } from "../Home/components/AddPlayerForm/AddPlayerForm";
 import { api } from "../../utils/api";
 import { LinkedAccounts, LinkedAccount } from "./components/LinkedAccounts";
 import { BackgroundSelector } from "./components/BackgroundSelector";
+import {
+  Person,
+  ArrowBack,
+  Wallpaper,
+  CheckCircle,
+  Error as ErrorIcon,
+  Save,
+  Group,
+  Add,
+  Refresh,
+} from "@mui/icons-material";
 
 const Profile = () => {
   const [loading, setLoading] = useState(false);
@@ -208,15 +219,17 @@ const Profile = () => {
   };
 
   return (
-    <div className="relative max-w-4xl mx-auto p-6">
+    <div className="relative min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Messages de succès/erreur */}
       {successMessage && (
-        <div className="mb-4 p-2 bg-green-100 text-green-700 rounded">
+        <div className="mb-4 p-2 bg-green-100 text-green-700 rounded flex items-center gap-2">
+          <CheckCircle className="w-5 h-5" />
           {successMessage}
         </div>
       )}
       {errorMessage && (
-        <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+        <div className="mb-4 p-2 bg-red-100 text-red-700 rounded flex items-center gap-2">
+          <ErrorIcon className="w-5 h-5" />
           {errorMessage}
         </div>
       )}
@@ -229,113 +242,137 @@ const Profile = () => {
             alt="Background"
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-black/50" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 to-black/40 backdrop-blur-[1px]" />
         </div>
       )}
 
-      {/* En-tête avec les boutons */}
-      <div className="flex justify-between items-center mb-6">
-        <button
-          onClick={() => navigate("/")}
-          className="px-4 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-        >
-          ← Retour
-        </button>
-
-        <button
-          onClick={() => setIsBackgroundSelectorOpen(true)}
-          className="px-4 py-2 text-sm bg-gray-100/10 backdrop-blur-sm text-white rounded-lg hover:bg-gray-100/20 transition-colors"
-        >
-          Changer le fond
-        </button>
-      </div>
-
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Profil
-        </h1>
-      </div>
-
-      <div className="space-y-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Email
-          </label>
-          <input
-            type="text"
-            value={email}
-            disabled
-            className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Pseudo
-            </label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Rôle
-            </label>
-            <select
-              value={userRole}
-              onChange={(e) => setUserRole(e.target.value)}
-              className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            >
-              <option value="">Sélectionner un rôle</option>
-              <option value="TOP">Top</option>
-              <option value="JUNGLE">Jungle</option>
-              <option value="MID">Mid</option>
-              <option value="ADC">ADC</option>
-              <option value="SUPPORT">Support</option>
-            </select>
-          </div>
-        </div>
-
-        <button
-          onClick={updateProfile}
-          disabled={loading}
-          className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
-        >
-          {loading ? "Sauvegarde..." : "Sauvegarder"}
-        </button>
-      </div>
-
-      <div className="mt-8">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-            Comptes liés ({linkedAccounts.length}/5)
-          </h2>
+      <div className="max-w-4xl mx-auto p-6 space-y-6">
+        {/* En-tête avec les boutons */}
+        <div className="flex justify-between items-center">
           <button
-            onClick={handleAddPlayer}
-            className={`px-4 py-2 rounded transition-colors ${
-              linkedAccounts.length >= 5
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-green-500 hover:bg-green-600"
-            } text-white`}
-            disabled={linkedAccounts.length >= 5}
+            onClick={() => navigate("/")}
+            className="px-4 py-2 text-sm bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all flex items-center gap-2"
           >
-            Ajouter un compte
+            <ArrowBack className="w-4 h-4" />
+            Retour
+          </button>
+
+          <button
+            onClick={() => setIsBackgroundSelectorOpen(true)}
+            className="px-4 py-2 text-sm bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all flex items-center gap-2"
+          >
+            <Wallpaper className="w-4 h-4" />
+            Changer le fond
           </button>
         </div>
 
-        {linkedAccounts.length > 0 && (
-          <LinkedAccounts
-            accounts={linkedAccounts}
-            username={username}
-            onDelete={handleDelete}
-            onRefresh={loadProfileData}
-          />
-        )}
+        {/* Section principale */}
+        <div className="bg-white/10 backdrop-blur-md rounded-xl p-8 shadow-xl border border-white/10">
+          <h1 className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
+            <Person className="w-7 h-7" />
+            Profil
+          </h1>
+
+          <div className="space-y-6">
+            {/* Email */}
+            <div className="bg-black/20 rounded-lg p-4">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Email
+              </label>
+              <input
+                type="text"
+                value={email}
+                disabled
+                className="w-full p-3 bg-black/20 border border-white/10 rounded-lg text-gray-300"
+              />
+            </div>
+
+            {/* Pseudo et Rôle */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-black/20 rounded-lg p-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Pseudo
+                </label>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full p-3 bg-black/20 border border-white/10 rounded-lg text-white focus:ring-2 focus:ring-blue-500/40 transition-all"
+                />
+              </div>
+
+              <div className="bg-black/20 rounded-lg p-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Rôle
+                </label>
+                <select
+                  value={userRole}
+                  onChange={(e) => setUserRole(e.target.value)}
+                  className="w-full p-3 bg-black/20 border border-white/10 rounded-lg text-white focus:ring-2 focus:ring-blue-500/40 transition-all"
+                >
+                  <option value="">Sélectionner un rôle</option>
+                  <option value="TOP">Top</option>
+                  <option value="JUNGLE">Jungle</option>
+                  <option value="MID">Mid</option>
+                  <option value="ADC">ADC</option>
+                  <option value="SUPPORT">Support</option>
+                </select>
+              </div>
+            </div>
+
+            <button
+              onClick={updateProfile}
+              disabled={loading}
+              className="w-full p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <Refresh className="w-5 h-5 animate-spin" />
+                  Sauvegarde...
+                </>
+              ) : (
+                <>
+                  <Save className="w-5 h-5" />
+                  Sauvegarder
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Section des comptes liés */}
+        <div className="bg-white/10 backdrop-blur-md rounded-xl p-8 shadow-xl border border-white/10">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-bold text-white flex items-center gap-3">
+              <Group className="w-6 h-6" />
+              Comptes liés ({linkedAccounts.length}/5)
+            </h2>
+            <button
+              onClick={handleAddPlayer}
+              disabled={linkedAccounts.length >= 5}
+              className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2
+                ${
+                  linkedAccounts.length >= 5
+                    ? "bg-gray-500/50 cursor-not-allowed"
+                    : "bg-green-500 hover:bg-green-600"
+                } text-white`}
+            >
+              <Add className="w-5 h-5" />
+              Ajouter un compte
+            </button>
+          </div>
+
+          {linkedAccounts.length > 0 && (
+            <div className="space-y-4">
+              <LinkedAccounts
+                accounts={linkedAccounts}
+                username={username}
+                onDelete={handleDelete}
+                onRefresh={loadProfileData}
+              />
+            </div>
+          )}
+        </div>
 
         {isAddPlayerOpen && (
           <div className="mt-4 bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
