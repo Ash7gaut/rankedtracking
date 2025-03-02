@@ -49,22 +49,6 @@ export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
 
   return (
     <div className="relative h-[180px] group">
-      {player.in_game && (
-        <a
-          href={`https://porofessor.gg/fr/live/euw/${formatSummonerNameForUrl(
-            player.summoner_name
-          )}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`absolute top-3 right-3 ${getInGameBadgeColor(
-            Number(winRate)
-          )} text-white px-3 py-1 rounded-full text-xs font-semibold animate-pulse z-50 hover:brightness-110 transition-all duration-300 backdrop-blur-sm shadow-lg`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          IN GAME
-        </a>
-      )}
-
       {rank && rank <= 3 && (
         <div
           className={`absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 ${getBadgeColor(
@@ -88,6 +72,22 @@ export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
         }`}
         onClick={() => navigate(`/player/${player.id}`)}
       >
+        {player.in_game && (
+          <a
+            href={`https://porofessor.gg/fr/live/euw/${formatSummonerNameForUrl(
+              player.summoner_name
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`absolute top-3 right-3 ${getInGameBadgeColor(
+              Number(winRate)
+            )} text-white px-3 py-1 rounded-full text-xs font-semibold animate-pulse z-50 hover:brightness-110 transition-all duration-300 backdrop-blur-sm shadow-lg`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            IN GAME
+          </a>
+        )}
+
         <div className="absolute inset-0 flex items-center justify-center opacity-[0.07] group-hover:opacity-[0.09] transition-opacity duration-300">
           <img
             src={

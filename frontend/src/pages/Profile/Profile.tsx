@@ -252,7 +252,7 @@ const Profile = () => {
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setIsBackgroundSelectorOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-200/80 dark:bg-white/10 backdrop-blur-sm text-gray-800 dark:text-white rounded-lg hover:bg-gray-300/80 dark:hover:bg-white/20 transition-all"
               >
                 <Wallpaper className="w-5 h-5" />
                 <span className="hidden sm:inline">Changer le fond</span>
@@ -262,15 +262,15 @@ const Profile = () => {
 
           {/* Messages de succès/erreur */}
           {successMessage && (
-            <div className="mb-6 p-4 bg-green-500/20 backdrop-blur-sm border border-green-500/30 text-green-200 rounded-lg flex items-center gap-3 animate-fadeIn">
-              <CheckCircle className="w-5 h-5 text-green-400" />
+            <div className="mb-6 p-4 bg-green-100/90 dark:bg-green-500/20 backdrop-blur-sm border border-green-200 dark:border-green-500/30 text-green-800 dark:text-green-200 rounded-lg flex items-center gap-3 animate-fadeIn">
+              <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
               <span>{successMessage}</span>
             </div>
           )}
 
           {errorMessage && (
-            <div className="mb-6 p-4 bg-red-500/20 backdrop-blur-sm border border-red-500/30 text-red-200 rounded-lg flex items-center gap-3 animate-fadeIn">
-              <ErrorIcon className="w-5 h-5 text-red-400" />
+            <div className="mb-6 p-4 bg-red-100/90 dark:bg-red-500/20 backdrop-blur-sm border border-red-200 dark:border-red-500/30 text-red-800 dark:text-red-200 rounded-lg flex items-center gap-3 animate-fadeIn">
+              <ErrorIcon className="w-5 h-5 text-red-600 dark:text-red-400" />
               <span>{errorMessage}</span>
             </div>
           )}
@@ -279,7 +279,7 @@ const Profile = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
             {/* Colonne de gauche - Informations de profil */}
             <div className="lg:col-span-1">
-              <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md rounded-xl shadow-xl border border-white/10 dark:border-gray-700/30 overflow-hidden">
+              <div className="bg-white/80 dark:bg-white/10 dark:bg-gray-800/20 backdrop-blur-md rounded-xl shadow-xl border border-gray-200 dark:border-white/10 dark:border-gray-700/30 overflow-hidden">
                 <div className="relative h-32">
                   {backgroundUrl ? (
                     <>
@@ -292,7 +292,7 @@ const Profile = () => {
                     </>
                   ) : (
                     <div className="h-full bg-gradient-to-r from-blue-600/30 to-purple-600/30 flex items-center justify-center">
-                      <span className="text-white/70 text-sm flex items-center gap-2">
+                      <span className="text-gray-600 dark:text-white/70 text-sm flex items-center gap-2">
                         <Wallpaper className="w-4 h-4" />
                         Cliquez pour ajouter un fond
                       </span>
@@ -332,15 +332,19 @@ const Profile = () => {
                       )}
                     </div>
 
-                    <h1 className="mt-4 text-2xl font-bold text-white">
+                    <h1 className="mt-4 text-2xl font-bold text-gray-800 dark:text-white">
                       {username || "Utilisateur"}
                     </h1>
-                    <p className="text-gray-300 text-sm">{email}</p>
+                    <p className="text-gray-600 dark:text-gray-300 text-sm">
+                      {email}
+                    </p>
 
                     <div className="mt-6 w-full">
                       <div className="flex justify-between items-center mb-2">
-                        <h3 className="text-white font-medium">Comptes liés</h3>
-                        <span className="text-blue-300 text-sm">
+                        <h3 className="text-gray-800 dark:text-white font-medium">
+                          Comptes liés
+                        </h3>
+                        <span className="text-blue-700 dark:text-blue-300 text-sm">
                           {linkedAccounts.length}/5
                         </span>
                       </div>
@@ -377,14 +381,64 @@ const Profile = () => {
                           </div>
                         ))}
 
-                        {linkedAccounts.length < 5 && (
-                          <button
-                            onClick={handleAddPlayer}
-                            className="w-10 h-10 rounded-full bg-gray-700/50 hover:bg-gray-600 flex items-center justify-center text-gray-300 hover:text-white transition-all"
-                            title="Ajouter un compte"
-                          >
-                            <Add className="w-5 h-5" />
-                          </button>
+                        {isAddPlayerOpen ? (
+                          <div className="mt-6 animate-fadeIn">
+                            <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+                              <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 dark:from-blue-500/20 dark:to-purple-500/20 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                                <div className="flex items-center justify-between">
+                                  <h3 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                                    <SportsEsports className="w-5 h-5 text-blue-500" />
+                                    Ajouter un compte League of Legends
+                                  </h3>
+                                  <button
+                                    onClick={() => setIsAddPlayerOpen(false)}
+                                    className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
+                                  >
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      className="h-5 w-5"
+                                      viewBox="0 0 20 20"
+                                      fill="currentColor"
+                                    >
+                                      <path
+                                        fillRule="evenodd"
+                                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                        clipRule="evenodd"
+                                      />
+                                    </svg>
+                                  </button>
+                                </div>
+                              </div>
+                              <div className="p-6">
+                                <AddPlayerForm
+                                  onSuccess={() => {
+                                    setIsAddPlayerOpen(false);
+                                    loadProfileData();
+                                    setSuccessMessage(
+                                      "Compte LoL ajouté avec succès !"
+                                    );
+                                  }}
+                                  defaultPlayerName={username}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          linkedAccounts.length < 5 && (
+                            <div className="mt-6">
+                              <button
+                                onClick={handleAddPlayer}
+                                className="w-full p-4 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all flex items-center justify-center gap-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 group"
+                              >
+                                <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 flex items-center justify-center transition-all">
+                                  <Add className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
+                                </div>
+                                <span className="font-medium">
+                                  Ajouter un nouveau compte
+                                </span>
+                              </button>
+                            </div>
+                          )
                         )}
                       </div>
                     </div>
@@ -395,14 +449,14 @@ const Profile = () => {
 
             {/* Colonne de droite - Onglets et contenu */}
             <div className="lg:col-span-2">
-              <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md rounded-xl shadow-xl border border-white/10 dark:border-gray-700/30 overflow-hidden h-full">
+              <div className="bg-white/80 dark:bg-white/10 dark:bg-gray-800/20 backdrop-blur-md rounded-xl shadow-xl border border-gray-200 dark:border-white/10 dark:border-gray-700/30 overflow-hidden h-full">
                 {/* Navigation par onglets */}
-                <div className="flex border-b border-gray-700/30">
+                <div className="flex border-b border-gray-300 dark:border-gray-700/30">
                   <button
                     className={`flex items-center gap-2 px-6 py-4 text-sm font-medium transition-all ${
                       activeTab === "profile"
-                        ? "text-white border-b-2 border-blue-500"
-                        : "text-gray-400 hover:text-gray-200"
+                        ? "text-blue-700 dark:text-white border-b-2 border-blue-500"
+                        : "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
                     }`}
                     onClick={() => setActiveTab("profile")}
                   >
@@ -412,8 +466,8 @@ const Profile = () => {
                   <button
                     className={`flex items-center gap-2 px-6 py-4 text-sm font-medium transition-all ${
                       activeTab === "accounts"
-                        ? "text-white border-b-2 border-blue-500"
-                        : "text-gray-400 hover:text-gray-200"
+                        ? "text-blue-700 dark:text-white border-b-2 border-blue-500"
+                        : "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
                     }`}
                     onClick={() => setActiveTab("accounts")}
                   >
@@ -423,8 +477,8 @@ const Profile = () => {
                   <button
                     className={`flex items-center gap-2 px-6 py-4 text-sm font-medium transition-all ${
                       activeTab === "settings"
-                        ? "text-white border-b-2 border-blue-500"
-                        : "text-gray-400 hover:text-gray-200"
+                        ? "text-blue-700 dark:text-white border-b-2 border-blue-500"
+                        : "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
                     }`}
                     onClick={() => setActiveTab("settings")}
                   >
@@ -438,32 +492,32 @@ const Profile = () => {
                   {/* Onglet Profil */}
                   {activeTab === "profile" && (
                     <div className="space-y-6">
-                      <h2 className="text-xl font-bold text-white mb-4">
+                      <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
                         Informations personnelles
                       </h2>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                          <label className="block text-sm font-medium text-gray-300">
+                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">
                             Pseudo
                           </label>
                           <input
                             type="text"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            className="w-full p-3 bg-black/20 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all"
+                            className="w-full p-3 bg-gray-100 dark:bg-black/20 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all"
                             placeholder="Votre pseudo"
                           />
                         </div>
 
                         <div className="space-y-2">
-                          <label className="block text-sm font-medium text-gray-300">
+                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">
                             Rôle principal
                           </label>
                           <select
                             value={userRole}
                             onChange={(e) => setUserRole(e.target.value)}
-                            className="w-full p-3 bg-black/20 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all"
+                            className="w-full p-3 bg-gray-100 dark:bg-black/20 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all"
                           >
                             <option value="">Sélectionner un rôle</option>
                             <option value="TOP">Top</option>
@@ -476,14 +530,14 @@ const Profile = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-300">
+                        <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">
                           Email
                         </label>
                         <input
                           type="text"
                           value={email}
                           disabled
-                          className="w-full p-3 bg-black/20 border border-gray-700 rounded-lg text-gray-400 cursor-not-allowed"
+                          className="w-full p-3 bg-gray-100 dark:bg-black/20 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-500 dark:text-gray-400 cursor-not-allowed"
                         />
                       </div>
 
@@ -511,7 +565,7 @@ const Profile = () => {
                   {activeTab === "accounts" && (
                     <div className="space-y-6">
                       <div className="flex justify-between items-center">
-                        <h2 className="text-xl font-bold text-white">
+                        <h2 className="text-xl font-bold text-gray-800 dark:text-white">
                           Comptes League of Legends
                         </h2>
                         <button
@@ -539,9 +593,9 @@ const Profile = () => {
                           />
                         </div>
                       ) : (
-                        <div className="flex flex-col items-center justify-center py-10 bg-black/20 rounded-lg border border-gray-700/50">
-                          <SportsEsports className="w-16 h-16 text-gray-600 mb-4" />
-                          <p className="text-gray-400 mb-4">
+                        <div className="flex flex-col items-center justify-center py-10 bg-gray-100/80 dark:bg-black/20 rounded-lg border border-gray-300 dark:border-gray-700/50">
+                          <SportsEsports className="w-16 h-16 text-gray-500 dark:text-gray-600 mb-4" />
+                          <p className="text-gray-600 dark:text-gray-400 mb-4">
                             Vous n'avez pas encore ajouté de compte League of
                             Legends
                           </p>
@@ -554,44 +608,26 @@ const Profile = () => {
                           </button>
                         </div>
                       )}
-
-                      {isAddPlayerOpen && (
-                        <div className="mt-6 bg-black/30 backdrop-blur-sm rounded-lg border border-gray-700/50 p-6">
-                          <h3 className="text-lg font-bold text-white mb-4">
-                            Ajouter un compte
-                          </h3>
-                          <AddPlayerForm
-                            onSuccess={() => {
-                              setIsAddPlayerOpen(false);
-                              loadProfileData();
-                              setSuccessMessage(
-                                "Compte LoL ajouté avec succès !"
-                              );
-                            }}
-                            defaultPlayerName={username}
-                          />
-                        </div>
-                      )}
                     </div>
                   )}
 
                   {/* Onglet Paramètres */}
                   {activeTab === "settings" && (
                     <div className="space-y-6">
-                      <h2 className="text-xl font-bold text-white mb-4">
+                      <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
                         Paramètres du profil
                       </h2>
 
                       <div className="space-y-4">
-                        <div className="p-4 bg-black/20 rounded-lg border border-gray-700/50">
+                        <div className="p-4 bg-gray-100/80 dark:bg-black/20 rounded-lg border border-gray-300 dark:border-gray-700/50">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                              <Wallpaper className="w-5 h-5 text-gray-400" />
+                              <Wallpaper className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                               <div>
-                                <h3 className="text-white font-medium">
+                                <h3 className="text-gray-800 dark:text-white font-medium">
                                   Fond de profil
                                 </h3>
-                                <p className="text-gray-400 text-sm">
+                                <p className="text-gray-600 dark:text-gray-400 text-sm">
                                   Personnalisez l'arrière-plan de votre profil
                                 </p>
                               </div>
@@ -616,18 +652,18 @@ const Profile = () => {
         {/* Dialog de confirmation de suppression */}
         {showDeleteConfirm && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full border border-gray-700">
-              <h3 className="text-xl font-bold mb-4 text-white">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full border border-gray-300 dark:border-gray-700">
+              <h3 className="text-xl font-bold mb-4 text-gray-800 dark:text-white">
                 Confirmer la suppression
               </h3>
-              <p className="text-gray-300 mb-6">
+              <p className="text-gray-600 dark:text-gray-300 mb-6">
                 Êtes-vous sûr de vouloir supprimer ce compte ? Cette action est
                 irréversible.
               </p>
               <div className="flex justify-end space-x-4">
                 <button
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all"
+                  className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-all"
                 >
                   Annuler
                 </button>

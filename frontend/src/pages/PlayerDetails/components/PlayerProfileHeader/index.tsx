@@ -8,6 +8,23 @@ interface PlayerProfileHeaderProps {
 }
 
 export const PlayerProfileHeader = ({ player }: PlayerProfileHeaderProps) => {
+  // Fonction pour formater le nom d'invocateur pour l'URL Porofessor
+  const formatSummonerNameForUrl = (name: string) => {
+    // Remplacer les espaces par %20 et # par -
+    return name.replace(/ /g, "%20").replace(/#/g, "-");
+  };
+
+  // Fonction pour déterminer la couleur du badge IN GAME
+  const getInGameBadgeColor = (winRate: number) => {
+    if (winRate < 50) return "bg-amber-800";
+    return "bg-green-500";
+  };
+
+  // Calcul du winrate
+  const totalGames = (player.wins || 0) + (player.losses || 0);
+  const winRate = totalGames > 0 ? ((player.wins || 0) / totalGames) * 100 : 0;
+  const winRateFormatted = winRate.toFixed(1);
+
   return (
     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
       <div className="flex items-center gap-8">
@@ -18,6 +35,25 @@ export const PlayerProfileHeader = ({ player }: PlayerProfileHeaderProps) => {
             alt="Profile Icon"
             className="relative w-24 h-24 rounded-full border-2 border-white dark:border-gray-700 shadow-lg group-hover:shadow-xl transform group-hover:scale-105 transition-all duration-300"
           />
+
+          {/* Badge IN GAME */}
+          {player.in_game && (
+            <div className="absolute -bottom-2 right-0 transition-transform duration-300 group-hover:scale-110">
+              <a
+                href={`https://porofessor.gg/fr/live/euw/${formatSummonerNameForUrl(
+                  player.summoner_name
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${getInGameBadgeColor(
+                  Number(winRateFormatted)
+                )} text-white px-3 py-1 rounded-full text-xs font-semibold animate-pulse shadow-lg hover:brightness-110 transition-all duration-300 backdrop-blur-sm`}
+                onClick={(e) => e.stopPropagation()}
+              >
+                IG
+              </a>
+            </div>
+          )}
         </div>
         <div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
