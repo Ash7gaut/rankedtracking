@@ -15,7 +15,12 @@ import {
   Group,
   Add,
   Refresh,
+  Settings,
+  AccountCircle,
+  SportsEsports,
+  Edit,
 } from "@mui/icons-material";
+import { PageTransition } from "../../components/PageTransition";
 
 const Profile = () => {
   const [loading, setLoading] = useState(false);
@@ -31,6 +36,7 @@ const Profile = () => {
   const [isBackgroundSelectorOpen, setIsBackgroundSelectorOpen] =
     useState(false);
   const [backgroundUrl, setBackgroundUrl] = useState("");
+  const [activeTab, setActiveTab] = useState("profile");
   const navigate = useNavigate();
 
   const loadProfileData = useCallback(async () => {
@@ -47,7 +53,7 @@ const Profile = () => {
 
       const { data: userData, error: userError } = await supabase
         .from("usernames")
-        .select("username, role")
+        .select("username, role, background_url")
         .eq("user_id", session.user.id)
         .single();
 
@@ -56,6 +62,9 @@ const Profile = () => {
       } else {
         setUsername(userData?.username || "");
         setUserRole(userData?.role || "");
+        if (userData?.background_url) {
+          setBackgroundUrl(userData.background_url);
+        }
       }
 
       if (userData?.username) {
@@ -174,27 +183,6 @@ const Profile = () => {
     setErrorMessage("");
   };
 
-  // Charger le fond au chargement du profil
-  useEffect(() => {
-    const loadBackground = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (session) {
-        const { data } = await supabase
-          .from("usernames")
-          .select("background_url")
-          .eq("user_id", session.user.id)
-          .single();
-
-        if (data?.background_url) {
-          setBackgroundUrl(data.background_url);
-        }
-      }
-    };
-    loadBackground();
-  }, []);
-
   const handleBackgroundSelect = async (url: string) => {
     try {
       const {
@@ -218,194 +206,434 @@ const Profile = () => {
     }
   };
 
+  const getRoleIcon = (role: string) => {
+    switch (role) {
+      case "TOP":
+        return "/roles/Role=Top.png";
+      case "JUNGLE":
+        return "/roles/Role=Jungle.png";
+      case "MID":
+        return "/roles/Role=Mid.png";
+      case "ADC":
+        return "/roles/Role=Bot.png";
+      case "SUPPORT":
+        return "/roles/Role=Support.png";
+      default:
+        return "/roles/Role=Mid.png";
+    }
+  };
+
   return (
-    <div className="relative min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Messages de succès/erreur */}
-      {successMessage && (
-        <div className="mb-4 p-2 bg-green-100 text-green-700 rounded flex items-center gap-2">
-          <CheckCircle className="w-5 h-5" />
-          {successMessage}
-        </div>
-      )}
-      {errorMessage && (
-        <div className="mb-4 p-2 bg-red-100 text-red-700 rounded flex items-center gap-2">
-          <ErrorIcon className="w-5 h-5" />
-          {errorMessage}
-        </div>
-      )}
-
-      {/* Fond avec overlay */}
-      {backgroundUrl && (
-        <div className="fixed inset-0 -z-10">
-          <img
-            src={backgroundUrl}
-            alt="Background"
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/70 to-black/40 backdrop-blur-[1px]" />
-        </div>
-      )}
-
-      <div className="max-w-4xl mx-auto p-6 space-y-6">
-        {/* En-tête avec les boutons */}
-        <div className="flex justify-between items-center">
-          <button
-            onClick={() => navigate("/")}
-            className="px-4 py-2 text-sm bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all flex items-center gap-2"
-          >
-            <ArrowBack className="w-4 h-4" />
-            Retour
-          </button>
-
-          <button
-            onClick={() => setIsBackgroundSelectorOpen(true)}
-            className="px-4 py-2 text-sm bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all flex items-center gap-2"
-          >
-            <Wallpaper className="w-4 h-4" />
-            Changer le fond
-          </button>
-        </div>
-
-        {/* Section principale */}
-        <div className="bg-white/10 backdrop-blur-md rounded-xl p-8 shadow-xl border border-white/10">
-          <h1 className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
-            <Person className="w-7 h-7" />
-            Profil
-          </h1>
-
-          <div className="space-y-6">
-            {/* Email */}
-            <div className="bg-black/20 rounded-lg p-4">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Email
-              </label>
-              <input
-                type="text"
-                value={email}
-                disabled
-                className="w-full p-3 bg-black/20 border border-white/10 rounded-lg text-gray-300"
-              />
-            </div>
-
-            {/* Pseudo et Rôle */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-black/20 rounded-lg p-4">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Pseudo
-                </label>
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full p-3 bg-black/20 border border-white/10 rounded-lg text-white focus:ring-2 focus:ring-blue-500/40 transition-all"
-                />
-              </div>
-
-              <div className="bg-black/20 rounded-lg p-4">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Rôle
-                </label>
-                <select
-                  value={userRole}
-                  onChange={(e) => setUserRole(e.target.value)}
-                  className="w-full p-3 bg-black/20 border border-white/10 rounded-lg text-white focus:ring-2 focus:ring-blue-500/40 transition-all"
-                >
-                  <option value="">Sélectionner un rôle</option>
-                  <option value="TOP">Top</option>
-                  <option value="JUNGLE">Jungle</option>
-                  <option value="MID">Mid</option>
-                  <option value="ADC">ADC</option>
-                  <option value="SUPPORT">Support</option>
-                </select>
-              </div>
-            </div>
-
-            <button
-              onClick={updateProfile}
-              disabled={loading}
-              className="w-full p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <Refresh className="w-5 h-5 animate-spin" />
-                  Sauvegarde...
-                </>
-              ) : (
-                <>
-                  <Save className="w-5 h-5" />
-                  Sauvegarder
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Section des comptes liés */}
-        <div className="bg-white/10 backdrop-blur-md rounded-xl p-8 shadow-xl border border-white/10">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-white flex items-center gap-3">
-              <Group className="w-6 h-6" />
-              Comptes liés ({linkedAccounts.length}/5)
-            </h2>
-            <button
-              onClick={handleAddPlayer}
-              disabled={linkedAccounts.length >= 5}
-              className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2
-                ${
-                  linkedAccounts.length >= 5
-                    ? "bg-gray-500/50 cursor-not-allowed"
-                    : "bg-green-500 hover:bg-green-600"
-                } text-white`}
-            >
-              <Add className="w-5 h-5" />
-              Ajouter un compte
-            </button>
-          </div>
-
-          {linkedAccounts.length > 0 && (
-            <div className="space-y-4">
-              <LinkedAccounts
-                accounts={linkedAccounts}
-                username={username}
-                onDelete={handleDelete}
-                onRefresh={loadProfileData}
-              />
-            </div>
-          )}
-        </div>
-
-        {isAddPlayerOpen && (
-          <div className="mt-4 bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <AddPlayerForm
-              onSuccess={() => {
-                setIsAddPlayerOpen(false);
-                loadProfileData();
-                setSuccessMessage("Compte LoL ajouté avec succès !");
-              }}
-              defaultPlayerName={username}
+    <PageTransition>
+      <div className="relative min-h-screen bg-gray-50 dark:bg-gray-900">
+        {/* Fond avec overlay */}
+        {backgroundUrl && (
+          <div className="fixed inset-0 -z-10">
+            <img
+              src={backgroundUrl}
+              alt="Background"
+              className="w-full h-full object-cover transition-all duration-500 ease-in-out"
             />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-blue-900/40 to-purple-900/40 backdrop-blur-[2px] transition-all duration-500 ease-in-out" />
           </div>
         )}
 
+        <div className="container mx-auto px-4 py-8">
+          {/* En-tête avec navigation */}
+          <div className="flex justify-between items-center mb-8">
+            <button
+              onClick={() => navigate("/")}
+              className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all"
+            >
+              <ArrowBack className="w-5 h-5" />
+              <span>Retour</span>
+            </button>
+
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setIsBackgroundSelectorOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all"
+              >
+                <Wallpaper className="w-5 h-5" />
+                <span className="hidden sm:inline">Changer le fond</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Messages de succès/erreur */}
+          {successMessage && (
+            <div className="mb-6 p-4 bg-green-500/20 backdrop-blur-sm border border-green-500/30 text-green-200 rounded-lg flex items-center gap-3 animate-fadeIn">
+              <CheckCircle className="w-5 h-5 text-green-400" />
+              <span>{successMessage}</span>
+            </div>
+          )}
+
+          {errorMessage && (
+            <div className="mb-6 p-4 bg-red-500/20 backdrop-blur-sm border border-red-500/30 text-red-200 rounded-lg flex items-center gap-3 animate-fadeIn">
+              <ErrorIcon className="w-5 h-5 text-red-400" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
+          {/* Carte de profil principale */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            {/* Colonne de gauche - Informations de profil */}
+            <div className="lg:col-span-1">
+              <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md rounded-xl shadow-xl border border-white/10 dark:border-gray-700/30 overflow-hidden">
+                <div className="relative h-32">
+                  {backgroundUrl ? (
+                    <>
+                      <img
+                        src={backgroundUrl}
+                        alt="Banner background"
+                        className="w-full h-full object-cover transition-all duration-500 ease-in-out"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-blue-900/40 to-purple-900/40 backdrop-blur-[2px] transition-all duration-500 ease-in-out"></div>
+                    </>
+                  ) : (
+                    <div className="h-full bg-gradient-to-r from-blue-600/30 to-purple-600/30 flex items-center justify-center">
+                      <span className="text-white/70 text-sm flex items-center gap-2">
+                        <Wallpaper className="w-4 h-4" />
+                        Cliquez pour ajouter un fond
+                      </span>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => setIsBackgroundSelectorOpen(true)}
+                    className="absolute top-3 right-3 p-2 bg-black/30 rounded-full text-white hover:bg-black/50 transition-all z-10 group"
+                    title="Changer le fond"
+                  >
+                    <Edit className="w-4 h-4" />
+                    <span className="absolute -bottom-8 right-0 bg-black/70 text-xs text-white px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                      Synchronisé
+                    </span>
+                  </button>
+                </div>
+
+                <div className="px-6 pt-0 pb-6 -mt-12">
+                  <div className="flex flex-col items-center">
+                    <div className="relative">
+                      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-3xl font-bold overflow-hidden border-4 border-white/10 dark:border-gray-800/50">
+                        {username ? (
+                          username.charAt(0).toUpperCase()
+                        ) : (
+                          <AccountCircle className="w-20 h-20" />
+                        )}
+                      </div>
+                      {userRole && (
+                        <div className="absolute -bottom-2 -right-2 bg-white dark:bg-gray-800 rounded-full p-1.5 shadow-lg">
+                          <img
+                            src={getRoleIcon(userRole)}
+                            alt={userRole}
+                            className="w-6 h-6"
+                            title={userRole}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <h1 className="mt-4 text-2xl font-bold text-white">
+                      {username || "Utilisateur"}
+                    </h1>
+                    <p className="text-gray-300 text-sm">{email}</p>
+
+                    <div className="mt-6 w-full">
+                      <div className="flex justify-between items-center mb-2">
+                        <h3 className="text-white font-medium">Comptes liés</h3>
+                        <span className="text-blue-300 text-sm">
+                          {linkedAccounts.length}/5
+                        </span>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {linkedAccounts.map((account) => (
+                          <div
+                            key={account.id}
+                            className={`relative group cursor-pointer ${
+                              account.is_main ? "order-first" : ""
+                            }`}
+                            onClick={() => navigate(`/player/${account.id}`)}
+                          >
+                            <div
+                              className={`absolute inset-0 rounded-full ${
+                                account.is_main ? "bg-blue-500" : "bg-gray-700"
+                              } transform scale-110 opacity-0 group-hover:opacity-100 transition-all duration-300`}
+                            ></div>
+                            <img
+                              src={`https://opgg-static.akamaized.net/meta/images/profile_icons/profileIcon${account.profile_icon_id}.jpg`}
+                              alt={account.summoner_name}
+                              className={`w-10 h-10 rounded-full border-2 ${
+                                account.is_main
+                                  ? "border-blue-500"
+                                  : "border-gray-700"
+                              } group-hover:scale-105 transition-all duration-300`}
+                              title={account.summoner_name}
+                            />
+                            {account.is_main && (
+                              <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full border border-white dark:border-gray-800 flex items-center justify-center">
+                                <span className="text-white text-[8px]">★</span>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+
+                        {linkedAccounts.length < 5 && (
+                          <button
+                            onClick={handleAddPlayer}
+                            className="w-10 h-10 rounded-full bg-gray-700/50 hover:bg-gray-600 flex items-center justify-center text-gray-300 hover:text-white transition-all"
+                            title="Ajouter un compte"
+                          >
+                            <Add className="w-5 h-5" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Colonne de droite - Onglets et contenu */}
+            <div className="lg:col-span-2">
+              <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md rounded-xl shadow-xl border border-white/10 dark:border-gray-700/30 overflow-hidden h-full">
+                {/* Navigation par onglets */}
+                <div className="flex border-b border-gray-700/30">
+                  <button
+                    className={`flex items-center gap-2 px-6 py-4 text-sm font-medium transition-all ${
+                      activeTab === "profile"
+                        ? "text-white border-b-2 border-blue-500"
+                        : "text-gray-400 hover:text-gray-200"
+                    }`}
+                    onClick={() => setActiveTab("profile")}
+                  >
+                    <Person className="w-5 h-5" />
+                    Profil
+                  </button>
+                  <button
+                    className={`flex items-center gap-2 px-6 py-4 text-sm font-medium transition-all ${
+                      activeTab === "accounts"
+                        ? "text-white border-b-2 border-blue-500"
+                        : "text-gray-400 hover:text-gray-200"
+                    }`}
+                    onClick={() => setActiveTab("accounts")}
+                  >
+                    <SportsEsports className="w-5 h-5" />
+                    Comptes LoL
+                  </button>
+                  <button
+                    className={`flex items-center gap-2 px-6 py-4 text-sm font-medium transition-all ${
+                      activeTab === "settings"
+                        ? "text-white border-b-2 border-blue-500"
+                        : "text-gray-400 hover:text-gray-200"
+                    }`}
+                    onClick={() => setActiveTab("settings")}
+                  >
+                    <Settings className="w-5 h-5" />
+                    Paramètres
+                  </button>
+                </div>
+
+                {/* Contenu des onglets */}
+                <div className="p-6">
+                  {/* Onglet Profil */}
+                  {activeTab === "profile" && (
+                    <div className="space-y-6">
+                      <h2 className="text-xl font-bold text-white mb-4">
+                        Informations personnelles
+                      </h2>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <label className="block text-sm font-medium text-gray-300">
+                            Pseudo
+                          </label>
+                          <input
+                            type="text"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            className="w-full p-3 bg-black/20 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all"
+                            placeholder="Votre pseudo"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="block text-sm font-medium text-gray-300">
+                            Rôle principal
+                          </label>
+                          <select
+                            value={userRole}
+                            onChange={(e) => setUserRole(e.target.value)}
+                            className="w-full p-3 bg-black/20 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all"
+                          >
+                            <option value="">Sélectionner un rôle</option>
+                            <option value="TOP">Top</option>
+                            <option value="JUNGLE">Jungle</option>
+                            <option value="MID">Mid</option>
+                            <option value="ADC">ADC</option>
+                            <option value="SUPPORT">Support</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-300">
+                          Email
+                        </label>
+                        <input
+                          type="text"
+                          value={email}
+                          disabled
+                          className="w-full p-3 bg-black/20 border border-gray-700 rounded-lg text-gray-400 cursor-not-allowed"
+                        />
+                      </div>
+
+                      <button
+                        onClick={updateProfile}
+                        disabled={loading}
+                        className="w-full p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        {loading ? (
+                          <>
+                            <Refresh className="w-5 h-5 animate-spin" />
+                            Sauvegarde...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="w-5 h-5" />
+                            Sauvegarder
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Onglet Comptes LoL */}
+                  {activeTab === "accounts" && (
+                    <div className="space-y-6">
+                      <div className="flex justify-between items-center">
+                        <h2 className="text-xl font-bold text-white">
+                          Comptes League of Legends
+                        </h2>
+                        <button
+                          onClick={handleAddPlayer}
+                          disabled={linkedAccounts.length >= 5}
+                          className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2
+                            ${
+                              linkedAccounts.length >= 5
+                                ? "bg-gray-600/50 cursor-not-allowed text-gray-400"
+                                : "bg-blue-600 hover:bg-blue-700 text-white"
+                            }`}
+                        >
+                          <Add className="w-5 h-5" />
+                          Ajouter
+                        </button>
+                      </div>
+
+                      {linkedAccounts.length > 0 ? (
+                        <div className="space-y-4">
+                          <LinkedAccounts
+                            accounts={linkedAccounts}
+                            username={username}
+                            onDelete={handleDelete}
+                            onRefresh={loadProfileData}
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-10 bg-black/20 rounded-lg border border-gray-700/50">
+                          <SportsEsports className="w-16 h-16 text-gray-600 mb-4" />
+                          <p className="text-gray-400 mb-4">
+                            Vous n'avez pas encore ajouté de compte League of
+                            Legends
+                          </p>
+                          <button
+                            onClick={handleAddPlayer}
+                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all flex items-center gap-2"
+                          >
+                            <Add className="w-5 h-5" />
+                            Ajouter un compte
+                          </button>
+                        </div>
+                      )}
+
+                      {isAddPlayerOpen && (
+                        <div className="mt-6 bg-black/30 backdrop-blur-sm rounded-lg border border-gray-700/50 p-6">
+                          <h3 className="text-lg font-bold text-white mb-4">
+                            Ajouter un compte
+                          </h3>
+                          <AddPlayerForm
+                            onSuccess={() => {
+                              setIsAddPlayerOpen(false);
+                              loadProfileData();
+                              setSuccessMessage(
+                                "Compte LoL ajouté avec succès !"
+                              );
+                            }}
+                            defaultPlayerName={username}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Onglet Paramètres */}
+                  {activeTab === "settings" && (
+                    <div className="space-y-6">
+                      <h2 className="text-xl font-bold text-white mb-4">
+                        Paramètres du profil
+                      </h2>
+
+                      <div className="space-y-4">
+                        <div className="p-4 bg-black/20 rounded-lg border border-gray-700/50">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <Wallpaper className="w-5 h-5 text-gray-400" />
+                              <div>
+                                <h3 className="text-white font-medium">
+                                  Fond de profil
+                                </h3>
+                                <p className="text-gray-400 text-sm">
+                                  Personnalisez l'arrière-plan de votre profil
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => setIsBackgroundSelectorOpen(true)}
+                              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all text-sm"
+                            >
+                              Modifier
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Dialog de confirmation de suppression */}
         {showDeleteConfirm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-sm w-full">
-              <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full border border-gray-700">
+              <h3 className="text-xl font-bold mb-4 text-white">
                 Confirmer la suppression
               </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Êtes-vous sûr de vouloir supprimer ce compte ?
+              <p className="text-gray-300 mb-6">
+                Êtes-vous sûr de vouloir supprimer ce compte ? Cette action est
+                irréversible.
               </p>
               <div className="flex justify-end space-x-4">
                 <button
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                  className="px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-all"
                 >
                   Annuler
                 </button>
                 <button
                   onClick={confirmDelete}
-                  className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all"
                 >
                   Supprimer
                 </button>
@@ -421,7 +649,7 @@ const Profile = () => {
         onClose={() => setIsBackgroundSelectorOpen(false)}
         onSelect={handleBackgroundSelect}
       />
-    </div>
+    </PageTransition>
   );
 };
 

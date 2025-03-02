@@ -165,7 +165,9 @@ export const PlayerCard = ({ player, rank }: PlayerCardProps) => {
             </div>
             <div
               className={`truncate text-right px-3 py-1.5 rounded-lg font-medium ${
-                Number(winRate) >= 50
+                totalGames === 0
+                  ? "text-gray-600 dark:text-gray-400 bg-gray-50/50 dark:bg-gray-700/30"
+                  : Number(winRate) >= 50
                   ? "text-green-600 dark:text-green-400 bg-green-50/50 dark:bg-green-900/20"
                   : "text-red-600 dark:text-red-400 bg-red-50/50 dark:bg-red-900/20"
               }`}

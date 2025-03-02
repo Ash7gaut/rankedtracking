@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 import { supabase } from "./utils/supabase";
 import { Session } from "@supabase/supabase-js";
 import Home from "./pages/Home/Home";
@@ -8,13 +14,12 @@ import PlayerDetails from "./pages/PlayerDetails/PlayerDetails";
 import AddPlayer from "./pages/AddPlayer/AddPlayer";
 import Profile from "./pages/Profile/Profile";
 import PlayerProfile from "./pages/PlayerProfile/PlayerProfile";
+import { AnimatePresence } from "framer-motion";
+import { PageTransition } from "./components/PageTransition";
 
-function App() {
-  const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem("darkMode");
-    return saved ? JSON.parse(saved) : true;
-  });
-
+// Composant pour gérer les transitions entre les routes
+const AnimatedRoutes = () => {
+  const location = useLocation();
   const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
@@ -31,11 +36,6 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem("darkMode", JSON.stringify(darkMode));
-    document.documentElement.classList.toggle("dark", darkMode);
-  }, [darkMode]);
-
   // Composant pour protéger les routes
   const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     if (!session) {
@@ -43,6 +43,78 @@ function App() {
     }
     return <>{children}</>;
   };
+
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        {/* Routes publiques */}
+        <Route
+          path="/"
+          element={
+            <PageTransition>
+              <Home />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <PageTransition>
+              <Login />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/player/:id"
+          element={
+            <PageTransition>
+              <PlayerDetails />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/profile/:playerName"
+          element={
+            <PageTransition>
+              <PlayerProfile />
+            </PageTransition>
+          }
+        />
+
+        {/* Routes protégées */}
+        <Route
+          path="/add"
+          element={
+            <ProtectedRoute>
+              <PageTransition>
+                <AddPlayer />
+              </PageTransition>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <PageTransition>
+              <Profile />
+            </PageTransition>
+          }
+        />
+      </Routes>
+    </AnimatePresence>
+  );
+};
+
+function App() {
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem("darkMode");
+    return saved ? JSON.parse(saved) : true;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("darkMode", JSON.stringify(darkMode));
+    document.documentElement.classList.toggle("dark", darkMode);
+  }, [darkMode]);
 
   return (
     <BrowserRouter>
@@ -58,24 +130,7 @@ function App() {
           >
             {darkMode ? "🌞" : "🌙"}
           </button>
-          <Routes>
-            {/* Routes publiques */}
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/player/:id" element={<PlayerDetails />} />
-            <Route path="/profile/:playerName" element={<PlayerProfile />} />
-
-            {/* Routes protégées */}
-            <Route
-              path="/add"
-              element={
-                <ProtectedRoute>
-                  <AddPlayer />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/profile" element={<Profile />} />
-          </Routes>
+          <AnimatedRoutes />
         </div>
       </div>
     </BrowserRouter>
