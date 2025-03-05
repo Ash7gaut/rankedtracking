@@ -16,6 +16,10 @@ import Profile from "./pages/Profile/Profile";
 import PlayerProfile from "./pages/PlayerProfile/PlayerProfile";
 import { AnimatePresence } from "framer-motion";
 import { PageTransition } from "./components/PageTransition";
+import LandingPage from "./pages/LandingPage/LandingPage";
+import PlayerProfiles from "./pages/PlayerProfiles/PlayerProfiles";
+import LPTracking from "./pages/LPTracking/LPTracking";
+import BackgroundBlobs from "./components/BackgroundBlobs";
 
 // Composant pour gérer les transitions entre les routes
 const AnimatedRoutes = () => {
@@ -52,6 +56,22 @@ const AnimatedRoutes = () => {
           path="/"
           element={
             <PageTransition>
+              <LandingPage />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/home"
+          element={
+            <PageTransition>
+              <Home />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/leaderboard"
+          element={
+            <PageTransition>
               <Home />
             </PageTransition>
           }
@@ -77,6 +97,22 @@ const AnimatedRoutes = () => {
           element={
             <PageTransition>
               <PlayerProfile />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/players"
+          element={
+            <PageTransition>
+              <PlayerProfiles />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/lp-tracking"
+          element={
+            <PageTransition>
+              <LPTracking />
             </PageTransition>
           }
         />
@@ -123,6 +159,8 @@ function App() {
           darkMode ? "dark bg-gray-900" : "bg-gray-200"
         }`}
       >
+        <BackgroundBlobs />
+
         <div className="container mx-auto px-4 py-8 max-w-full sm:max-w-[720px] md:max-w-[860px] lg:max-w-[1100px] xl:max-w-[1400px] 2xl:max-w-[1600px]">
           <button
             onClick={() => setDarkMode(!darkMode)}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useQuery } from "react-query";
 import { api } from "../../utils/api";
-import { Header } from "./components/Header";
+import { HeaderUniform } from "../../components/HeaderUniform";
 import { PlayersList } from "./components/PlayersList/PlayerList";
 import { SkeletonCard } from "./components/PlayersList/SkeletonCard";
 import { EnhancedPlayerFilter } from "./components/PlayerFilter/EnhancedPlayerFilter";
@@ -95,8 +95,8 @@ const Home = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Header title="Classement" />
+    <div className="min-h-screen">
+      <HeaderUniform title="Classement" showHomeButton={true} />
 
       {!isInitialLoading && (
         <div className="container mx-auto px-4 py-6">

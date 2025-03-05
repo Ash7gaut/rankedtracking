@@ -225,7 +225,7 @@ const Profile = () => {
 
   return (
     <PageTransition>
-      <div className="relative min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="relative min-h-screen">
         {/* Fond avec overlay */}
         {backgroundUrl && (
           <div className="fixed inset-0 -z-10">

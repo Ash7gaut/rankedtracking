@@ -41,7 +41,7 @@ const PlayerDetails = () => {
   if (!player) return null;
 
   return (
-    <div className="relative overflow-x-hidden min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="relative overflow-x-hidden min-h-screen">
       <div
         className={`container mx-auto px-4 py-8 ${
           isFetching ? "opacity-70" : ""

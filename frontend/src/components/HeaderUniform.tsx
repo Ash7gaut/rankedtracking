@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "../../../utils/supabase";
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { supabase } from "../utils/supabase";
 import { Session } from "@supabase/supabase-js";
-import { AccountMenu } from "../../../components/AccountMenu";
+import { AccountMenu } from "./AccountMenu";
 import { Search, Star, Home as HomeIcon } from "@mui/icons-material";
 
-interface HeaderProps {
+interface HeaderUniformProps {
   title: string;
   showHomeButton?: boolean;
 }
@@ -20,14 +20,17 @@ interface PlayerSuggestion {
   is_main: boolean;
 }
 
-export const Header = ({ title, showHomeButton = false }: HeaderProps) => {
+export const HeaderUniform = ({
+  title,
+  showHomeButton = false,
+}: HeaderUniformProps) => {
   const navigate = useNavigate();
-  const [session, setSession] = React.useState<Session | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<PlayerSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
     });
@@ -44,82 +47,32 @@ export const Header = ({ title, showHomeButton = false }: HeaderProps) => {
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
     if (query.length >= 1) {
-      const { data } = await supabase
-        .from("players")
-        .select("*")
-        .ilike("player_name", `%${query}%`)
-        .limit(10);
+      try {
+        const { data, error } = await supabase
+          .from("players")
+          .select(
+            "id, summoner_name, profile_icon_id, tier, rank, league_points, is_main"
+          )
+          .ilike("summoner_name", `%${query}%`)
+          .limit(5);
 
-      // Map pour stocker le meilleur compte de chaque joueur
-      const bestAccounts = new Map();
+        if (error) throw error;
 
-      const tierOrder: { [key: string]: number } = {
-        CHALLENGER: 9,
-        GRANDMASTER: 8,
-        MASTER: 7,
-        DIAMOND: 6,
-        EMERALD: 5,
-        PLATINUM: 4,
-        GOLD: 3,
-        SILVER: 2,
-        BRONZE: 1,
-        IRON: 0,
-      };
-
-      data?.forEach((player) => {
-        const currentBest = bestAccounts.get(player.player_name);
-
-        // Si c'est un compte principal, on le prend automatiquement
-        if (player.is_main) {
-          bestAccounts.set(player.player_name, {
+        setSuggestions(
+          data.map((player) => ({
             id: player.id,
-            name: player.player_name,
+            name: player.summoner_name,
             profile_icon_id: player.profile_icon_id,
             tier: player.tier,
             rank: player.rank,
             league_points: player.league_points,
             is_main: player.is_main,
-          });
-          return;
-        }
-
-        // Si on n'a pas encore de compte pour ce joueur
-        if (!currentBest) {
-          bestAccounts.set(player.player_name, {
-            id: player.id,
-            name: player.player_name,
-            profile_icon_id: player.profile_icon_id,
-            tier: player.tier,
-            rank: player.rank,
-            league_points: player.league_points,
-            is_main: player.is_main,
-          });
-          return;
-        }
-
-        // Si le compte actuel a un meilleur rang
-        if (
-          player.tier &&
-          (!currentBest.tier ||
-            tierOrder[player.tier] > tierOrder[currentBest.tier] ||
-            (player.tier === currentBest.tier &&
-              player.league_points > currentBest.league_points))
-        ) {
-          bestAccounts.set(player.player_name, {
-            id: player.id,
-            name: player.player_name,
-            profile_icon_id: player.profile_icon_id,
-            tier: player.tier,
-            rank: player.rank,
-            league_points: player.league_points,
-            is_main: player.is_main,
-          });
-        }
-      });
-
-      const uniqueSuggestions = Array.from(bestAccounts.values());
-      setSuggestions(uniqueSuggestions);
-      setShowSuggestions(true);
+          }))
+        );
+        setShowSuggestions(true);
+      } catch (error) {
+        console.error("Error searching players:", error);
+      }
     } else {
       setSuggestions([]);
       setShowSuggestions(false);
@@ -127,8 +80,9 @@ export const Header = ({ title, showHomeButton = false }: HeaderProps) => {
   };
 
   const handleSelectPlayer = (playerName: string) => {
-    navigate(`/profile/${encodeURIComponent(playerName)}`);
+    navigate(`/player/${encodeURIComponent(playerName)}`);
     setSearchQuery("");
+    setSuggestions([]);
     setShowSuggestions(false);
   };
 
@@ -149,6 +103,27 @@ export const Header = ({ title, showHomeButton = false }: HeaderProps) => {
             <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
               {title}
             </h1>
+          </div>
+
+          <div className="flex items-center space-x-6">
+            <Link
+              to="/home"
+              className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"
+            >
+              Classement
+            </Link>
+            <Link
+              to="/players"
+              className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"
+            >
+              Profils Détaillés
+            </Link>
+            <Link
+              to="/lp-tracking"
+              className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"
+            >
+              Suivi LP
+            </Link>
           </div>
 
           <div className="relative flex-1 max-w-md mx-4">

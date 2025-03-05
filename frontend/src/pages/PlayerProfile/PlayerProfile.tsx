@@ -123,7 +123,7 @@ const PlayerProfile = () => {
   if (isLoading) {
     return (
       <PageTransition>
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="min-h-screen flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
         </div>
       </PageTransition>
@@ -133,7 +133,7 @@ const PlayerProfile = () => {
   if (!accounts || accounts.length === 0) {
     return (
       <PageTransition>
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="min-h-screen">
           <div className="container mx-auto px-4 py-8">
             <button
               onClick={() => navigate("/")}
@@ -161,7 +161,7 @@ const PlayerProfile = () => {
 
   return (
     <PageTransition>
-      <div className="relative min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="relative min-h-screen">
         {/* Fond avec overlay */}
         {userData?.background_url && (
           <div className="fixed inset-0 -z-10">
