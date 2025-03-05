@@ -51,6 +51,7 @@ const PlayerProfiles = () => {
         const { data: playersData, error: playersError } = await supabase
           .from("players")
           .select("*")
+          .order("is_main", { ascending: false })
           .order("league_points", { ascending: false });
 
         if (playersError) throw playersError;
