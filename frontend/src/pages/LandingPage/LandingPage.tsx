@@ -496,12 +496,7 @@ const LandingPage = () => {
 
               {/* Only show logout if user is logged in */}
               {session ? (
-                <button
-                  onClick={() => supabase.auth.signOut()}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-purple-700 bg-purple-100 hover:bg-purple-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
-                >
-                  Déconnexion
-                </button>
+                <AccountMenu session={session} />
               ) : (
                 <button
                   onClick={() => navigate("/login")}
@@ -579,15 +574,26 @@ const LandingPage = () => {
                   </button>
 
                   {session ? (
-                    <button
-                      onClick={() => {
-                        supabase.auth.signOut();
-                        setMobileMenuOpen(false);
-                      }}
-                      className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-purple-300 hover:bg-white/10 transition-colors"
-                    >
-                      Déconnexion
-                    </button>
+                    <>
+                      <button
+                        onClick={() => {
+                          navigate("/profile");
+                          setMobileMenuOpen(false);
+                        }}
+                        className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-purple-300 hover:bg-white/10 transition-colors"
+                      >
+                        Profil
+                      </button>
+                      <button
+                        onClick={() => {
+                          supabase.auth.signOut();
+                          setMobileMenuOpen(false);
+                        }}
+                        className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-400 hover:bg-white/10 transition-colors"
+                      >
+                        Déconnexion
+                      </button>
+                    </>
                   ) : (
                     <button
                       onClick={() => {
@@ -1065,17 +1071,43 @@ const LandingPage = () => {
                   Prêt à suivre votre progression ?
                 </h2>
                 <p className="text-white/70 max-w-2xl mx-auto mb-8">
-                  Connectez-vous pour accéder à toutes les fonctionnalités ou
-                  ajoutez simplement un joueur pour commencer à explorer ses
-                  statistiques.
+                  {session
+                    ? "Accédez à toutes les fonctionnalités et suivez vos statistiques en détail."
+                    : "Connectez-vous pour accéder à toutes les fonctionnalités ou ajoutez simplement un joueur pour commencer à explorer ses statistiques."}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <button
-                    onClick={() => navigate("/login")}
-                    className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-lg transition-all duration-300 shadow-lg"
-                  >
-                    Se connecter
-                  </button>
+                  {session ? (
+                    <div className="bg-white/10 border border-white/20 rounded-lg p-4 flex flex-col items-center">
+                      <h3 className="text-xl font-semibold mb-2">
+                        Votre Compte
+                      </h3>
+                      <p className="text-white/70 mb-2">
+                        {session.user.user_metadata?.username ||
+                          session.user.email}
+                      </p>
+                      <div className="mt-2 flex gap-4">
+                        <button
+                          onClick={() => navigate("/profile")}
+                          className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-lg transition-all duration-300 shadow-lg"
+                        >
+                          Mon Profil
+                        </button>
+                        <button
+                          onClick={() => navigate("/lp-tracking")}
+                          className="px-6 py-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-lg transition-all duration-300"
+                        >
+                          Suivi LP
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => navigate("/login")}
+                      className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-lg transition-all duration-300 shadow-lg"
+                    >
+                      Se connecter
+                    </button>
+                  )}
                   <button
                     onClick={() => navigate("/add-player")}
                     className="px-8 py-3 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-lg transition-all duration-300"

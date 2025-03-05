@@ -26,10 +26,10 @@ export const PlayerProfileHeader = ({ player }: PlayerProfileHeaderProps) => {
   const winRateFormatted = winRate.toFixed(1);
 
   return (
-    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 relative z-10">
       <div className="flex items-center gap-8">
         <div className="relative group">
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full opacity-50 group-hover:opacity-70 blur transition duration-300"></div>
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full opacity-60 group-hover:opacity-80 blur transition duration-300"></div>
           <img
             src={`https://opgg-static.akamaized.net/meta/images/profile_icons/profileIcon${player.profile_icon_id}.jpg?image=e_upscale,q_auto:good,f_webp,w_auto&v=1729058249`}
             alt="Profile Icon"
@@ -56,13 +56,13 @@ export const PlayerProfileHeader = ({ player }: PlayerProfileHeaderProps) => {
           )}
         </div>
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold text-white drop-shadow-lg">
             {player.summoner_name}
           </h1>
           {player.player_name && (
             <Link
               to={`/profile/${encodeURIComponent(player.player_name)}`}
-              className="inline-flex items-center gap-2 mt-2 text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+              className="inline-flex items-center gap-2 mt-2 text-sm text-blue-300 hover:text-blue-200 transition-colors"
             >
               <Person className="w-4 h-4" />
               {player.player_name}
@@ -70,7 +70,7 @@ export const PlayerProfileHeader = ({ player }: PlayerProfileHeaderProps) => {
           )}
           {player.tier && (
             <div className="mt-2 flex items-center gap-3">
-              <span className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded-lg font-medium text-sm flex items-center gap-2">
+              <span className="bg-blue-700/40 backdrop-blur-sm text-white px-3 py-1.5 rounded-lg font-medium text-sm flex items-center gap-2">
                 <img
                   src={`/ranks/${player.tier.toLowerCase()}.png`}
                   alt={player.tier}
@@ -78,14 +78,14 @@ export const PlayerProfileHeader = ({ player }: PlayerProfileHeaderProps) => {
                 />
                 {player.tier} {player.rank}
               </span>
-              <span className="bg-gray-100 dark:bg-gray-700/50 px-3 py-1.5 rounded-lg text-gray-700 dark:text-gray-300 font-medium text-sm">
+              <span className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-lg text-white font-medium text-sm">
                 {player.league_points} LP
               </span>
             </div>
           )}
         </div>
       </div>
-      <div className="w-full md:w-auto">
+      <div className="w-full md:w-auto bg-black/30 backdrop-blur-sm p-3 rounded-lg">
         <LinkedAccountsView playerName={player.player_name || ""} />
       </div>
     </div>

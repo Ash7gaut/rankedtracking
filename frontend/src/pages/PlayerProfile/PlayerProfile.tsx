@@ -174,25 +174,15 @@ const PlayerProfile = () => {
   return (
     <PageTransition>
       <div className="relative min-h-screen">
-        {/* Fond avec overlay */}
-        {userData?.background_url && (
-          <div className="fixed inset-0 -z-10">
-            <img
-              src={userData.background_url}
-              alt="Background"
-              className="w-full h-full object-cover transition-all duration-500 ease-in-out"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-blue-900/40 to-purple-900/40 backdrop-blur-[2px] transition-all duration-500 ease-in-out" />
-          </div>
-        )}
+        {/* Suppression du fond avec overlay */}
 
         <div className="container mx-auto px-4 py-8">
           <button
             onClick={handleGoBack}
-            className="mb-8 px-4 py-2 text-sm bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all flex items-center gap-2"
+            className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all mb-8"
           >
-            <ArrowBack className="w-4 h-4" />
-            Retour
+            <ArrowBack className="w-5 h-5" />
+            <span>Retour</span>
           </button>
 
           <div className="grid gap-6">

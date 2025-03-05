@@ -230,18 +230,6 @@ const Profile = () => {
   return (
     <PageTransition>
       <div className="relative min-h-screen">
-        {/* Fond avec overlay */}
-        {backgroundUrl && (
-          <div className="fixed inset-0 -z-10">
-            <img
-              src={backgroundUrl}
-              alt="Background"
-              className="w-full h-full object-cover transition-all duration-500 ease-in-out"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-blue-900/40 to-purple-900/40 backdrop-blur-[2px] transition-all duration-500 ease-in-out" />
-          </div>
-        )}
-
         <div className="container mx-auto px-4 py-8">
           {/* En-tête avec navigation */}
           <div className="flex justify-between items-center mb-8">
@@ -415,9 +403,9 @@ const Profile = () => {
                               </div>
                               <div className="p-6">
                                 <AddPlayerForm
-                                  onSuccess={() => {
+                                  onSuccess={async () => {
                                     setIsAddPlayerOpen(false);
-                                    loadProfileData();
+                                    await loadProfileData();
                                     setSuccessMessage(
                                       "Compte LoL ajouté avec succès !"
                                     );
@@ -636,12 +624,6 @@ const Profile = () => {
                                 </p>
                               </div>
                             </div>
-                            <button
-                              onClick={() => setIsBackgroundSelectorOpen(true)}
-                              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all text-sm"
-                            >
-                              Modifier
-                            </button>
                           </div>
                         </div>
                       </div>
@@ -653,27 +635,37 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Dialog de confirmation de suppression */}
+        {isAddPlayerOpen && (
+          <AddPlayerForm
+            onSuccess={async () => {
+              setIsAddPlayerOpen(false);
+              await loadProfileData();
+              setSuccessMessage("Compte ajouté avec succès !");
+            }}
+            defaultPlayerName={username}
+          />
+        )}
+
         {showDeleteConfirm && (
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full border border-gray-300 dark:border-gray-700">
-              <h3 className="text-xl font-bold mb-4 text-gray-800 dark:text-white">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg max-w-md w-full">
+              <h3 className="text-xl font-bold mb-4 dark:text-white">
                 Confirmer la suppression
               </h3>
-              <p className="text-gray-600 dark:text-gray-300 mb-6">
-                Êtes-vous sûr de vouloir supprimer ce compte ? Cette action est
-                irréversible.
+              <p className="mb-6 dark:text-gray-300">
+                Êtes-vous sûr de vouloir supprimer le compte{" "}
+                <span className="font-bold">{accountToDelete}</span> ?
               </p>
-              <div className="flex justify-end space-x-4">
+              <div className="flex justify-end gap-4">
                 <button
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-all"
+                  className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 dark:text-white"
                 >
                   Annuler
                 </button>
                 <button
                   onClick={confirmDelete}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all"
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
                 >
                   Supprimer
                 </button>
@@ -681,14 +673,14 @@ const Profile = () => {
             </div>
           </div>
         )}
-      </div>
 
-      {/* Dialog du sélecteur de fond */}
-      <BackgroundSelector
-        isOpen={isBackgroundSelectorOpen}
-        onClose={() => setIsBackgroundSelectorOpen(false)}
-        onSelect={handleBackgroundSelect}
-      />
+        {/* Dialog du sélecteur de fond */}
+        <BackgroundSelector
+          isOpen={isBackgroundSelectorOpen}
+          onClose={() => setIsBackgroundSelectorOpen(false)}
+          onSelect={handleBackgroundSelect}
+        />
+      </div>
     </PageTransition>
   );
 };

@@ -20,6 +20,7 @@ import LandingPage from "./pages/LandingPage/LandingPage";
 import PlayerProfiles from "./pages/PlayerProfiles/PlayerProfiles";
 import LPTracking from "./pages/LPTracking/LPTracking";
 import BackgroundBlobs from "./components/BackgroundBlobs";
+import ScrollToTop from "./components/ScrollToTop";
 
 // Composant pour gérer les transitions entre les routes
 const AnimatedRoutes = () => {
@@ -50,6 +51,7 @@ const AnimatedRoutes = () => {
 
   return (
     <AnimatePresence mode="wait">
+      <ScrollToTop />
       <Routes location={location} key={location.pathname}>
         {/* Routes publiques */}
         <Route
