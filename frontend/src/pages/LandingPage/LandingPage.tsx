@@ -23,6 +23,18 @@ import { AccountMenu } from "../../components/AccountMenu";
 import { Session } from "@supabase/supabase-js";
 import { motion, AnimatePresence } from "framer-motion";
 
+// Interface pour un joueur
+interface Player {
+  id: string;
+  summoner_name: string;
+  player_name: string;
+  profile_icon_id: number;
+  tier: string | null;
+  rank: string | null;
+  league_points: number;
+  is_main: boolean;
+}
+
 interface PlayerSuggestion {
   id: string;
   name: string;
@@ -42,9 +54,12 @@ const LandingPage = () => {
   >([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [topPlayers, setTopPlayers] = useState<any[]>([]);
+  const [topPlayers, setTopPlayers] = useState<Player[]>([]);
   const [recentLPChanges, setRecentLPChanges] = useState<any[]>([]);
-  const [allPlayers, setAllPlayers] = useState<any[]>([]);
+  const [allPlayers, setAllPlayers] = useState<Player[]>([]);
+  const [displayedPlayers, setDisplayedPlayers] = useState<Player[]>([]);
+  const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
+  const carouselInterval = useRef<NodeJS.Timeout | null>(null);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   React.useEffect(() => {
@@ -198,6 +213,9 @@ const LandingPage = () => {
 
         if (error) throw error;
         setAllPlayers(data || []);
+        if (data && data.length > 0) {
+          setDisplayedPlayers(data.slice(0, 3));
+        }
       } catch (error) {
         console.error(
           "Erreur lors de la récupération de tous les joueurs:",
@@ -210,6 +228,26 @@ const LandingPage = () => {
     fetchRecentLPChanges();
     fetchAllPlayers();
   }, []);
+
+  // Autoplay pour le carrousel
+  useEffect(() => {
+    if (allPlayers.length > 3) {
+      carouselInterval.current = setInterval(() => {
+        setCurrentPlayerIndex((prevIndex) => {
+          const nextIndex = (prevIndex + 3) % allPlayers.length;
+          const endIndex = Math.min(nextIndex + 3, allPlayers.length);
+          setDisplayedPlayers(allPlayers.slice(nextIndex, endIndex));
+          return nextIndex;
+        });
+      }, 5000);
+    }
+
+    return () => {
+      if (carouselInterval.current) {
+        clearInterval(carouselInterval.current);
+      }
+    };
+  }, [allPlayers]);
 
   const handleSearch = async (query: string) => {
     if (query.length >= 2) {
@@ -361,7 +399,7 @@ const LandingPage = () => {
     }
   };
 
-  const getTierColor = (tier?: string) => {
+  const getTierColor = (tier?: string | null) => {
     if (!tier) return "text-white/60";
     switch (tier.toLowerCase()) {
       case "iron":
@@ -389,8 +427,10 @@ const LandingPage = () => {
     }
   };
 
-  const getTierAbbreviation = (tier: string) => {
-    switch (tier?.toLowerCase()) {
+  const getTierAbbreviation = (tier: string | null | undefined) => {
+    if (!tier) return "U";
+
+    switch (tier.toLowerCase()) {
       case "iron":
         return "I";
       case "bronze":
@@ -640,7 +680,7 @@ const LandingPage = () => {
                       >
                         <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-700 flex-shrink-0">
                           <img
-                            src={`https://ddragon.leagueoflegends.com/cdn/14.5.1/img/profileicon/${player.profile_icon_id}.png`}
+                            src={`https://opgg-static.akamaized.net/meta/images/profile_icons/profileIcon${player.profile_icon_id}.jpg?image=e_upscale,q_auto:good,f_webp,w_auto&v=1729058249`}
                             alt={player.name}
                             className="w-full h-full object-cover"
                           />
@@ -810,8 +850,8 @@ const LandingPage = () => {
                                   className="w-4 h-4"
                                 />
                               )}
-                              {getTierAbbreviation(change.previous_tier)}{" "}
-                              {change.previous_rank} {change.previous_lp}LP →{" "}
+                              {change.previous_tier} {change.previous_rank}{" "}
+                              {change.previous_lp}LP →{" "}
                               {change.tier && (
                                 <img
                                   src={`/ranks/${change.tier.toLowerCase()}.png`}
@@ -819,10 +859,9 @@ const LandingPage = () => {
                                   className="w-4 h-4"
                                 />
                               )}
-                              {getTierAbbreviation(change.tier)} {change.rank}{" "}
-                              {change.current_lp}LP
+                              {change.tier} {change.rank} {change.current_lp}LP
                             </span>
-                            <span className="text-xs">
+                            <span className="text-xs ml-2 whitespace-nowrap">
                               {getTimeAgo(change.timestamp)}
                             </span>
                           </div>
@@ -859,44 +898,62 @@ const LandingPage = () => {
                       Chargement...
                     </div>
                   ) : (
-                    <div className="divide-y divide-white/5">
-                      {allPlayers.slice(0, 3).map((player) => (
-                        <div
-                          key={player.id}
-                          className="py-3 flex items-center gap-3 hover:bg-white/5 cursor-pointer transition-all duration-200 rounded-lg px-2"
-                          onClick={() => handlePlayerClick(player.id)}
-                        >
-                          <div className="flex-shrink-0 relative">
-                            <img
-                              src={`https://ddragon.leagueoflegends.com/cdn/14.5.1/img/profileicon/${player.profile_icon_id}.png`}
-                              alt={player.summoner_name}
-                              className="w-10 h-10 rounded-full border border-white/10"
-                            />
-                            {player.is_main && (
-                              <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 border-2 border-[#1a1d29] rounded-full" />
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium truncate">
-                              {player.player_name || player.summoner_name}
-                            </div>
-                            <div className="text-sm text-white/60 flex items-center gap-1.5">
-                              {player.tier && (
-                                <img
-                                  src={`/ranks/${player.tier.toLowerCase()}.png`}
-                                  alt={player.tier}
-                                  className="w-4 h-4"
-                                />
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={currentPlayerIndex}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.3 }}
+                        className="divide-y divide-white/5"
+                      >
+                        {displayedPlayers.map((player) => (
+                          <div
+                            key={player.id}
+                            className="py-3 flex items-center gap-3 hover:bg-white/5 hover:translate-x-1 cursor-pointer transition-all duration-200 rounded-lg px-2"
+                            onClick={() => handlePlayerClick(player.id)}
+                          >
+                            <div className="flex-shrink-0 relative">
+                              <img
+                                src={`https://opgg-static.akamaized.net/meta/images/profile_icons/profileIcon${player.profile_icon_id}.jpg?image=e_upscale,q_auto:good,f_webp,w_auto&v=1729058249`}
+                                alt={player.summoner_name}
+                                className="w-10 h-10 rounded-full border border-white/10"
+                              />
+                              {player.is_main && (
+                                <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 border-2 border-[#1a1d29] rounded-full" />
                               )}
-                              <span>
-                                {getTierAbbreviation(player.tier)} {player.rank}{" "}
-                                {player.league_points}LP
-                              </span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium truncate">
+                                {player.player_name || player.summoner_name}
+                              </div>
+                              <div className="text-sm text-white/60">
+                                {player.summoner_name}
+                              </div>
+                              <div
+                                className={`text-sm flex items-center gap-1 ${getTierColor(
+                                  player.tier
+                                )}`}
+                              >
+                                {player.tier ? (
+                                  <>
+                                    <img
+                                      src={`/ranks/${player.tier.toLowerCase()}.png`}
+                                      alt={player.tier}
+                                      className="w-4 h-4"
+                                    />
+                                    {player.tier} {player.rank} •{" "}
+                                    {player.league_points} LP
+                                  </>
+                                ) : (
+                                  "Non classé"
+                                )}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </motion.div>
+                    </AnimatePresence>
                   )}
                 </div>
                 <div className="mt-auto p-4 pt-3 border-t border-white/10 text-center">

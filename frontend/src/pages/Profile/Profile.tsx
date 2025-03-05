@@ -223,6 +223,10 @@ const Profile = () => {
     }
   };
 
+  const handleGoBack = () => {
+    window.history.back();
+  };
+
   return (
     <PageTransition>
       <div className="relative min-h-screen">
@@ -242,7 +246,7 @@ const Profile = () => {
           {/* En-tête avec navigation */}
           <div className="flex justify-between items-center mb-8">
             <button
-              onClick={() => navigate("/")}
+              onClick={handleGoBack}
               className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all"
             >
               <ArrowBack className="w-5 h-5" />

@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { supabase } from "../utils/supabase";
 import { Session } from "@supabase/supabase-js";
 import { AccountMenu } from "./AccountMenu";
-import { Search, Star, Home as HomeIcon } from "@mui/icons-material";
+import {
+  Search,
+  Home as HomeIcon,
+  ArrowBack,
+  KeyboardArrowDown,
+  BarChart as LeaderboardIcon,
+  Person,
+  ShowChart as SuiviLPIcon,
+} from "@mui/icons-material";
 
 interface HeaderUniformProps {
   title: string;
@@ -25,6 +33,7 @@ export const HeaderUniform = ({
   showHomeButton = false,
 }: HeaderUniformProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [session, setSession] = useState<Session | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<PlayerSuggestion[]>([]);
@@ -79,116 +88,144 @@ export const HeaderUniform = ({
     }
   };
 
-  const handleSelectPlayer = (playerName: string) => {
-    navigate(`/player/${encodeURIComponent(playerName)}`);
+  const handleSelectPlayer = (playerId: string, playerName: string) => {
+    navigate(`/player/${playerId}`);
     setSearchQuery("");
     setSuggestions([]);
     setShowSuggestions(false);
   };
 
+  const handleGoBack = () => {
+    window.history.back();
+  };
+
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
+
   return (
     <div className="container mx-auto px-4 py-6">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-4">
+      <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg p-6">
+        {/* Première rangée: Navigation et utilisateur */}
+        <div className="flex flex-wrap items-center justify-between mb-4">
+          {/* Zone gauche: Home + Retour + Titre */}
+          <div className="flex items-center gap-2">
+            <Link
+              to="/"
+              className="flex items-center justify-center w-12 h-12 bg-white/10 hover:bg-white/15 rounded-lg transition-all"
+            >
+              <HomeIcon className="text-white" />
+            </Link>
+
             {showHomeButton && (
               <button
-                onClick={() => navigate("/")}
-                className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                title="Retour à l'accueil"
+                onClick={handleGoBack}
+                className="flex items-center gap-2 px-4 h-12 bg-white/10 hover:bg-white/15 rounded-lg transition-all"
               >
-                <HomeIcon className="text-gray-600 dark:text-gray-300" />
+                <ArrowBack className="text-white" />
+                <span className="text-white">Retour</span>
               </button>
             )}
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-              {title}
-            </h1>
+
+            <h1 className="text-2xl font-bold text-white ml-2">{title}</h1>
           </div>
 
-          <div className="flex items-center space-x-6">
-            <Link
-              to="/home"
-              className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"
-            >
-              Classement
-            </Link>
-            <Link
-              to="/players"
-              className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"
-            >
-              Profils Détaillés
-            </Link>
-            <Link
-              to="/lp-tracking"
-              className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"
-            >
-              Suivi LP
-            </Link>
+          {/* Zone droite: Menu utilisateur */}
+          <div className="flex items-center">
+            <AccountMenu session={session} />
+          </div>
+        </div>
+
+        {/* Deuxième rangée: Onglets de navigation */}
+        <div className="flex border-b border-white/10 mb-4">
+          <Link
+            to="/home"
+            className={`flex items-center gap-2 px-6 py-3 ${
+              isActive("/home") || isActive("/leaderboard")
+                ? "border-b-2 border-white text-white"
+                : "text-white/70 hover:text-white"
+            }`}
+          >
+            <LeaderboardIcon className="w-5 h-5" />
+            <span>Classement</span>
+          </Link>
+
+          <Link
+            to="/players"
+            className={`flex items-center gap-2 px-6 py-3 ${
+              isActive("/players")
+                ? "border-b-2 border-white text-white"
+                : "text-white/70 hover:text-white"
+            }`}
+          >
+            <Person className="w-5 h-5" />
+            <span>Profils</span>
+          </Link>
+
+          <Link
+            to="/lp-tracking"
+            className={`flex items-center gap-2 px-6 py-3 ${
+              isActive("/lp-tracking")
+                ? "border-b-2 border-white text-white"
+                : "text-white/70 hover:text-white"
+            }`}
+          >
+            <SuiviLPIcon className="w-5 h-5" />
+            <span>Suivi LP</span>
+          </Link>
+        </div>
+
+        {/* Troisième rangée: Barre de recherche */}
+        <div className="relative">
+          <div className="flex items-center relative">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
+              placeholder="Rechercher un joueur..."
+              className="w-full px-10 py-3 bg-white/5 focus:bg-white/10 text-white border border-white/10 focus:border-white/20 rounded-lg outline-none transition-all"
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+            />
+            <Search className="absolute left-3 text-white/60" />
           </div>
 
-          <div className="relative flex-1 max-w-md mx-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => handleSearch(e.target.value)}
-                placeholder="Rechercher un joueur..."
-                className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-              />
-            </div>
-            {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg divide-y divide-gray-100 dark:divide-gray-700">
-                {suggestions.map((player) => (
-                  <button
-                    key={player.id}
-                    onClick={() => handleSelectPlayer(player.name)}
-                    className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-3"
-                  >
-                    <div className="relative flex-shrink-0">
-                      <img
-                        src={`https://opgg-static.akamaized.net/meta/images/profile_icons/profileIcon${player.profile_icon_id}.jpg?image=e_upscale,q_auto:good,f_webp,w_auto&v=1729058249`}
-                        alt="Profile Icon"
-                        className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-600"
+          {/* Suggestions */}
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="absolute z-10 mt-2 w-full bg-gray-800/95 backdrop-blur-md border border-white/10 rounded-lg shadow-lg max-h-72 overflow-y-auto">
+              {suggestions.map((player) => (
+                <div
+                  key={player.id}
+                  className="px-4 py-3 hover:bg-white/10 cursor-pointer transition-colors flex items-center gap-3"
+                  onClick={() => handleSelectPlayer(player.id, player.name)}
+                >
+                  <div className="relative">
+                    <img
+                      src={`https://opgg-static.akamaized.net/meta/images/profile_icons/profileIcon${player.profile_icon_id}.jpg?image=q_auto,f_webp,w_auto&v=1696473789633`}
+                      alt={player.name}
+                      className="w-10 h-10 rounded-full object-cover border border-white/20"
+                    />
+                    {player.is_main && (
+                      <div
+                        className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full"
+                        title="Compte principal"
                       />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-gray-900 dark:text-white truncate">
-                        {player.name}
+                    )}
+                  </div>
+                  <div>
+                    <div className="font-medium text-white">{player.name}</div>
+                    {player.tier ? (
+                      <div className="text-xs text-white/60">
+                        {player.tier} {player.rank} • {player.league_points} LP
                       </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        <img
-                          src={`/ranks/${(
-                            player.tier || "unranked"
-                          ).toLowerCase()}.png`}
-                          alt={player.tier || "UNRANKED"}
-                          className="w-4 h-4"
-                        />
-                        <span className="text-gray-600 dark:text-gray-300">
-                          {player.tier
-                            ? `${player.tier} ${player.rank} • ${player.league_points} LP`
-                            : "UNRANKED"}
-                        </span>
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="flex items-center gap-4">
-            {session ? (
-              <AccountMenu session={session} />
-            ) : (
-              <button
-                onClick={() => navigate("/login")}
-                className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-              >
-                Connexion
-              </button>
-            )}
-          </div>
+                    ) : (
+                      <div className="text-xs text-white/60">Non classé</div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

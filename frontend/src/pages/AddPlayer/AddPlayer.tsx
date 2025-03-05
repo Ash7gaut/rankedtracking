@@ -5,6 +5,10 @@ import { ArrowBack } from "@mui/icons-material";
 export const AddPlayer = () => {
   const navigate = useNavigate();
 
+  const handleGoBack = () => {
+    window.history.back();
+  };
+
   return (
     <div className="min-h-screen text-white">
       <div className="relative z-10 max-w-3xl mx-auto px-4 py-12">
@@ -13,7 +17,7 @@ export const AddPlayer = () => {
             Ajouter un joueur
           </h1>
           <button
-            onClick={() => navigate("/")}
+            onClick={handleGoBack}
             className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all"
           >
             <ArrowBack className="w-5 h-5" />

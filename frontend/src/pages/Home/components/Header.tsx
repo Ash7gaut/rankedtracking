@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "../../../utils/supabase";
 import { Session } from "@supabase/supabase-js";
 import { AccountMenu } from "../../../components/AccountMenu";
-import { Search, Star, Home as HomeIcon } from "@mui/icons-material";
+import { Search, Star, Home as HomeIcon, ArrowBack } from "@mui/icons-material";
 
 interface HeaderProps {
   title: string;
@@ -132,23 +132,26 @@ export const Header = ({ title, showHomeButton = false }: HeaderProps) => {
     setShowSuggestions(false);
   };
 
+  const handleGoBack = () => {
+    window.history.back();
+  };
+
   return (
     <div className="container mx-auto px-4 py-6">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
+      <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg p-6">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-4">
             {showHomeButton && (
               <button
-                onClick={() => navigate("/")}
-                className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                title="Retour à l'accueil"
+                onClick={handleGoBack}
+                className="flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all"
+                title="Retour à la page précédente"
               >
-                <HomeIcon className="text-gray-600 dark:text-gray-300" />
+                <ArrowBack className="w-4 h-4" />
+                <span className="text-sm">Retour</span>
               </button>
             )}
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-              {title}
-            </h1>
+            <h1 className="text-3xl font-bold text-white">{title}</h1>
           </div>
 
           <div className="relative flex-1 max-w-md mx-4">

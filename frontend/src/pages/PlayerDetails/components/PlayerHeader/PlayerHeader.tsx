@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../../../utils/supabase";
+import { ArrowBack } from "@mui/icons-material";
 
 interface PlayerHeaderProps {
   playerId: string;
@@ -9,6 +10,10 @@ interface PlayerHeaderProps {
 export const PlayerHeader = ({ playerId }: PlayerHeaderProps) => {
   const navigate = useNavigate();
   const [backgroundUrl, setBackgroundUrl] = useState("");
+
+  const handleGoBack = () => {
+    window.history.back();
+  };
 
   // Charger le fond du joueur
   useEffect(() => {
@@ -53,10 +58,11 @@ export const PlayerHeader = ({ playerId }: PlayerHeaderProps) => {
       {/* Contenu du header */}
       <div className="relative p-6">
         <button
-          onClick={() => navigate("/")}
-          className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mb-4"
+          onClick={handleGoBack}
+          className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all"
         >
-          Retour
+          <ArrowBack className="w-5 h-5" />
+          <span>Retour</span>
         </button>
 
         <div className="flex items-center gap-4">

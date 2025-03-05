@@ -1,16 +1,24 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "react-query";
 import { supabase } from "../../utils/supabase";
 import { Player } from "../../types/interfaces";
+import { Fade } from "@mui/material";
 import {
   ArrowBack,
-  Star,
-  EmojiEvents,
+  WatchLater,
+  AutoGraph,
+  Equalizer,
   Timeline,
+  Group,
+  SportsEsports,
+  Schedule,
+  Star,
+  StarBorder,
+  SwapHoriz,
+  EmojiEvents,
   TrendingUp,
   TrendingDown,
-  SportsEsports,
   Person,
 } from "@mui/icons-material";
 import { PageTransition } from "../../components/PageTransition";
@@ -120,6 +128,10 @@ const PlayerProfile = () => {
     }
   };
 
+  const handleGoBack = () => {
+    window.history.back();
+  };
+
   if (isLoading) {
     return (
       <PageTransition>
@@ -136,8 +148,8 @@ const PlayerProfile = () => {
         <div className="min-h-screen">
           <div className="container mx-auto px-4 py-8">
             <button
-              onClick={() => navigate("/")}
-              className="mb-8 px-4 py-2 text-sm bg-gray-200/80 dark:bg-white/10 backdrop-blur-sm text-gray-800 dark:text-white rounded-lg hover:bg-gray-300/80 dark:hover:bg-white/20 transition-all flex items-center gap-2"
+              onClick={handleGoBack}
+              className="mb-8 px-4 py-2 text-sm bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all flex items-center gap-2"
             >
               <ArrowBack className="w-4 h-4" />
               Retour
@@ -176,8 +188,8 @@ const PlayerProfile = () => {
 
         <div className="container mx-auto px-4 py-8">
           <button
-            onClick={() => navigate("/")}
-            className="mb-8 px-4 py-2 text-sm bg-gray-200/80 dark:bg-white/10 backdrop-blur-sm text-gray-800 dark:text-white rounded-lg hover:bg-gray-300/80 dark:hover:bg-white/20 transition-all flex items-center gap-2"
+            onClick={handleGoBack}
+            className="mb-8 px-4 py-2 text-sm bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all flex items-center gap-2"
           >
             <ArrowBack className="w-4 h-4" />
             Retour
