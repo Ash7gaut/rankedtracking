@@ -249,7 +249,7 @@ const PlayerProfiles = () => {
 
   return (
     <div className="min-h-screen">
-      <HeaderUniform title="Profils Détaillés" showHomeButton={true} />
+      <HeaderUniform title="Liste des joueurs" showHomeButton={true} />
 
       <div className="container mx-auto px-4 py-6">
         {/* Content with higher z-index */}

@@ -479,7 +479,7 @@ const LandingPage = () => {
                 onClick={() => navigate("/players")}
                 className="text-gray-300 hover:text-white transition-colors"
               >
-                Profils
+                Joueurs
               </button>
               <button
                 onClick={() => navigate("/lp-tracking")}
@@ -552,7 +552,7 @@ const LandingPage = () => {
                     }}
                     className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-white hover:bg-white/10 transition-colors"
                   >
-                    Profils
+                    Joueurs
                   </button>
                   <button
                     onClick={() => {
@@ -1022,7 +1022,7 @@ const LandingPage = () => {
 
                 <div className="relative z-10 cursor-pointer">
                   <Person className="text-purple-400 mb-4 w-10 h-10" />
-                  <h3 className="text-xl font-bold mb-2">Profils Détaillés</h3>
+                  <h3 className="text-xl font-bold mb-2">Liste des joueurs</h3>
                   <p className="text-white/70">
                     Analysez en détail vos statistiques et suivez votre
                     progression au fil du temps.

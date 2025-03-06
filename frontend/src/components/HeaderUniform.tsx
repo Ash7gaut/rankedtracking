@@ -159,7 +159,7 @@ export const HeaderUniform = ({
             }`}
           >
             <Person className="w-5 h-5" />
-            <span>Profils</span>
+            <span>Joueurs</span>
           </Link>
 
           <Link
