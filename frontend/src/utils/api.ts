@@ -71,17 +71,12 @@ export const api = {
 
   deletePlayer: async (summonerName: string) => {
     try {
-      console.log('API - URL:', `${API_URL}/api/players/delete`);
-      console.log('API - Données envoyées:', { summonerName });
-      
       const response = await axios.post(`${API_URL}/api/players/delete`, {
         summonerName
       });
-      
-      console.log('API - Réponse complète:', response);
       return response.data;
     } catch (error: any) {
-      console.error('API - Erreur complète:', error);
+      console.error('Erreur lors de la suppression:', error);
       throw error;
     }
   },

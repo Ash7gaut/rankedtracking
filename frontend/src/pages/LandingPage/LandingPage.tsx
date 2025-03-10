@@ -33,6 +33,9 @@ interface Player {
   rank: string | null;
   league_points: number;
   is_main: boolean;
+  wins?: number;
+  losses?: number;
+  in_game?: boolean;
 }
 
 interface PlayerSuggestion {
@@ -61,6 +64,7 @@ const LandingPage = () => {
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
   const carouselInterval = useRef<NodeJS.Timeout | null>(null);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [inGamePlayers, setInGamePlayers] = useState<Player[]>([]);
 
   React.useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -224,9 +228,39 @@ const LandingPage = () => {
       }
     };
 
+    const fetchInGamePlayers = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("players")
+          .select(
+            "id, summoner_name, player_name, profile_icon_id, tier, rank, is_main, league_points, wins, losses, in_game"
+          )
+          .eq("in_game", true)
+          .limit(6);
+
+        if (error) throw error;
+        setInGamePlayers(data || []);
+      } catch (error) {
+        console.error(
+          "Erreur lors de la récupération des joueurs en partie:",
+          error
+        );
+      }
+    };
+
     fetchTopPlayers();
     fetchRecentLPChanges();
     fetchAllPlayers();
+    fetchInGamePlayers();
+
+    // Mettre à jour les joueurs en partie toutes les 2 minutes
+    const inGameInterval = setInterval(() => {
+      fetchInGamePlayers();
+    }, 2 * 60 * 1000);
+
+    return () => {
+      clearInterval(inGameInterval);
+    };
   }, []);
 
   // Autoplay pour le carrousel
@@ -250,92 +284,33 @@ const LandingPage = () => {
   }, [allPlayers]);
 
   const handleSearch = async (query: string) => {
-    if (query.length >= 2) {
+    setSearchQuery(query);
+    if (query.length >= 1) {
       try {
-        // Récupérer les joueurs qui correspondent à la recherche
         const { data, error } = await supabase
           .from("players")
-          .select("*")
-          .ilike("player_name", `%${query}%`)
-          .order("league_points", { ascending: false });
+          .select(
+            "id, summoner_name, profile_icon_id, tier, rank, league_points, is_main"
+          )
+          .ilike("summoner_name", `%${query}%`)
+          .limit(5);
 
         if (error) throw error;
 
-        // Organiser les résultats pour privilégier les comptes principaux
-        // et les meilleurs comptes par joueur
-        const bestAccounts = new Map<string, PlayerSuggestion>();
-
-        const tierOrder: { [key: string]: number } = {
-          CHALLENGER: 9,
-          GRANDMASTER: 8,
-          MASTER: 7,
-          DIAMOND: 6,
-          EMERALD: 5,
-          PLATINUM: 4,
-          GOLD: 3,
-          SILVER: 2,
-          BRONZE: 1,
-          IRON: 0,
-        };
-
-        data?.forEach((player) => {
-          const currentBest = bestAccounts.get(player.player_name);
-
-          // Si c'est un compte principal, on le prend automatiquement
-          if (player.is_main) {
-            bestAccounts.set(player.player_name, {
-              id: player.id,
-              name: player.player_name,
-              profile_icon_id: player.profile_icon_id,
-              tier: player.tier,
-              rank: player.rank,
-              league_points: player.league_points,
-              is_main: player.is_main,
-            });
-            return;
-          }
-
-          // Si on n'a pas encore de compte pour ce joueur
-          if (!currentBest) {
-            bestAccounts.set(player.player_name, {
-              id: player.id,
-              name: player.player_name,
-              profile_icon_id: player.profile_icon_id,
-              tier: player.tier,
-              rank: player.rank,
-              league_points: player.league_points,
-              is_main: player.is_main,
-            });
-            return;
-          }
-
-          // Si le compte actuel a un meilleur rang
-          if (
-            player.tier &&
-            (!currentBest.tier ||
-              tierOrder[player.tier] > tierOrder[currentBest.tier] ||
-              (player.tier === currentBest.tier &&
-                player.league_points > currentBest.league_points))
-          ) {
-            bestAccounts.set(player.player_name, {
-              id: player.id,
-              name: player.player_name,
-              profile_icon_id: player.profile_icon_id,
-              tier: player.tier,
-              rank: player.rank,
-              league_points: player.league_points,
-              is_main: player.is_main,
-            });
-          }
-        });
-
-        const uniqueSuggestions = Array.from(bestAccounts.values());
-        setPlayerSuggestions(uniqueSuggestions);
+        setPlayerSuggestions(
+          data.map((player) => ({
+            id: player.id,
+            name: player.summoner_name,
+            profile_icon_id: player.profile_icon_id,
+            tier: player.tier,
+            rank: player.rank,
+            league_points: player.league_points,
+            is_main: player.is_main,
+          }))
+        );
         setShowSuggestions(true);
       } catch (error) {
         console.error("Erreur lors de la recherche:", error);
-        setPlayerSuggestions([]);
-        setShowSuggestions(false);
       }
     } else {
       setPlayerSuggestions([]);
@@ -343,9 +318,10 @@ const LandingPage = () => {
     }
   };
 
-  const handleSelectPlayer = (playerName: string) => {
-    navigate(`/profile/${encodeURIComponent(playerName)}`);
+  const handleSelectPlayer = (playerId: string) => {
+    navigate(`/player/${playerId}`);
     setSearchQuery("");
+    setPlayerSuggestions([]);
     setShowSuggestions(false);
   };
 
@@ -487,12 +463,6 @@ const LandingPage = () => {
               >
                 Suivi LP
               </button>
-              <button
-                onClick={() => navigate("/add")}
-                className="text-gray-300 hover:text-white transition-colors"
-              >
-                Ajouter un joueur
-              </button>
 
               {/* Only show logout if user is logged in */}
               {session ? (
@@ -562,15 +532,6 @@ const LandingPage = () => {
                     className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-white hover:bg-white/10 transition-colors"
                   >
                     Suivi LP
-                  </button>
-                  <button
-                    onClick={() => {
-                      navigate("/add");
-                      setMobileMenuOpen(false);
-                    }}
-                    className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-white hover:bg-white/10 transition-colors"
-                  >
-                    Ajouter un joueur
                   </button>
 
                   {session ? (
@@ -665,12 +626,13 @@ const LandingPage = () => {
                     <input
                       type="text"
                       value={searchQuery}
-                      onChange={(e) => {
-                        setSearchQuery(e.target.value);
-                        handleSearch(e.target.value);
-                      }}
+                      onChange={(e) => handleSearch(e.target.value)}
                       placeholder="Rechercher un joueur..."
                       className="w-full pl-12 pr-4 py-3 bg-transparent text-white/90 placeholder-white/60 focus:outline-none"
+                      onFocus={() => setShowSuggestions(true)}
+                      onBlur={() =>
+                        setTimeout(() => setShowSuggestions(false), 200)
+                      }
                     />
                   </div>
                 </div>
@@ -681,31 +643,37 @@ const LandingPage = () => {
                     {playerSuggestions.map((player) => (
                       <div
                         key={player.id}
-                        onClick={() => handleSelectPlayer(player.name)}
+                        onClick={() => handleSelectPlayer(player.id)}
                         className="flex items-center gap-3 p-3 hover:bg-white/10 cursor-pointer transition-colors border-b border-white/5 last:border-0"
                       >
-                        <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-700 flex-shrink-0">
+                        <div className="relative">
                           <img
-                            src={`https://opgg-static.akamaized.net/meta/images/profile_icons/profileIcon${player.profile_icon_id}.jpg?image=e_upscale,q_auto:good,f_webp,w_auto&v=1729058249`}
+                            src={`https://opgg-static.akamaized.net/meta/images/profile_icons/profileIcon${player.profile_icon_id}.jpg?image=q_auto,f_webp,w_auto&v=1696473789633`}
                             alt={player.name}
-                            className="w-full h-full object-cover"
+                            className="w-10 h-10 rounded-full object-cover border border-white/20"
                           />
+                          {player.is_main && (
+                            <div
+                              className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full"
+                              title="Compte principal"
+                            />
+                          )}
                         </div>
-                        <div className="flex-1">
-                          <div className="font-semibold text-white">
+                        <div>
+                          <div className="font-medium text-white">
                             {player.name}
                           </div>
-                          <div className="text-sm text-white/60">
-                            {player.tier && player.rank
-                              ? `${player.tier} ${player.rank} ${player.league_points} LP`
-                              : "Classé non disponible"}
-                          </div>
+                          {player.tier ? (
+                            <div className="text-xs text-white/60">
+                              {player.tier} {player.rank} •{" "}
+                              {player.league_points} LP
+                            </div>
+                          ) : (
+                            <div className="text-xs text-white/60">
+                              Non classé
+                            </div>
+                          )}
                         </div>
-                        {player.is_main && (
-                          <span className="px-2 py-1 text-xs bg-blue-900/60 text-blue-200 rounded-md">
-                            Principal
-                          </span>
-                        )}
                       </div>
                     ))}
                   </div>
@@ -974,6 +942,190 @@ const LandingPage = () => {
             </div>
           </section>
 
+          {/* Section Joueurs en partie */}
+          <section className="mb-24">
+            <motion.h2
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              className="text-3xl font-bold mb-12 text-center"
+            >
+              Joueurs en partie
+            </motion.h2>
+
+            {inGamePlayers.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {inGamePlayers.map((player) => (
+                  <motion.div
+                    key={player.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="relative h-[180px] group"
+                  >
+                    <div
+                      className="relative bg-white/5 backdrop-blur-sm border-l-4 border-green-500/70 dark:border-green-500/50 rounded-xl shadow-lg p-5 cursor-pointer 
+                      hover:shadow-xl transition-all duration-300 overflow-hidden group 
+                      [&:hover_.icon-hover]:opacity-100 h-full 
+                      hover:scale-[1.02] hover:-translate-y-1"
+                      onClick={() => navigate(`/player/${player.id}`)}
+                    >
+                      <a
+                        href={`https://porofessor.gg/fr/live/euw/${player.summoner_name
+                          .replace(/ /g, "%20")
+                          .replace(/#/g, "-")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`absolute top-3 right-3 ${
+                          ((player.wins || 0) /
+                            ((player.wins || 0) + (player.losses || 0))) *
+                            100 <
+                          50
+                            ? "bg-amber-800"
+                            : "bg-green-500"
+                        } text-white px-3 py-1 rounded-full text-xs font-semibold animate-pulse z-50 hover:brightness-110 transition-all duration-300 backdrop-blur-sm shadow-lg`}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        IN GAME
+                      </a>
+
+                      <div className="absolute inset-0 flex items-center justify-center opacity-[0.07] group-hover:opacity-[0.09] transition-opacity duration-300">
+                        <img
+                          src={
+                            player.tier
+                              ? `/ranks/${player.tier.toLowerCase()}.png`
+                              : "/ranks/unranked.png"
+                          }
+                          alt="Rank"
+                          className="w-80 h-80 object-contain"
+                        />
+                      </div>
+
+                      <div className="relative z-10 flex flex-col h-full">
+                        <div className="flex gap-5 mb-4">
+                          <div className="flex-shrink-0">
+                            <img
+                              src={`https://opgg-static.akamaized.net/meta/images/profile_icons/profileIcon${player.profile_icon_id}.jpg?image=e_upscale,q_auto:good,f_webp,w_auto&v=1729058249`}
+                              alt="Profile Icon"
+                              className="w-16 h-16 rounded-full border-2 border-gray-200/70 dark:border-gray-600/50 shadow-md group-hover:shadow-lg transition-all duration-300"
+                            />
+                          </div>
+                          <div className="flex-grow min-w-0">
+                            <h2 className="text-lg font-bold mb-2 text-gray-100 flex items-center gap-2">
+                              <div className="flex-1 min-w-0">
+                                <span className="truncate block group-hover:text-blue-400 transition-colors duration-300">
+                                  {player.summoner_name}
+                                </span>
+                              </div>
+                            </h2>
+                            {player.player_name && (
+                              <a
+                                href={`/profile/${encodeURIComponent(
+                                  player.player_name
+                                )}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(
+                                    `/profile/${encodeURIComponent(
+                                      player.player_name
+                                    )}`
+                                  );
+                                }}
+                                className="inline-flex items-center gap-1 mb-2 text-sm text-blue-400 hover:text-blue-300 transition-colors"
+                              >
+                                <Person className="w-4 h-4" />
+                                {player.player_name}
+                              </a>
+                            )}
+                            <div className="text-gray-300 truncate flex items-center gap-2">
+                              <div className="bg-white/5 px-2 py-1 rounded-md flex items-center gap-2 min-w-0">
+                                {player.tier ? (
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <span>
+                                      {player.tier} {player.rank}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  "UNRANKED"
+                                )}
+                              </div>
+                              <span className="flex-shrink-0 text-blue-400/90">
+                                {player.league_points} LP
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4 text-sm mt-auto">
+                          <div className="text-gray-300 truncate bg-white/5 px-3 py-1.5 rounded-lg font-medium">
+                            W/L: {player.wins || 0}/{player.losses || 0}
+                          </div>
+                          <div
+                            className={`truncate text-right px-3 py-1.5 rounded-lg font-medium ${
+                              !player.wins && !player.losses
+                                ? "text-gray-400 bg-white/5"
+                                : Number(
+                                    (
+                                      ((player.wins || 0) /
+                                        ((player.wins || 0) +
+                                          (player.losses || 0))) *
+                                      100
+                                    ).toFixed(1)
+                                  ) >= 50
+                                ? "text-green-400 bg-green-900/20"
+                                : "text-red-400 bg-red-900/20"
+                            }`}
+                          >
+                            {!player.wins && !player.losses
+                              ? "0%"
+                              : (
+                                  ((player.wins || 0) /
+                                    ((player.wins || 0) +
+                                      (player.losses || 0))) *
+                                  100
+                                ).toFixed(1) + "%"}{" "}
+                            WR
+                          </div>
+                        </div>
+                      </div>
+
+                      <a
+                        href={`https://www.leagueofgraphs.com/fr/summoner/euw/${player.summoner_name
+                          .replace(/ /g, "%20")
+                          .replace(/#/g, "-")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="absolute bottom-3 right-3 text-sm text-blue-400 hover:text-blue-300 hover:underline z-20 group"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <img
+                          src="https://i.imgur.com/TCDG5tK.png"
+                          alt="League of Graphs"
+                          className="w-6 h-6 opacity-0 icon-hover duration-300 transform group-hover:rotate-12 transition-all"
+                        />
+                      </a>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-8 text-center"
+              >
+                <div className="text-xl text-white/70 mb-4">
+                  Aucun joueur en partie actuellement
+                </div>
+                <p className="text-white/50">
+                  Les joueurs en partie apparaîtront ici lorsqu'ils seront en
+                  jeu.
+                </p>
+              </motion.div>
+            )}
+          </section>
+
           {/* Services Section */}
           <section className="mb-24">
             <motion.h2
@@ -1008,28 +1160,6 @@ const LandingPage = () => {
                 </div>
               </motion.div>
 
-              {/* Card 2 */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2 }}
-                className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 overflow-hidden group hover:bg-white/10 transition-all duration-300"
-                whileHover={{ scale: 1.02 }}
-                onClick={() => navigate("/players")}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 to-blue-500/0 group-hover:from-purple-500/10 group-hover:to-pink-500/10 transition-all duration-300"></div>
-
-                <div className="relative z-10 cursor-pointer">
-                  <Person className="text-purple-400 mb-4 w-10 h-10" />
-                  <h3 className="text-xl font-bold mb-2">Liste des joueurs</h3>
-                  <p className="text-white/70">
-                    Analysez en détail vos statistiques et suivez votre
-                    progression au fil du temps.
-                  </p>
-                </div>
-              </motion.div>
-
               {/* Card 3 */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -1048,6 +1178,28 @@ const LandingPage = () => {
                   <p className="text-white/70">
                     Suivez l'évolution de vos LP et identifiez vos périodes de
                     progression.
+                  </p>
+                </div>
+              </motion.div>
+
+              {/* Card 2 */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+                className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 overflow-hidden group hover:bg-white/10 transition-all duration-300"
+                whileHover={{ scale: 1.02 }}
+                onClick={() => navigate("/players")}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 to-blue-500/0 group-hover:from-purple-500/10 group-hover:to-pink-500/10 transition-all duration-300"></div>
+
+                <div className="relative z-10 cursor-pointer">
+                  <Person className="text-purple-400 mb-4 w-10 h-10" />
+                  <h3 className="text-xl font-bold mb-2">Liste des joueurs</h3>
+                  <p className="text-white/70">
+                    Analysez en détail vos statistiques et suivez votre
+                    progression au fil du temps.
                   </p>
                 </div>
               </motion.div>
@@ -1108,12 +1260,6 @@ const LandingPage = () => {
                       Se connecter
                     </button>
                   )}
-                  <button
-                    onClick={() => navigate("/add-player")}
-                    className="px-8 py-3 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-lg transition-all duration-300"
-                  >
-                    Ajouter un joueur
-                  </button>
                 </div>
               </div>
             </motion.div>

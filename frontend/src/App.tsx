@@ -20,6 +20,7 @@ import LandingPage from "./pages/LandingPage/LandingPage";
 import PlayerProfiles from "./pages/PlayerProfiles/PlayerProfiles";
 import LPTracking from "./pages/LPTracking/LPTracking";
 import BackgroundBlobs from "./components/BackgroundBlobs";
+import ParticlesBackground from "./components/ParticlesBackground";
 import ScrollToTop from "./components/ScrollToTop";
 
 // Composant pour gérer les transitions entre les routes
@@ -149,10 +150,41 @@ function App() {
     return saved ? JSON.parse(saved) : true;
   });
 
+  const [animationMode, setAnimationMode] = useState(() => {
+    const saved = localStorage.getItem("animationMode");
+    return saved ? JSON.parse(saved) : "blobs"; // Valeurs possibles: "blobs", "particles", "both", "none"
+  });
+
   useEffect(() => {
     localStorage.setItem("darkMode", JSON.stringify(darkMode));
     document.documentElement.classList.toggle("dark", darkMode);
   }, [darkMode]);
+
+  useEffect(() => {
+    localStorage.setItem("animationMode", JSON.stringify(animationMode));
+  }, [animationMode]);
+
+  const cycleAnimationMode = () => {
+    const modes = ["blobs", "particles", "both", "none"];
+    const currentIndex = modes.indexOf(animationMode);
+    const nextIndex = (currentIndex + 1) % modes.length;
+    setAnimationMode(modes[nextIndex]);
+  };
+
+  const getAnimationIcon = () => {
+    switch (animationMode) {
+      case "blobs":
+        return "🔵";
+      case "particles":
+        return "✨";
+      case "both":
+        return "🌈";
+      case "none":
+        return "🔄";
+      default:
+        return "🔵";
+    }
+  };
 
   return (
     <BrowserRouter>
@@ -161,15 +193,30 @@ function App() {
           darkMode ? "dark bg-gray-900" : "bg-gray-200"
         }`}
       >
-        <BackgroundBlobs />
+        {(animationMode === "blobs" || animationMode === "both") && (
+          <BackgroundBlobs />
+        )}
+        {(animationMode === "particles" || animationMode === "both") && (
+          <ParticlesBackground />
+        )}
 
         <div className="container mx-auto px-4 py-8 max-w-full sm:max-w-[720px] md:max-w-[860px] lg:max-w-[1100px] xl:max-w-[1400px] 2xl:max-w-[1600px]">
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            className="fixed bottom-4 z-10 right-4 p-3 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-          >
-            {darkMode ? "🌞" : "🌙"}
-          </button>
+          <div className="fixed bottom-4 z-10 right-4 flex flex-col gap-3">
+            <button
+              onClick={cycleAnimationMode}
+              className="p-3 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              title="Changer l'animation d'arrière-plan"
+            >
+              {getAnimationIcon()}
+            </button>
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className="p-3 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              title="Changer le mode clair/sombre"
+            >
+              {darkMode ? "🌞" : "🌙"}
+            </button>
+          </div>
           <AnimatedRoutes />
         </div>
       </div>
