@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../utils/supabase";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { ArrowBack, Home } from "@mui/icons-material";
 
 export default function Auth() {
   const [mode, setMode] = useState<"login" | "register">("login");
@@ -155,9 +156,27 @@ export default function Auth() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-xl text-white">
-        <div className="flex justify-center space-x-4">
+    <div className="flex flex-col items-center justify-center w-full">
+      {/* Barre de navigation */}
+      <div className="fixed top-0 left-0 right-0 p-4 flex justify-between items-center z-10 bg-black/20 backdrop-blur-md">
+        <Link
+          to="/"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-all"
+        >
+          <ArrowBack className="w-5 h-5" />
+          <span>Retour</span>
+        </Link>
+        <Link
+          to="/"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-all"
+        >
+          <Home className="w-5 h-5" />
+          <span>Accueil</span>
+        </Link>
+      </div>
+
+      <div className="w-full max-w-md p-6 md:p-8 space-y-5 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-xl text-white">
+        <div className="flex justify-center space-x-4 mb-2">
           <button
             onClick={() => setMode("login")}
             className={`px-4 py-2 rounded-lg transition-colors ${
@@ -193,20 +212,22 @@ export default function Auth() {
                 </div>
               )}
 
-              <input
-                type="email"
-                placeholder="Email"
-                value={loginEmail}
-                onChange={(e) => setLoginEmail(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/10 text-white placeholder-white/60 focus:outline-none focus:border-blue-500/50"
-              />
-              <input
-                type="password"
-                placeholder="Mot de passe"
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/10 text-white placeholder-white/60 focus:outline-none focus:border-blue-500/50"
-              />
+              <div className="space-y-3">
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/10 text-white placeholder-white/60 focus:outline-none focus:border-blue-500/50"
+                />
+                <input
+                  type="password"
+                  placeholder="Mot de passe"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/10 text-white placeholder-white/60 focus:outline-none focus:border-blue-500/50"
+                />
+              </div>
               <button
                 type="submit"
                 disabled={loading}
@@ -216,7 +237,7 @@ export default function Auth() {
               </button>
             </form>
 
-            <div className="pt-4 space-y-4">
+            <div className="pt-2 space-y-4">
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-white/10"></div>
@@ -262,32 +283,34 @@ export default function Auth() {
               </div>
             )}
 
-            <input
-              type="email"
-              placeholder="Email"
-              value={registerEmail}
-              onChange={(e) => setRegisterEmail(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/10 text-white placeholder-white/60 focus:outline-none focus:border-blue-500/50"
-            />
+            <div className="space-y-3">
+              <input
+                type="email"
+                placeholder="Email"
+                value={registerEmail}
+                onChange={(e) => setRegisterEmail(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/10 text-white placeholder-white/60 focus:outline-none focus:border-blue-500/50"
+              />
+              <input
+                type="password"
+                placeholder="Mot de passe"
+                value={registerPassword}
+                onChange={(e) => setRegisterPassword(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/10 text-white placeholder-white/60 focus:outline-none focus:border-blue-500/50"
+              />
+              <input
+                type="password"
+                placeholder="Confirmer le mot de passe"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/10 text-white placeholder-white/60 focus:outline-none focus:border-blue-500/50"
+              />
+            </div>
 
-            <input
-              type="password"
-              placeholder="Mot de passe"
-              value={registerPassword}
-              onChange={(e) => setRegisterPassword(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/10 text-white placeholder-white/60 focus:outline-none focus:border-blue-500/50"
-            />
-            <input
-              type="password"
-              placeholder="Confirmer le mot de passe"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/10 text-white placeholder-white/60 focus:outline-none focus:border-blue-500/50"
-            />
             <button
               type="submit"
               disabled={loading}
-              className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+              className="w-full px-4 py-2 text-white bg-blue-500/80 hover:bg-blue-600/80 rounded-lg focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Chargement..." : "S'inscrire"}
             </button>
