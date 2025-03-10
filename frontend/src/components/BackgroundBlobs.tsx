@@ -73,7 +73,7 @@ const BackgroundBlobs = () => {
 
       {/* Blob jaune - accent, plus petit */}
       <div
-        className="absolute transition-transform duration-2000 ease-out bottom-[10%] right-[15%] w-[40vw] h-[40vw] rounded-full bg-gradient-to-r from-amber-500/20 to-yellow-400/15 blur-[130px] animate-pulse"
+        className="absolute transition-transform duration-2000 ease-out bottom-[10%] right-[0%] w-[40vw] h-[40vw] rounded-full bg-gradient-to-r from-amber-500/20 to-yellow-400/15 blur-[130px] animate-pulse"
         style={{
           animationDuration: "25s",
           transform: `translate(${yellowOffset.x}%, ${yellowOffset.y}%)`,
