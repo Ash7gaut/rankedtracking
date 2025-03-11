@@ -252,7 +252,7 @@ export const deletePlayer = async (req: Request, res: Response): Promise<void> =
 
     console.log('Joueur trouvé, ID:', player.id);
 
-    // D'abord supprimer les entrées dans lp_tracker
+    // 1. Supprimer les entrées dans lp_tracker
     const { error: trackerError } = await supabase
       .from('lp_tracker')
       .delete()
@@ -264,7 +264,31 @@ export const deletePlayer = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
-    // Ensuite supprimer le joueur
+    // 2. Supprimer les entrées dans player_history
+    const { error: historyError } = await supabase
+      .from('player_history')
+      .delete()
+      .eq('player_id', player.id);
+
+    if (historyError) {
+      console.error('Erreur lors de la suppression de l\'historique:', historyError);
+      res.status(500).json({ error: 'Erreur lors de la suppression de l\'historique' });
+      return;
+    }
+
+    // 3. Supprimer les entrées dans player_stats_monthly
+    const { error: statsError } = await supabase
+      .from('player_stats_monthly')
+      .delete()
+      .eq('player_id', player.id);
+
+    if (statsError) {
+      console.error('Erreur lors de la suppression des statistiques mensuelles:', statsError);
+      res.status(500).json({ error: 'Erreur lors de la suppression des statistiques mensuelles' });
+      return;
+    }
+
+    // 4. Enfin, supprimer le joueur
     const { error: deleteError } = await supabase
       .from('players')
       .delete()
