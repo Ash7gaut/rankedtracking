@@ -76,27 +76,11 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
   console.log(`\nMise à jour des données pour ${gameName}#${tagLine}`);
 
   try {
-    // On utilise toujours le PUUID en premier si disponible
-    let summonerData;
-    if (player.puuid) {
-      try {
-        summonerData = await retryWithDelay(
-          () => riotService.getSummonerByPUUID(player.puuid),
-          `récupération par PUUID de ${player.summoner_name}`
-        );
-      } catch (error: any) {
-        console.log(`Échec de récupération par PUUID pour ${player.summoner_name}, tentative par Riot ID`);
-        summonerData = await retryWithDelay(
-          () => riotService.getSummonerByName(gameName, tagLine),
-          `récupération par Riot ID de ${player.summoner_name}`
-        );
-      }
-    } else {
-      summonerData = await retryWithDelay(
-        () => riotService.getSummonerByName(gameName, tagLine),
-        `récupération par Riot ID de ${player.summoner_name}`
-      );
-    }
+    // Toujours récupérer les données à partir du Riot ID (gameName + tagLine)
+    const summonerData = await retryWithDelay(
+      () => riotService.getSummonerByName(gameName, tagLine),
+      `récupération par Riot ID de ${player.summoner_name}`
+    );
 
     // Vérification de la validité des données
     if (!summonerData || !summonerData.gameName || !summonerData.tagLine) {
