@@ -20,15 +20,15 @@ interface Player {
 
 interface MigrationResult {
   playerId: string;
-  oldSummonerId: string;
-  newSummonerId: string;
+  oldPUUID: string;
+  newPUUID: string;
   summonerName: string;
   success: boolean;
   error?: string;
 }
 
-const migrateSummonerIds = async (): Promise<void> => {
-  console.log('🚀 Début de la migration des Summoner ID...');
+const migratePUUIDs = async (): Promise<void> => {
+  console.log('🚀 Début de la migration des PUUID...');
   console.log('📅 Date:', new Date().toISOString());
   console.log('=====================================');
   
@@ -68,8 +68,8 @@ const migrateSummonerIds = async (): Promise<void> => {
           console.log(`  ❌ Format invalide pour ${player.summoner_name}`);
           results.push({
             playerId: player.id,
-            oldSummonerId: player.summoner_id,
-            newSummonerId: '',
+            oldPUUID: player.puuid,
+            newPUUID: '',
             summonerName: player.summoner_name,
             success: false,
             error: 'Format Riot ID invalide'
@@ -81,12 +81,12 @@ const migrateSummonerIds = async (): Promise<void> => {
         // Récupérer les nouvelles données avec la nouvelle clé API
         const summonerData = await riotService.getSummonerByName(gameName, tagLine);
         
-        if (!summonerData || !summonerData.id) {
+        if (!summonerData || !summonerData.puuid) {
           console.log(`  ❌ Impossible de récupérer les données pour ${player.summoner_name}`);
           results.push({
             playerId: player.id,
-            oldSummonerId: player.summoner_id,
-            newSummonerId: '',
+            oldPUUID: player.puuid,
+            newPUUID: '',
             summonerName: player.summoner_name,
             success: false,
             error: 'Impossible de récupérer les nouvelles données'
@@ -95,21 +95,21 @@ const migrateSummonerIds = async (): Promise<void> => {
           continue;
         }
 
-        const newSummonerId = summonerData.id;
+        const newPUUID = summonerData.puuid;
         
-        // Debug: Afficher les Summoner ID pour comparaison
-        console.log(`  🔍 Comparaison Summoner ID pour ${player.summoner_name}:`);
-        console.log(`     Ancien: ${player.summoner_id}`);
-        console.log(`     Nouveau: ${newSummonerId}`);
-        console.log(`     Identiques: ${player.summoner_id === newSummonerId ? 'OUI' : 'NON'}`);
+        // Debug: Afficher les PUUID pour comparaison
+        console.log(`  🔍 Comparaison PUUID pour ${player.summoner_name}:`);
+        console.log(`     Ancien: ${player.puuid}`);
+        console.log(`     Nouveau: ${newPUUID}`);
+        console.log(`     Identiques: ${player.puuid === newPUUID ? 'OUI' : 'NON'}`);
         
-        // Vérifier si le Summoner ID a changé
-        if (player.summoner_id === newSummonerId) {
-          console.log(`  ✅ Summoner ID inchangé pour ${player.summoner_name}`);
+        // Vérifier si le PUUID a changé
+        if (player.puuid === newPUUID) {
+          console.log(`  ✅ PUUID inchangé pour ${player.summoner_name}`);
           results.push({
             playerId: player.id,
-            oldSummonerId: player.summoner_id,
-            newSummonerId: newSummonerId,
+            oldPUUID: player.puuid,
+            newPUUID: newPUUID,
             summonerName: player.summoner_name,
             success: true
           });
@@ -117,14 +117,13 @@ const migrateSummonerIds = async (): Promise<void> => {
           continue;
         }
 
-        console.log(`  🔄 Summoner ID changé: ${player.summoner_id.substring(0, 8)}... → ${newSummonerId.substring(0, 8)}...`);
+        console.log(`  🔄 PUUID changé: ${player.puuid.substring(0, 8)}... → ${newPUUID.substring(0, 8)}...`);
 
-        // 3. Mettre à jour le joueur avec le nouveau Summoner ID
+        // 3. Mettre à jour le joueur avec le nouveau PUUID
         const { error: updateError } = await supabase
           .from('players')
           .update({
-            summoner_id: newSummonerId,
-            profile_icon_id: summonerData.profileIconId,
+            puuid: newPUUID,
             last_update: new Date().toISOString()
           })
           .eq('id', player.id);
@@ -133,8 +132,8 @@ const migrateSummonerIds = async (): Promise<void> => {
           console.log(`  ❌ Erreur lors de la mise à jour de ${player.summoner_name}: ${updateError.message}`);
           results.push({
             playerId: player.id,
-            oldSummonerId: player.summoner_id,
-            newSummonerId: newSummonerId,
+            oldPUUID: player.puuid,
+            newPUUID: newPUUID,
             summonerName: player.summoner_name,
             success: false,
             error: `Erreur de mise à jour: ${updateError.message}`
@@ -146,8 +145,8 @@ const migrateSummonerIds = async (): Promise<void> => {
         console.log(`  ✅ ${player.summoner_name} migré avec succès`);
         results.push({
           playerId: player.id,
-          oldSummonerId: player.summoner_id,
-          newSummonerId: newSummonerId,
+          oldPUUID: player.puuid,
+          newPUUID: newPUUID,
           summonerName: player.summoner_name,
           success: true
         });
@@ -160,8 +159,8 @@ const migrateSummonerIds = async (): Promise<void> => {
         console.log(`  ❌ Erreur pour ${player.summoner_name}: ${error.message}`);
         results.push({
           playerId: player.id,
-          oldSummonerId: player.summoner_id,
-          newSummonerId: '',
+          oldPUUID: player.puuid,
+          newPUUID: '',
           summonerName: player.summoner_name,
           success: false,
           error: error.message
@@ -176,8 +175,8 @@ const migrateSummonerIds = async (): Promise<void> => {
     console.log('==========================');
     console.log(`✅ Succès: ${successCount}/${results.length}`);
     console.log(`❌ Échecs: ${errorCount}/${results.length}`);
-    console.log(`🔄 Summoner ID changés: ${successCount}/${results.length}`);
-    console.log(`📊 Summoner ID inchangés: ${unchangedCount}/${results.length}`);
+    console.log(`🔄 PUUID changés: ${successCount}/${results.length}`);
+    console.log(`📊 PUUID inchangés: ${unchangedCount}/${results.length}`);
     console.log('');
 
     if (errorCount > 0) {
@@ -191,12 +190,12 @@ const migrateSummonerIds = async (): Promise<void> => {
     }
 
     if (successCount > 0) {
-      console.log('🔄 SUMMONER ID CHANGÉS:');
-      console.log('=======================');
-      const changed = results.filter(r => r.oldSummonerId !== r.newSummonerId && r.success);
+      console.log('🔄 PUUID CHANGÉS:');
+      console.log('=================');
+      const changed = results.filter(r => r.oldPUUID !== r.newPUUID && r.success);
       changed.forEach((result, index) => {
         console.log(`${index + 1}. ${result.summonerName}`);
-        console.log(`   ${result.oldSummonerId.substring(0, 8)}... → ${result.newSummonerId.substring(0, 8)}...`);
+        console.log(`   ${result.oldPUUID.substring(0, 8)}... → ${result.newPUUID.substring(0, 8)}...`);
       });
       console.log('');
     }
@@ -363,9 +362,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       break;
     case 'migrate':
     default:
-      migrateSummonerIds();
+      migratePUUIDs();
       break;
   }
 }
 
-export { migrateSummonerIds, checkMigrationStatus, forceUpdateAllPlayers }; 
+export { migratePUUIDs, checkMigrationStatus, forceUpdateAllPlayers }; 
