@@ -53,11 +53,11 @@ export const riotService = {
     }
   },
 
-  getRankedStats: async (summonerId: string): Promise<RankedStats[]> => {
+  getRankedStats: async (puuid: string): Promise<RankedStats[]> => {
     try {
-      console.log('Fetching ranked stats for summoner:', summonerId);
+      console.log('Fetching ranked stats for puuid:', puuid);
       const response = await axios.get<RankedStats[]>(
-        `${LOL_API_BASE_URL}/league/v4/entries/by-summoner/${summonerId}`,
+        `${LOL_API_BASE_URL}/league/v4/entries/by-puuid/${puuid}`,
         {
           headers: {
             'X-Riot-Token': RIOT_API_KEY
@@ -73,7 +73,7 @@ export const riotService = {
           queueType: 'RANKED_SOLO_5x5',
           tier: null,
           rank: null,
-          summonerId: summonerId,
+          summonerId: '',
           summonerName: '',
           leaguePoints: 0,
           wins: 0,
@@ -90,7 +90,7 @@ export const riotService = {
       if (error.response?.status === 429) {
         const retryAfter = error.response.headers['retry-after'] || 10;
         await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
-        return riotService.getRankedStats(summonerId); // Retry after waiting
+        return riotService.getRankedStats(puuid); // Retry after waiting
       }
       console.error('Error in getRankedStats:', error);
       throw error;

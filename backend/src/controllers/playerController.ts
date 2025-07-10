@@ -39,7 +39,7 @@ export const getPlayerById = async (req: Request, res: Response) => {
 
       // 2. Mettre à jour les données du joueur
     try {
-      const rankedStats = await riotService.getRankedStats(player.summoner_id);
+      const rankedStats = await riotService.getRankedStats(player.puuid);
       console.log('Ranked Stats pour', player.summoner_name, ':', rankedStats);
 
       const soloQStats = rankedStats.find(
@@ -98,7 +98,7 @@ export const addPlayer = async (req: Request, res: Response) => {
     }
 
     const summonerData = await riotService.getSummonerByName(gameName, tagLine);
-    const rankedStats = await riotService.getRankedStats(summonerData.id);
+    const rankedStats = await riotService.getRankedStats(summonerData.puuid);
     const soloQStats = rankedStats.find(
       (queue: any) => queue.queueType === 'RANKED_SOLO_5x5'
     );
@@ -170,7 +170,7 @@ export const updateAllPlayers = async (req: Request, res: Response) => {
           fullObject: summonerData
         });
         
-        const rankedStats = await riotService.getRankedStats(summonerData.id);
+        const rankedStats = await riotService.getRankedStats(summonerData.puuid);
         const soloQStats = rankedStats.find(
           (queue: any) => queue.queueType === 'RANKED_SOLO_5x5'
         );
@@ -312,7 +312,7 @@ export const updatePlayer = async (player: Player) => {
   try {
     const [summonerData, rankedStats] = await Promise.all([
       riotService.getSummonerByName(player.summoner_name.split('#')[0], player.summoner_name.split('#')[1]),
-      riotService.getRankedStats(player.summoner_id)
+      riotService.getRankedStats(player.puuid)
     ]);
     
     const soloQStats = rankedStats.find(
@@ -368,7 +368,7 @@ export const autoUpdatePlayers = async (req: Request, res: Response) => {
         const summonerData = await riotService.getSummonerByName(gameName, tagLine);
         console.log('Summoner Data:', summonerData);
 
-        const rankedStats = await riotService.getRankedStats(summonerData.id);
+        const rankedStats = await riotService.getRankedStats(summonerData.puuid);
         console.log('Ranked Stats:', rankedStats);
 
         const soloQStats = rankedStats.find(
