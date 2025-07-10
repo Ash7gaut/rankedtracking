@@ -139,7 +139,7 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
     const totalGames = (soloQStats?.wins || 0) + (soloQStats?.losses || 0);
 
     const updateData = {
-      summoner_id: summonerData.id,
+      summoner_id: summonerData.puuid, // On met maintenant le PUUID dans la colonne summoner_id
       puuid: summonerData.puuid,
       summoner_name: currentRiotId,
       profile_icon_id: summonerData.profileIconId,
