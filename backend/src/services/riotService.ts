@@ -38,6 +38,8 @@ export const riotService = {
 
       const finalData = {
         ...summonerResponse.data,
+        gameName: accountData.gameName,
+        tagLine: accountData.tagLine,
         riotId: `${accountData.gameName}#${accountData.tagLine}`
       };
       console.log('Final summoner data:', finalData);

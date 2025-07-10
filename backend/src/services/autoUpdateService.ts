@@ -107,7 +107,7 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
     // On regroupe les requêtes restantes
     const [rankedStats, activeGame] = await Promise.all([
       retryWithDelay(
-        () => riotService.getRankedStats(summonerData.id),
+        () => riotService.getRankedStats(summonerData.puuid),
         `stats ranked de ${currentRiotId}`
       ),
       retryWithDelay(
