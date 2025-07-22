@@ -75,188 +75,208 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
   const [gameName, tagLine] = player.summoner_name.split('#');
   console.log(`\nMise à jour des données pour ${gameName}#${tagLine}`);
 
+  let summonerData;
   try {
-    // Toujours récupérer les données à partir du Riot ID (gameName + tagLine)
-    const summonerData = await retryWithDelay(
+    // Essayer d'abord par Riot ID
+    summonerData = await retryWithDelay(
       () => riotService.getSummonerByName(gameName, tagLine),
       `récupération par Riot ID de ${player.summoner_name}`
     );
-
-    // Vérification de la validité des données
-    if (!summonerData || !summonerData.gameName || !summonerData.tagLine) {
-      console.log(`❌ Données invalides reçues pour ${player.summoner_name}, conservation des anciennes données`);
-      return { 
-        success: false, 
-        player: player.summoner_name, 
-        error: "Données invalides reçues de l'API" 
-      };
-    }
-
-    const currentRiotId = `${summonerData.gameName}#${summonerData.tagLine}`;
-    
-    // Vérification supplémentaire pour éviter les undefined#undefined
-    if (currentRiotId === "undefined#undefined") {
-      console.log(`❌ Riot ID invalide reçu pour ${player.summoner_name}, conservation des anciennes données`);
-      return { 
-        success: false, 
-        player: player.summoner_name, 
-        error: "Riot ID invalide reçu" 
-      };
-    }
-
-    // On regroupe les requêtes restantes
-    const [rankedStats, activeGame] = await Promise.all([
-      retryWithDelay(
-        () => riotService.getRankedStats(summonerData.puuid),
-        `stats ranked de ${currentRiotId}`
-      ),
-      retryWithDelay(
-        () => riotService.getActiveGame(summonerData.puuid),
-        `statut en jeu de ${currentRiotId}`
-      )
-    ]);
-
-    const soloQStats = rankedStats.find(
-      (queue: any) => queue.queueType === 'RANKED_SOLO_5x5'
-    );
-
-    const totalGames = (soloQStats?.wins || 0) + (soloQStats?.losses || 0);
-
-    const updateData = {
-      summoner_id: summonerData.puuid, // On met maintenant le PUUID dans la colonne summoner_id
-      puuid: summonerData.puuid,
-      summoner_name: currentRiotId,
-      profile_icon_id: summonerData.profileIconId,
-      tier: soloQStats?.tier || null,
-      rank: soloQStats?.rank || null,
-      league_points: soloQStats?.leaguePoints || 0,
-      wins: soloQStats?.wins || 0,
-      losses: soloQStats?.losses || 0,
-      in_game: activeGame.inGame || false,
-      last_update: new Date().toISOString()
-    };
-
-    // Vérifier si on doit sauvegarder l'historique (toutes les 12 heures)
-    const shouldSaveHistory = async () => {
-      const SIX_HOURS = 12 * 60 * 60 * 1000; // 12 heures en millisecondes
-      
-      // Récupérer la dernière entrée d'historique pour ce joueur
-      const { data: lastHistory, error } = await supabase
-        .from('player_history')
-        .select('timestamp')
-        .eq('player_id', player.id)
-        .order('timestamp', { ascending: false })
-        .limit(1);
-
-      if (error) {
-        console.error('Erreur en vérifiant l\'historique:', error);
-        return false;
-      }
-
-      // Si pas d'historique ou si le dernier est vieux de plus de 6 heures
-      if (!lastHistory?.length) return true;
-      
-      const lastUpdate = new Date(lastHistory[0].timestamp).getTime();
-      const now = new Date().getTime();
-      
-      return (now - lastUpdate) >= SIX_HOURS;
-    };
-
-    // Avant de mettre à jour le joueur, sauvegarder l'état actuel dans l'historique si nécessaire
-    if (updateData.tier || updateData.rank || updateData.league_points) {
-      const saveHistory = await shouldSaveHistory();
-      
-      if (saveHistory) {
-        const { error: historyError } = await supabase
-          .from('player_history')
-          .insert({
-            player_id: player.id,
-            tier: updateData.tier,
-            rank: updateData.rank,
-            league_points: updateData.league_points,
-            wins: updateData.wins,
-            losses: updateData.losses
-          });
-
-        if (historyError) throw historyError;
-        console.log(`✅ Historique sauvegardé pour ${player.summoner_name}`);
-      }
-    }
-
-    if (player.league_points !== updateData.league_points || 
-        player.tier !== updateData.tier || 
-        player.rank !== updateData.rank) {
-
-      const lpDifference = calculateLPDifference(
-        player.tier,
-        player.rank,
-        player.league_points,
-        updateData.tier,
-        updateData.rank,
-        updateData.league_points
-      );
-
-      // Vérifier les entrées dans l'heure précédente
-      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-      
-      const { data: existingEntry } = await supabase
-        .from('lp_tracker')
-        .select('*')
-        .eq('player_id', player.id)
-        .eq('current_lp', updateData.league_points)
-        .eq('tier', updateData.tier)
-        .eq('rank', updateData.rank)
-        .gte('timestamp', oneHourAgo)
-        .order('timestamp', { ascending: false })
-        .limit(1);
-
-      if (!existingEntry?.length) {
-        const { error: trackerError } = await supabase
-          .from('lp_tracker')
-          .insert({
-            player_id: player.id,
-            previous_lp: player.league_points,
-            current_lp: updateData.league_points,
-            difference: lpDifference,
-            previous_tier: player.tier,
-            previous_rank: player.rank,
-            tier: updateData.tier,
-            rank: updateData.rank,
-            summoner_name: player.summoner_name
-          });
-
-        if (trackerError) console.error('Erreur lors du tracking des LP:', trackerError);
-      }
-    }
-
-    // Vérification finale des données avant mise à jour
-    if (Object.values(updateData).some(value => value === undefined)) {
-      console.log(`❌ Données incomplètes pour ${player.summoner_name}, conservation des anciennes données`);
-      return { 
-        success: false, 
-        player: player.summoner_name, 
-        error: "Données incomplètes" 
-      };
-    }
-
-    const { error: updateError } = await supabase
-      .from('players')
-      .update(updateData)
-      .eq('id', player.id);
-
-    if (updateError) throw updateError;
-    
-    console.log(`✅ ${currentRiotId} mis à jour (${updatedCount + 1}/${totalPlayers})${activeGame.inGame ? ' (IN GAME)' : ' (NOT IN GAME)'}`);
-    return { success: true, player: currentRiotId, error: null };
-
   } catch (error: any) {
-    console.error(`❌ Échec de la mise à jour pour ${player.summoner_name}:`, error);
+    // Si 404, tenter par PUUID
+    if (error?.response?.status === 404) {
+      console.log(`Riot ID introuvable pour ${player.summoner_name}, tentative de récupération par PUUID...`);
+      try {
+        summonerData = await retryWithDelay(
+          () => riotService.getSummonerByPUUID(player.puuid),
+          `récupération par PUUID de ${player.puuid}`
+        );
+      } catch (puuidError) {
+        console.log(`❌ Impossible de récupérer les données pour ${player.summoner_name} (PUUID: ${player.puuid})`);
+        return {
+          success: false,
+          player: player.summoner_name,
+          error: "Impossible de récupérer les données par Riot ID ou PUUID"
+        };
+      }
+    } else {
+      // Autre erreur
+      console.log(`❌ Erreur lors de la récupération de ${player.summoner_name}:`, error.message);
+      return {
+        success: false,
+        player: player.summoner_name,
+        error: error.message || 'Erreur inconnue'
+      };
+    }
+  }
+
+  // Vérification de la validité des données
+  if (!summonerData || !summonerData.gameName || !summonerData.tagLine) {
+    console.log(`❌ Données invalides reçues pour ${player.summoner_name}, conservation des anciennes données`);
     return { 
       success: false, 
       player: player.summoner_name, 
-      error: error.message || 'Unknown error'
+      error: "Données invalides reçues de l'API" 
     };
   }
+
+  const currentRiotId = `${summonerData.gameName}#${summonerData.tagLine}`;
+  
+  // Vérification supplémentaire pour éviter les undefined#undefined
+  if (currentRiotId === "undefined#undefined") {
+    console.log(`❌ Riot ID invalide reçu pour ${player.summoner_name}, conservation des anciennes données`);
+    return { 
+      success: false, 
+      player: player.summoner_name, 
+      error: "Riot ID invalide reçu" 
+    };
+  }
+
+  // On regroupe les requêtes restantes
+  const [rankedStats, activeGame] = await Promise.all([
+    retryWithDelay(
+      () => riotService.getRankedStats(summonerData.puuid),
+      `stats ranked de ${currentRiotId}`
+    ),
+    retryWithDelay(
+      () => riotService.getActiveGame(summonerData.puuid),
+      `statut en jeu de ${currentRiotId}`
+    )
+  ]);
+
+  const soloQStats = rankedStats.find(
+    (queue: any) => queue.queueType === 'RANKED_SOLO_5x5'
+  );
+
+  const totalGames = (soloQStats?.wins || 0) + (soloQStats?.losses || 0);
+
+  const updateData = {
+    summoner_id: summonerData.puuid, // On met maintenant le PUUID dans la colonne summoner_id
+    puuid: summonerData.puuid,
+    summoner_name: currentRiotId,
+    profile_icon_id: summonerData.profileIconId,
+    tier: soloQStats?.tier || null,
+    rank: soloQStats?.rank || null,
+    league_points: soloQStats?.leaguePoints || 0,
+    wins: soloQStats?.wins || 0,
+    losses: soloQStats?.losses || 0,
+    in_game: activeGame.inGame || false,
+    last_update: new Date().toISOString()
+  };
+
+  // Vérifier si on doit sauvegarder l'historique (toutes les 12 heures)
+  const shouldSaveHistory = async () => {
+    const SIX_HOURS = 12 * 60 * 60 * 1000; // 12 heures en millisecondes
+    
+    // Récupérer la dernière entrée d'historique pour ce joueur
+    const { data: lastHistory, error } = await supabase
+      .from('player_history')
+      .select('timestamp')
+      .eq('player_id', player.id)
+      .order('timestamp', { ascending: false })
+      .limit(1);
+
+    if (error) {
+      console.error('Erreur en vérifiant l\'historique:', error);
+      return false;
+    }
+
+    // Si pas d'historique ou si le dernier est vieux de plus de 6 heures
+    if (!lastHistory?.length) return true;
+    
+    const lastUpdate = new Date(lastHistory[0].timestamp).getTime();
+    const now = new Date().getTime();
+    
+    return (now - lastUpdate) >= SIX_HOURS;
+  };
+
+  // Avant de mettre à jour le joueur, sauvegarder l'état actuel dans l'historique si nécessaire
+  if (updateData.tier || updateData.rank || updateData.league_points) {
+    const saveHistory = await shouldSaveHistory();
+    
+    if (saveHistory) {
+      const { error: historyError } = await supabase
+        .from('player_history')
+        .insert({
+          player_id: player.id,
+          tier: updateData.tier,
+          rank: updateData.rank,
+          league_points: updateData.league_points,
+          wins: updateData.wins,
+          losses: updateData.losses
+        });
+
+      if (historyError) throw historyError;
+      console.log(`✅ Historique sauvegardé pour ${player.summoner_name}`);
+    }
+  }
+
+  if (player.league_points !== updateData.league_points || 
+      player.tier !== updateData.tier || 
+      player.rank !== updateData.rank) {
+
+    const lpDifference = calculateLPDifference(
+      player.tier,
+      player.rank,
+      player.league_points,
+      updateData.tier,
+      updateData.rank,
+      updateData.league_points
+    );
+
+    // Vérifier les entrées dans l'heure précédente
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    
+    const { data: existingEntry } = await supabase
+      .from('lp_tracker')
+      .select('*')
+      .eq('player_id', player.id)
+      .eq('current_lp', updateData.league_points)
+      .eq('tier', updateData.tier)
+      .eq('rank', updateData.rank)
+      .gte('timestamp', oneHourAgo)
+      .order('timestamp', { ascending: false })
+      .limit(1);
+
+    if (!existingEntry?.length) {
+      const { error: trackerError } = await supabase
+        .from('lp_tracker')
+        .insert({
+          player_id: player.id,
+          previous_lp: player.league_points,
+          current_lp: updateData.league_points,
+          difference: lpDifference,
+          previous_tier: player.tier,
+          previous_rank: player.rank,
+          tier: updateData.tier,
+          rank: updateData.rank,
+          summoner_name: player.summoner_name
+        });
+
+      if (trackerError) console.error('Erreur lors du tracking des LP:', trackerError);
+    }
+  }
+
+  // Vérification finale des données avant mise à jour
+  if (Object.values(updateData).some(value => value === undefined)) {
+    console.log(`❌ Données incomplètes pour ${player.summoner_name}, conservation des anciennes données`);
+    return { 
+      success: false, 
+      player: player.summoner_name, 
+      error: "Données incomplètes" 
+    };
+  }
+
+  const { error: updateError } = await supabase
+    .from('players')
+    .update(updateData)
+    .eq('id', player.id);
+
+  if (updateError) throw updateError;
+  
+  console.log(`✅ ${currentRiotId} mis à jour (${updatedCount + 1}/${totalPlayers})${activeGame.inGame ? ' (IN GAME)' : ' (NOT IN GAME)'}`);
+  return { success: true, player: currentRiotId, error: null };
+
 };
 
 const updateAllPlayers = async () => {
