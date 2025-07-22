@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { riotService } from '../services/riotService.js';
 import { supabase } from '../config/supabase.js';
 import { Player } from '../types/interfaces.js';
+import type { RequestHandler } from 'express';
 
 interface ParamsWithId {
   id: string;
@@ -74,6 +75,27 @@ export const getPlayerById = async (req: Request, res: Response) => {
       console.error(`Erreur lors de la mise à jour de ${player.summoner_name}:`, updateError);
       res.json(player);
     }
+  } catch (error) {
+    console.error('Erreur:', error);
+    res.status(500).json({ error: 'Error fetching player' });
+  }
+};
+
+export const getPlayerByPUUID: RequestHandler = async (req, res) => {
+  const { puuid } = req.params;
+  try {
+    const { data: player, error } = await supabase
+      .from('players')
+      .select('*')
+      .eq('puuid', puuid)
+      .single();
+
+    if (error) throw error;
+    if (!player) {
+      res.status(404).json({ error: 'Player not found' });
+      return;
+    }
+    res.json(player);
   } catch (error) {
     console.error('Erreur:', error);
     res.status(500).json({ error: 'Error fetching player' });

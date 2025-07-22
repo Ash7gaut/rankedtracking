@@ -2,10 +2,8 @@ import express from 'express';
 import type { Request, Response, RequestHandler } from 'express';
 import { riotService } from '../services/riotService.js';
 import { supabase } from '../config/supabase.js';
-import { updateAllPlayers } from '../controllers/playerController.js';
+import { updateAllPlayers, getPlayerById, addPlayer, deletePlayer, updatePlayer, autoUpdatePlayers, getPlayerByPUUID } from '../controllers/playerController.js';
 import { MatchDetails } from '../types/interfaces.js';
-import { addPlayer } from '../controllers/playerController.js';
-import { deletePlayer } from '../controllers/playerController.js';
 
 const router = express.Router();
 
@@ -148,32 +146,15 @@ const handleGetPlayerHistory: RequestHandler = async (req, res) => {
 };
 
 // Routes
+router.get('/players/puuid/:puuid', getPlayerByPUUID);
 router.get('/:id/history', handleGetPlayerHistory);
 router.get('/', handleGetPlayers);
 router.post('/', addPlayer as RequestHandler);
 router.get('/:id', handleGetPlayerById);
 router.get('/:puuid/games', handleGetPlayerGames);
 router.post('/update-all', updateAllPlayers);
-router.get('/players/:name', async (req, res) => {
-  const { name } = req.params;
-  
-  try {
-    const { data, error } = await supabase
-      .from('players')
-      .select('*')
-      .eq('summoner_name', name)
-      .single();
-
-    if (error) throw error;
-    if (!data) {
-      res.status(404).json({ error: 'Player not found' });
-      return;
-    }
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: 'Error fetching player' });
-  }
-});
+// Ancien endpoint (à supprimer ou déprécier)
+// router.get('/players/:name', ...)
 
 router.post('/delete', deletePlayer as RequestHandler);
 
