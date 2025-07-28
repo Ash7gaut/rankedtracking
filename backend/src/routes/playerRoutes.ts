@@ -153,8 +153,6 @@ router.post('/', addPlayer as RequestHandler);
 router.get('/:id', handleGetPlayerById);
 router.get('/:puuid/games', handleGetPlayerGames);
 router.post('/update-all', updateAllPlayers);
-// Ancien endpoint (à supprimer ou déprécier)
-// router.get('/players/:name', ...)
 
 router.post('/delete', deletePlayer as RequestHandler);
 

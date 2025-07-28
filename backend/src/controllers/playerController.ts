@@ -137,7 +137,7 @@ export const addPlayer = async (req: Request, res: Response) => {
       console.log('SoloQ stats trouvées:', soloQStats);
 
       const playerData = {
-        summoner_id: summonerData.id,
+        summoner_id: summonerData.puuid, // Utiliser le PUUID comme summoner_id
         summoner_name: summonerData.riotId,
         player_name: playerName,
         role: role.toUpperCase(),
