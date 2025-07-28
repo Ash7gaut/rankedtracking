@@ -105,6 +105,7 @@ export const getPlayerByPUUID: RequestHandler = async (req, res) => {
 export const addPlayer = async (req: Request, res: Response) => {
   try {
     const { summonerName, playerName, role, isMain } = req.body;
+    console.log('=== DÉBUT ADD PLAYER ===');
     console.log('Données reçues dans le contrôleur:', { 
       summonerName, 
       playerName, 
@@ -114,17 +115,26 @@ export const addPlayer = async (req: Request, res: Response) => {
     });
     
     const [gameName, tagLine] = summonerName.split('#');
+    console.log('GameName:', gameName, 'TagLine:', tagLine);
     
     if (!gameName || !tagLine) {
+      console.log('Format invalide détecté');
       return res.status(400).json({ error: 'Format invalide. Utilisez le format: nom#tag' });
     }
 
     try {
+      console.log('Appel API Riot pour récupérer les données du summoner...');
       const summonerData = await riotService.getSummonerByName(gameName, tagLine);
+      console.log('Données summoner récupérées:', summonerData);
+      
+      console.log('Appel API Riot pour récupérer les ranked stats...');
       const rankedStats = await riotService.getRankedStats(summonerData.puuid);
+      console.log('Ranked stats récupérées:', rankedStats);
+      
       const soloQStats = rankedStats.find(
         (queue: any) => queue.queueType === 'RANKED_SOLO_5x5'
       );
+      console.log('SoloQ stats trouvées:', soloQStats);
 
       const playerData = {
         summoner_id: summonerData.id,
@@ -141,17 +151,28 @@ export const addPlayer = async (req: Request, res: Response) => {
         losses: soloQStats?.losses || 0,
         last_update: new Date().toISOString()
       };
+      console.log('Données joueur préparées:', playerData);
 
+      console.log('Insertion en base de données...');
       const { data, error } = await supabase
         .from('players')
         .upsert(playerData)
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erreur Supabase:', error);
+        throw error;
+      }
+      
+      console.log('Joueur ajouté avec succès:', data);
       res.json(data);
     } catch (riotError: any) {
-      console.error('Erreur API Riot:', riotError);
+      console.error('=== ERREUR API RIOT ===');
+      console.error('Erreur complète:', riotError);
+      console.error('Status:', riotError?.response?.status);
+      console.error('Message:', riotError?.message);
+      console.error('Data:', riotError?.response?.data);
       
       if (riotError?.response?.status === 404) {
         return res.status(404).json({ 
@@ -176,7 +197,8 @@ export const addPlayer = async (req: Request, res: Response) => {
       });
     }
   } catch (error) {
-    console.error('Erreur générale:', error);
+    console.error('=== ERREUR GÉNÉRALE ===');
+    console.error('Erreur complète:', error);
     res.status(500).json({ error: 'Erreur serveur interne' });
   }
 };
