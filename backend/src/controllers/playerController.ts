@@ -119,39 +119,65 @@ export const addPlayer = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Format invalide. Utilisez le format: nom#tag' });
     }
 
-    const summonerData = await riotService.getSummonerByName(gameName, tagLine);
-    const rankedStats = await riotService.getRankedStats(summonerData.puuid);
-    const soloQStats = rankedStats.find(
-      (queue: any) => queue.queueType === 'RANKED_SOLO_5x5'
-    );
+    try {
+      const summonerData = await riotService.getSummonerByName(gameName, tagLine);
+      const rankedStats = await riotService.getRankedStats(summonerData.puuid);
+      const soloQStats = rankedStats.find(
+        (queue: any) => queue.queueType === 'RANKED_SOLO_5x5'
+      );
 
-    const playerData = {
-      summoner_id: summonerData.id,
-      summoner_name: summonerData.riotId,
-      player_name: playerName,
-      role: role.toUpperCase(),
-      is_main: isMain === true,
-      puuid: summonerData.puuid,
-      profile_icon_id: summonerData.profileIconId,
-      tier: soloQStats?.tier || null,
-      rank: soloQStats?.rank || null,
-      league_points: soloQStats?.leaguePoints || 0,
-      wins: soloQStats?.wins || 0,
-      losses: soloQStats?.losses || 0,
-      last_update: new Date().toISOString()
-    };
+      const playerData = {
+        summoner_id: summonerData.id,
+        summoner_name: summonerData.riotId,
+        player_name: playerName,
+        role: role.toUpperCase(),
+        is_main: isMain === true,
+        puuid: summonerData.puuid,
+        profile_icon_id: summonerData.profileIconId,
+        tier: soloQStats?.tier || null,
+        rank: soloQStats?.rank || null,
+        league_points: soloQStats?.leaguePoints || 0,
+        wins: soloQStats?.wins || 0,
+        losses: soloQStats?.losses || 0,
+        last_update: new Date().toISOString()
+      };
 
-    const { data, error } = await supabase
-      .from('players')
-      .upsert(playerData)
-      .select()
-      .single();
+      const { data, error } = await supabase
+        .from('players')
+        .upsert(playerData)
+        .select()
+        .single();
 
-    if (error) throw error;
-    res.json(data);
+      if (error) throw error;
+      res.json(data);
+    } catch (riotError: any) {
+      console.error('Erreur API Riot:', riotError);
+      
+      if (riotError?.response?.status === 404) {
+        return res.status(404).json({ 
+          error: `Le joueur "${summonerName}" n'existe pas. Vérifiez le nom et le tag.` 
+        });
+      }
+      
+      if (riotError?.response?.status === 403) {
+        return res.status(500).json({ 
+          error: 'Erreur de clé API Riot. Contactez l\'administrateur.' 
+        });
+      }
+      
+      if (riotError?.response?.status === 429) {
+        return res.status(429).json({ 
+          error: 'Trop de requêtes vers l\'API Riot. Réessayez dans quelques minutes.' 
+        });
+      }
+      
+      return res.status(500).json({ 
+        error: `Erreur lors de la récupération des données: ${riotError.message || 'Erreur inconnue'}` 
+      });
+    }
   } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: 'Error adding player' });
+    console.error('Erreur générale:', error);
+    res.status(500).json({ error: 'Erreur serveur interne' });
   }
 };
 
