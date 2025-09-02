@@ -13,9 +13,27 @@ export const AccountMenu = ({ session }: AccountMenuProps) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [username, setUsername] = useState<string>("");
 
-  const displayName =
-    session?.user.user_metadata?.username || session?.user.email;
+  // Récupérer le pseudo depuis la table usernames
+  useEffect(() => {
+    if (session?.user.id) {
+      const fetchUsername = async () => {
+        const { data } = await supabase
+          .from("usernames")
+          .select("username")
+          .eq("user_id", session.user.id)
+          .single();
+
+        if (data?.username) {
+          setUsername(data.username);
+        }
+      };
+      fetchUsername();
+    }
+  }, [session?.user.id]);
+
+  const displayName = username || session?.user.email;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
