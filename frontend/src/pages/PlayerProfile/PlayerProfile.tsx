@@ -22,6 +22,7 @@ import {
   Person,
 } from "@mui/icons-material";
 import { PageTransition } from "../../components/PageTransition";
+import { HeaderUniform } from "../../components/HeaderUniform";
 
 const PlayerProfile = () => {
   const { playerName } = useParams<{ playerName: string }>();
@@ -174,17 +175,11 @@ const PlayerProfile = () => {
   return (
     <PageTransition>
       <div className="relative min-h-screen">
-        {/* Suppression du fond avec overlay */}
-
+        <HeaderUniform
+          title={`Profil • ${decodedPlayerName}`}
+          showHomeButton={true}
+        />
         <div className="container mx-auto px-4 py-8">
-          <button
-            onClick={handleGoBack}
-            className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all mb-8"
-          >
-            <ArrowBack className="w-5 h-5" />
-            <span>Retour</span>
-          </button>
-
           <div className="grid gap-6">
             {/* En-tête du profil avec bannière */}
             <div className="bg-white/80 dark:bg-white/10 dark:bg-gray-800/20 backdrop-blur-md rounded-xl shadow-xl border border-gray-200 dark:border-white/10 dark:border-gray-700/30 overflow-hidden">

@@ -192,7 +192,7 @@ export const HeaderUniform = ({
 
           {/* Suggestions */}
           {showSuggestions && suggestions.length > 0 && (
-            <div className="absolute z-10 mt-2 w-full bg-gray-800/95 backdrop-blur-md border border-white/10 rounded-lg shadow-lg max-h-72 overflow-y-auto">
+            <div className="absolute z-50 mt-2 w-full bg-gray-800/95 backdrop-blur-md border border-white/10 rounded-lg shadow-lg max-h-72 overflow-y-auto">
               {suggestions.map((player) => (
                 <div
                   key={player.id}

@@ -10,6 +10,7 @@ import { PlayerStats } from "./components/PlayerStats/PlayerStats";
 import { GamesList } from "./components/GamesList/GamesList";
 import { PlayerHistory } from "../Home/components/PlayerHistory/PlayerHistory";
 import { useChampionNames } from "./hooks/useChampionNames";
+import { HeaderUniform } from "../../components/HeaderUniform";
 
 const PlayerDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -92,6 +93,10 @@ const PlayerDetails = () => {
 
   return (
     <div className="relative overflow-x-hidden min-h-screen">
+      <HeaderUniform
+        title={player.summoner_name || "Détails du joueur"}
+        showHomeButton={true}
+      />
       <div
         className={`container mx-auto px-4 py-8 ${
           isFetching ? "opacity-70" : ""

@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { PlayerHistoryEntry } from '../types/interfaces';
 
-const API_URL = process.env.REACT_APP_API_URL || 'https://rankedtracking-backend.onrender.com' ;
+// Utilisez REACT_APP_API_URL si défini, sinon fallback vers la prod Railway
+// (évite les erreurs CORS/404 de l'ancienne instance Render en local)
+const API_URL = process.env.REACT_APP_API_URL
 
 export const api = {
   getPlayers: async () => {

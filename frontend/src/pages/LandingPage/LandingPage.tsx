@@ -723,7 +723,7 @@ const LandingPage = () => {
                         </div>
                         <div className="flex-shrink-0 relative">
                           <img
-                            src={`https://ddragon.leagueoflegends.com/cdn/14.5.1/img/profileicon/${player.profile_icon_id}.png`}
+                            src={`https://opgg-static.akamaized.net/meta/images/profile_icons/profileIcon${player.profile_icon_id}.jpg?image=e_upscale,q_auto:good,f_webp,w_auto&v=1729058249`}
                             alt={player.summoner_name}
                             className="w-10 h-10 rounded-full border border-white/10"
                           />
