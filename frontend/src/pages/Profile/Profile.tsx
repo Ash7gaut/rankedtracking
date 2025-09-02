@@ -444,17 +444,28 @@ const Profile = () => {
                       <Person className="w-5 h-5" />
                       Profil
                     </button>
-                    <button
-                      className={`flex items-center gap-2 px-6 py-4 text-sm font-medium transition-all ${
-                        activeTab === "accounts"
-                          ? "text-blue-700 dark:text-white border-b-2 border-blue-500"
-                          : "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-                      }`}
-                      onClick={() => setActiveTab("accounts")}
-                    >
-                      <SportsEsports className="w-5 h-5" />
-                      Comptes LoL
-                    </button>
+                    <div className="relative group">
+                      <button
+                        className={`flex items-center gap-2 px-6 py-4 text-sm font-medium transition-all ${
+                          !username
+                            ? "text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50"
+                            : activeTab === "accounts"
+                            ? "text-blue-700 dark:text-white border-b-2 border-blue-500"
+                            : "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                        }`}
+                        onClick={() => username && setActiveTab("accounts")}
+                        disabled={!username}
+                      >
+                        <SportsEsports className="w-5 h-5" />
+                        Comptes LoL
+                      </button>
+                      {!username && (
+                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                          Définissez d'abord votre pseudo dans l'onglet Profil
+                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                        </div>
+                      )}
+                    </div>
                     <button
                       className={`flex items-center gap-2 px-6 py-4 text-sm font-medium transition-all ${
                         activeTab === "settings"
