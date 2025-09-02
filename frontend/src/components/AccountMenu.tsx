@@ -106,7 +106,7 @@ export const AccountMenu = ({ session }: AccountMenuProps) => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-1 z-50 transition-opacity duration-150">
+        <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-1 z-[100001] transition-opacity duration-150">
           <button
             onClick={() => {
               navigate("/profile");
