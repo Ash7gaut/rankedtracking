@@ -613,12 +613,12 @@ const LandingPage = () => {
             </div>
 
             {/* Search Bar avec effet glassmorphism */}
-            <div className="max-w-3xl mx-auto">
+            <div className="max-w-3xl mx-auto relative z-[10000]">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
-                className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-xl overflow-hidden shadow-xl"
+                className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-xl shadow-xl"
               >
                 <div className="flex items-center p-1">
                   <div className="flex-1 relative">
@@ -639,7 +639,7 @@ const LandingPage = () => {
 
                 {/* Suggestions */}
                 {showSuggestions && playerSuggestions.length > 0 && (
-                  <div className="absolute left-0 right-0 bg-gray-800/90 backdrop-blur-md max-h-80 overflow-y-auto z-50 rounded-b-xl border-t border-white/10">
+                  <div className="absolute left-0 right-0 top-full bg-gray-800 max-h-80 overflow-y-auto z-[99999] rounded-b-xl border border-white/20 mt-1 shadow-2xl">
                     {playerSuggestions.map((player) => (
                       <div
                         key={player.id}
