@@ -31,6 +31,7 @@ const getTierAbbreviation = (tier: string) => {
     SILVER: "S",
     GOLD: "G",
     PLATINUM: "P",
+    EMERALD: "E",
     DIAMOND: "D",
     MASTER: "M",
     GRANDMASTER: "GM",
