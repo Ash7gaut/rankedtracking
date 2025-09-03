@@ -802,7 +802,7 @@ const LandingPage = () => {
                         onClick={() => handleLPChangeClick(change.player_id)}
                       >
                         <div
-                          className={`flex-shrink-0 w-8 h-8 flex items-center justify-center font-bold rounded-full ${
+                          className={`flex-shrink-0 w-10 h-10 flex items-center justify-center font-bold rounded-full ${
                             change.difference > 0
                               ? "bg-green-500/20 text-green-400"
                               : "bg-red-500/20 text-red-400"

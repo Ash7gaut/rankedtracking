@@ -350,7 +350,7 @@ const retryWithDelay = async (fn: () => Promise<any>, context: string, retries =
       }
       
       if (error?.response?.status === 503) {
-        const waitTime = Math.min(RETRY_DELAY * Math.pow(2, i), 30000); // Exponential backoff, max 30s
+        const waitTime = Math.min(RETRY_DELAY * Math.pow(2, i), 30000); // max 30s
         console.log(`Service indisponible pour ${context}, nouvelle tentative dans ${waitTime/1000}s... (${retries - i - 1} essais restants)`);
         await sleep(waitTime);
         continue;
