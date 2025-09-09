@@ -274,7 +274,7 @@ const LPTracking = () => {
                     </div>
                   </div>
 
-                  {/* Filtre winrate négative */}
+                  {/* Filtre winrate négatif */}
                   <div className="flex items-center">
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
@@ -285,7 +285,7 @@ const LPTracking = () => {
                       />
                       <div className="w-11 h-6 bg-white/10 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500/80"></div>
                       <span className="ml-3 text-white/80">
-                        Winrate négative uniquement
+                        Winrate négatif uniquement
                       </span>
                     </label>
                   </div>

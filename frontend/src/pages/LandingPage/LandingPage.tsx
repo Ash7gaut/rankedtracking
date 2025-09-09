@@ -440,7 +440,7 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex items-center justify-between py-6">
             <div className="flex items-center">
-              <h1 className="text-xl font-bold text-white">LeagueTracker</h1>
+              <h1 className="text-xl font-bold text-white">RankedTracking</h1>
             </div>
 
             {/* Desktop Navigation */}
