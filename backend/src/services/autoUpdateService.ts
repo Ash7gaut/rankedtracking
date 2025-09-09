@@ -42,32 +42,32 @@ const calculateLPDifference = (
   const tiers = ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'EMERALD', 'DIAMOND', 'MASTER', 'GRANDMASTER', 'CHALLENGER'];
   const ranks = ['IV', 'III', 'II', 'I'];
 
-  // Même tier et rank = calcul simple
+  // Same tier and rank = simple calculation
   if (previousTier === newTier && previousRank === newRank) {
     return newLP - previousLP;
   }
 
-  // Promotion de division dans le même tier
+  // Promotion of division in the same tier
   if (previousTier === newTier && ranks.indexOf(previousRank) < ranks.indexOf(newRank)) {
     return (100 - previousLP) + newLP;
   }
 
-  // Rétrogradation de division dans le même tier
+  // Demotion of division in the same tier
   if (previousTier === newTier && ranks.indexOf(previousRank) > ranks.indexOf(newRank)) {
     return -(previousLP + (100 - newLP));
   }
 
-  // Promotion de tier
+  // Promotion of tier
   if (tiers.indexOf(previousTier) < tiers.indexOf(newTier)) {
     return (100 - previousLP) + newLP;
   }
 
-  // Rétrogradation de tier
+  // Demotion of tier
   if (tiers.indexOf(previousTier) > tiers.indexOf(newTier)) {
     return -(previousLP + (100 - newLP));
   }
 
-  // Cas par défaut
+  // Default case
   return newLP - previousLP;
 };
 
@@ -77,13 +77,13 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
 
   let summonerData;
   try {
-    // Essayer d'abord par Riot ID
+    // Try with Riot ID first
     summonerData = await retryWithDelay(
       () => riotService.getSummonerByName(gameName, tagLine),
       `récupération par Riot ID de ${player.summoner_name}`
     );
   } catch (error: any) {
-    // Si 404, tenter par PUUID
+    // If 404, try with PUUID
     if (error?.response?.status === 404) {
       console.log(`Riot ID introuvable pour ${player.summoner_name}, tentative de récupération par PUUID...`);
       try {
@@ -100,7 +100,7 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
         };
       }
     } else {
-      // Autre erreur
+      // Other error
       console.log(`❌ Erreur lors de la récupération de ${player.summoner_name}:`, error.message);
       return {
         success: false,
@@ -110,7 +110,7 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
     }
   }
 
-  // Vérification de la validité des données
+  // Check if the summoner data is valid
   if (!summonerData || !summonerData.gameName || !summonerData.tagLine) {
     console.log(`❌ Données invalides reçues pour ${player.summoner_name}, conservation des anciennes données`);
     return { 
@@ -122,7 +122,7 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
 
   const currentRiotId = `${summonerData.gameName}#${summonerData.tagLine}`;
   
-  // Vérification supplémentaire pour éviter les undefined#undefined
+  // Check if the riot id is valid
   if (currentRiotId === "undefined#undefined") {
     console.log(`❌ Riot ID invalide reçu pour ${player.summoner_name}, conservation des anciennes données`);
     return { 
@@ -132,7 +132,7 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
     };
   }
 
-  // On regroupe les requêtes restantes
+  // Get ranked stats and active game
   const [rankedStats, activeGame] = await Promise.all([
     retryWithDelay(
       () => riotService.getRankedStats(summonerData.puuid),
@@ -151,7 +151,7 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
   const totalGames = (soloQStats?.wins || 0) + (soloQStats?.losses || 0);
 
   const updateData = {
-    summoner_id: summonerData.puuid, // On met maintenant le PUUID dans la colonne summoner_id
+    summoner_id: summonerData.puuid,
     puuid: summonerData.puuid,
     summoner_name: currentRiotId,
     profile_icon_id: summonerData.profileIconId,
@@ -164,11 +164,11 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
     last_update: new Date().toISOString()
   };
 
-  // Vérifier si on doit sauvegarder l'historique (toutes les 12 heures)
+  // Check if we need to save the history 
   const shouldSaveHistory = async () => {
-    const SIX_HOURS = 12 * 60 * 60 * 1000; // 12 heures en millisecondes
+    const SIX_HOURS = 12 * 60 * 60 * 1000; // 12h
     
-    // Récupérer la dernière entrée d'historique pour ce joueur
+    // Last update
     const { data: lastHistory, error } = await supabase
       .from('player_history')
       .select('timestamp')
@@ -181,7 +181,7 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
       return false;
     }
 
-    // Si pas d'historique ou si le dernier est vieux de plus de 6 heures
+    // If no history or if the last one is older than 6 hours
     if (!lastHistory?.length) return true;
     
     const lastUpdate = new Date(lastHistory[0].timestamp).getTime();
@@ -190,7 +190,7 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
     return (now - lastUpdate) >= SIX_HOURS;
   };
 
-  // Avant de mettre à jour le joueur, sauvegarder l'état actuel dans l'historique si nécessaire
+  // Before updating the player, save the current state in the history if necessary
   if (updateData.tier || updateData.rank || updateData.league_points) {
     const saveHistory = await shouldSaveHistory();
     
@@ -224,7 +224,7 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
       updateData.league_points
     );
 
-    // Vérifier les entrées dans l'heure précédente
+    // Check the entries in the previous hour
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
     
     const { data: existingEntry } = await supabase
@@ -257,7 +257,7 @@ const updatePlayer = async (player: any, totalPlayers: number, updatedCount: num
     }
   }
 
-  // Vérification finale des données avant mise à jour
+  // Final check of the data before updating
   if (Object.values(updateData).some(value => value === undefined)) {
     console.log(`❌ Données incomplètes pour ${player.summoner_name}, conservation des anciennes données`);
     return { 
@@ -290,7 +290,7 @@ const updateAllPlayers = async () => {
     const totalPlayers = players.length;
     console.log(`\nDébut de la mise à jour pour ${totalPlayers} joueurs...`);
 
-    // Création de lots plus petits pour respecter le rate limit
+    // Create smaller batches to respect the rate limit
     const batches = [];
     for (let i = 0; i < players.length; i += SAFE_BATCH_SIZE) {
       batches.push(players.slice(i, i + SAFE_BATCH_SIZE));
@@ -310,11 +310,11 @@ const updateAllPlayers = async () => {
         updates.push(result);
         if (result.success) updatedCount++;
         
-        // Petit délai entre chaque joueur
+        // Small delay between each player
         await sleep(DELAY_BETWEEN_REQUESTS);
       }
 
-      // Si ce n'est pas le dernier lot, on attend le cooldown
+      // If it's not the last batch, wait for the cooldown
       if (i < batches.length - 1) {
         const remainingPlayers = totalPlayers - (i + 1) * SAFE_BATCH_SIZE;
         console.log(`\nPause de ${BATCH_COOLDOWN/1000} secondes pour respecter le rate limit...`);
@@ -361,7 +361,7 @@ const retryWithDelay = async (fn: () => Promise<any>, context: string, retries =
         throw error;
       }
 
-      // Pour les autres erreurs, on attend un peu plus longtemps
+      // For other errors, wait a bit longer
       const waitTime = RETRY_DELAY * (i + 1);
       console.log(`Erreur ${error?.response?.status || 'inconnue'} pour ${context}, nouvelle tentative dans ${waitTime/1000}s...`);
       await sleep(waitTime);
